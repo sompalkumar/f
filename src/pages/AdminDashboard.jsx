@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { API_BASE_URL } from '../config'; // सही इम्पोर्ट
+import { API_BASE_URL } from '../config';
 
 function AdminDashboard() {
   const userRole = localStorage.getItem('userRole') || sessionStorage.getItem('userRole');
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
   const [logs, setLogs] = useState([]);
   const [uploadedMaterials, setUploadedMaterials] = useState([]);
 
@@ -16,16 +18,24 @@ function AdminDashboard() {
   const [filterCourse, setFilterCourse] = useState('all');
   const [filterSemester, setFilterSemester] = useState('all');
 
+  // 🔴 1. Authorization Header के साथ Logs प्राप्त करें
   const fetchLiveLogs = async () => {
+    if (!token) return;
     try {
-      // 🟢 सही बैक-टिक्स का उपयोग
-      const response = await fetch(`${API_BASE_URL}/api/admin/logs`);
+      const response = await fetch(`${API_BASE_URL}/api/admin/logs`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
       if (response.status === 401 || response.status === 403) {
         sessionStorage.clear(); 
         localStorage.clear(); 
         window.location.replace('/'); 
         return;
       }
+
       const data = await response.json();
       if (response.ok) setLogs(data);
     } catch (error) { 
@@ -33,10 +43,21 @@ function AdminDashboard() {
     }
   };
 
+  // 🔴 2. Authorization Header के साथ Materials प्राप्त करें
   const fetchUploadedMaterials = async () => {
+    if (!token) return;
     try {
-      // 🟢 सही बैक-टिक्स का उपयोग
-      const response = await fetch(`${API_BASE_URL}/api/admin/materials`);
+      const response = await fetch(`${API_BASE_URL}/api/admin/materials`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 401 || response.status === 403) {
+        return;
+      }
+
       const data = await response.json();
       if (response.ok) setUploadedMaterials(data);
     } catch (error) { 
@@ -45,7 +66,7 @@ function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (userRole !== 'admin') { 
+    if (userRole !== 'admin' || !token) { 
       window.location.replace('/'); 
     } else {
       fetchLiveLogs();
@@ -53,15 +74,20 @@ function AdminDashboard() {
       const interval = setInterval(fetchLiveLogs, 4000);
       return () => clearInterval(interval);
     }
-  }, [userRole]);
+  }, [userRole, token]);
 
+  // 🔴 3. Delete API में Authorization Header जोड़ा
   const handleDeleteMaterial = async (id, fileTitle) => {
     const confirmDelete = window.confirm(`🗑️ क्या आप सच में "${fileTitle}" को हमेशा के लिए डिलीट करना चाहते हैं?`);
     if (!confirmDelete) return;
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/admin/delete-material/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       const data = await response.json();
       if (response.ok) {
@@ -75,14 +101,17 @@ function AdminDashboard() {
     }
   };
 
+  // 🔴 4. Force Logout API में Authorization Header जोड़ा
   const handleLogoutAllStudents = async () => {
     const confirmAction = window.confirm("⚠️ Do you really want to immediately log out all logged-in students?");
     if (!confirmAction) return;
     try {
-      // 🟢 सही बैक-टिक्स का उपयोग
       const response = await fetch(`${API_BASE_URL}/api/admin/logout-all`, { 
         method: 'POST', 
-        headers: { 'Content-Type': 'application/json' } 
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json' 
+        } 
       });
       const data = await response.json();
       if (response.ok) { 
@@ -94,6 +123,7 @@ function AdminDashboard() {
     }
   };
 
+  // 🔴 5. File Upload API में Authorization Header जोड़ा
   const handleFileUpload = async (e) => {
     e.preventDefault();
     if (!file) { 
@@ -104,31 +134,33 @@ function AdminDashboard() {
     formData.append('title', title);
     formData.append('course', course);
     formData.append('semester', semester);
-    formData.append('pdfFile', file); // 🟢 एकल फ़ाइल
+    formData.append('pdfFile', file);
 
     try {
-      // 🟢 सही बैक-टिक्स का उपयोग
       const response = await fetch(`${API_BASE_URL}/api/upload-material`, { 
-        method: 'POST', 
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}` // FormData के साथ Content-Type की ज़रूरत नहीं होती
+        },
         body: formData 
       });
       const data = await response.json();
       if (response.ok) { 
-        alert(data.message); 
+        alert(data.message || 'फ़ाइल सफलतापूर्वक अपलोड हो गई!'); 
         setTitle(''); 
         setFile(null); 
         const fileInput = document.getElementById('fileInput');
         if (fileInput) fileInput.value = ''; 
         fetchUploadedMaterials(); 
       } else { 
-        alert(data.message); 
+        alert(data.message || 'अपलोड फ़ेल हो गया!'); 
       }
     } catch (error) { 
       alert('अपलोड एरर!'); 
     }
   };
 
-  // 🟢 जादुई फिल्टर लॉजिक
+  // फ़िल्टर लॉजिक
   const filteredMaterials = uploadedMaterials.filter((mat) => {
     const matchCourse = filterCourse === 'all' || mat.course === filterCourse;
     const matchSemester = filterSemester === 'all' || mat.semester === filterSemester;
@@ -194,7 +226,7 @@ function AdminDashboard() {
               id="fileInput" 
               type="file" 
               accept=".pdf, .jpg, .jpeg, .png" 
-              onChange={(e) => setFile(e.target.files[0])} // 🟢 केवल पहली फ़ाइल लें
+              onChange={(e) => setFile(e.target.files[0])} 
               style={fileInputStyle} 
               required 
             />
