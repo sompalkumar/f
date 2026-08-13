@@ -21,7 +21,7 @@ const AdminRoute = () => {
 
   if (userRole !== 'admin') {
     // Agar candidate /admin-dashboard kholne ki koshish kare, toh Candidate Dashboard par bhej do
-    return <Navigate to="/dashboard" replace />;
+    return <h>you are not admin</h>
   }
 
   return <Outlet />;
