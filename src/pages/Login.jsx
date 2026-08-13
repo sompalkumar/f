@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 // 🌐 Centralized API Base URL Import
-import { API_BASE_URL } from '../config'; // Apne folder structure ke hisab se path verify kar lein (e.g. './config')
+import { API_BASE_URL } from '../config';
 
 function Login() {
   const [mobile, setMobile] = useState('');
@@ -44,38 +44,49 @@ function Login() {
 
   // 🔑 Login Handler
   const handleLogin = async (e) => {
-  e.preventDefault();
-  
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mobile, password })
-    });
+    e.preventDefault();
+    setLoading(true); // ⏳ Loading chalu karein
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile, password })
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      // 🔴 1. अगर एडमिन पोर्टल से लॉगिन हो रहा है और रोल 'admin' नहीं है:
-      if (data.role !== 'admin') {
-        alert('❌ You are not an admin! (आप एडमिन नहीं हैं)');
-        return; // ⛔ यही रोक दें! न Storage में डेटा सेव होगा, न Redirect होगा।
+      if (response.ok) {
+        const userRole = data.role || data.userRole;
+
+        // 🔴 1. अगर यूज़र एडमिन नहीं है तो लॉगिन तुरंत ब्लॉक करें
+        if (userRole !== 'admin') {
+          alert('❌ You are not an admin! You cannot log in from here. (आप एडमिन नहीं हैं, आप यहाँ से लॉगिन नहीं कर सकते।)');
+          
+          // किसी भी पुराने डेटा को साफ़ करें और यहीं रोक दें
+          sessionStorage.clear();
+          localStorage.clear();
+          setLoading(false);
+          return; // ⛔ यही रोक दें! न Storage में डेटा सेव होगा, न Redirect होगा।
+        }
+
+        // 🟢 2. केवल Admin होने पर ही Session सेव करें और Admin Dashboard पर भेजें
+        sessionStorage.setItem('isLoggedIn', 'true');
+        sessionStorage.setItem('token', data.token);
+        sessionStorage.setItem('userRole', userRole);
+        if (data.logId) sessionStorage.setItem('logId', data.logId);
+
+        navigate('/admin-dashboard', { replace: true });
+      } else {
+        alert(data.message || 'लॉगिन विफल रहा!');
       }
-
-      // 🟢 2. केवल Admin होने पर ही Session सेव करें और Navigate करें
-      sessionStorage.setItem('isLoggedIn', 'true');
-      sessionStorage.setItem('token', data.token);
-      sessionStorage.setItem('userRole', data.role);
-      sessionStorage.setItem('logId', data.logId);
-
-      navigate('/admin-dashboard');
-    } else {
-      alert(data.message || 'लॉगिन विफल रहा!');
+    } catch (error) {
+      console.error('Login Error:', error);
+      alert('सर्वर से कनेक्शन नहीं हो पाया!');
+    } finally {
+      setLoading(false); // ⏳ Loading बंद करें
     }
-  } catch (error) {
-    alert('सर्वर से कनेक्शन नहीं हो पाया!');
-  }
-};
+  };
 
   return (
     <div style={{ 
