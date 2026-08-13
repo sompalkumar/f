@@ -56,7 +56,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     return strongPasswordRegex.test(pass);
   };
 
-  // 🔑 लॉगिन हैंडलर
+  // 🔑 लॉगिन हैंडलर (UPDATED FOR STRICT ADMIN SECURITY)
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateMobile(mobile)) { alert('⚠️ कृपया एक वैध 10 अंकों का मोबाइल नंबर दर्ज करें!'); return; }
@@ -69,50 +69,74 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/login`, {
+      // 🛡️ dynamic endpoint: Admin tab चुने जाने पर /api/admin-login पर हिट होगा
+      const endpoint = userRole === 'admin' 
+        ? `${API_BASE_URL}/api/admin-login` 
+        : `${API_BASE_URL}/api/login`;
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile, password, role: userRole })
+        body: JSON.stringify({ mobile, password })
       });
+      
       const data = await response.json();
 
-      if (response.ok) {
+      // 🔴 अगर Backend Status 200 OK नहीं है (जैसे Student Admin Panel से लॉगिन की कोशिश कर रहा हो)
+      if (!response.ok) {
+        alert(data.message || '🛑 लॉगिन विफल! कृपया अपनी जानकारी पुनः जांचें।');
         localStorage.clear();
         sessionStorage.clear();
-
-        const tokenValue = data.token || '';
-        const roleValue = data.role || userRole;
-        const nameValue = data.name || '';
-        const logIdValue = data.logId || '';
-        const courseValue = data.course || 'bca';
-
-        localStorage.setItem('token', tokenValue);
-        localStorage.setItem('userToken', tokenValue);
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userName', nameValue);
-        localStorage.setItem('logId', logIdValue);
-        localStorage.setItem('userRole', roleValue);
-        localStorage.setItem('userCourse', courseValue);
-
-        sessionStorage.setItem('token', tokenValue);
-        sessionStorage.setItem('userToken', tokenValue);
-        sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('userName', nameValue);
-        sessionStorage.setItem('logId', logIdValue);
-        sessionStorage.setItem('userRole', roleValue);
-        sessionStorage.setItem('userCourse', courseValue);
-
-        setShowPortalModal(false);
-
-        if (roleValue === 'admin') { 
-          window.location.replace('/admin-dashboard'); 
-        } else { 
-          window.location.replace('/dashboard'); 
-        }
-      } else { 
-        alert(data.message || 'लॉगिन विफल!'); 
         refreshCaptcha();
+        setCaptchaInput('');
+        setIsLoading(false);
+        return; // ⛔ यहीं रोक दें!
       }
+
+      // 🛑 Extra Check: Admin tab के साथ अगर role 'admin' नहीं मिला
+      if (userRole === 'admin' && data.role !== 'admin') {
+        alert('❌ You are not an admin! (आप एडमिन नहीं हैं)');
+        localStorage.clear();
+        sessionStorage.clear();
+        refreshCaptcha();
+        setIsLoading(false);
+        return;
+      }
+
+      // 🟢 केवल सही Credentials पर ही Storage सेट होगा
+      localStorage.clear();
+      sessionStorage.clear();
+
+      const tokenValue = data.token || '';
+      const roleValue = data.role || userRole;
+      const nameValue = data.name || '';
+      const logIdValue = data.logId || '';
+      const courseValue = data.course || 'bca';
+
+      localStorage.setItem('token', tokenValue);
+      localStorage.setItem('userToken', tokenValue);
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userName', nameValue);
+      localStorage.setItem('logId', logIdValue);
+      localStorage.setItem('userRole', roleValue);
+      localStorage.setItem('userCourse', courseValue);
+
+      sessionStorage.setItem('token', tokenValue);
+      sessionStorage.setItem('userToken', tokenValue);
+      sessionStorage.setItem('isLoggedIn', 'true');
+      sessionStorage.setItem('userName', nameValue);
+      sessionStorage.setItem('logId', logIdValue);
+      sessionStorage.setItem('userRole', roleValue);
+      sessionStorage.setItem('userCourse', courseValue);
+
+      setShowPortalModal(false);
+
+      if (roleValue === 'admin') { 
+        window.location.replace('/admin-dashboard'); 
+      } else { 
+        window.location.replace('/dashboard'); 
+      }
+
     } catch (error) {
       console.error(error);
       alert('सर्वर एरर! कृपया सर्वर कनेक्शन जांचें।');
@@ -345,7 +369,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
                     <input type="text" placeholder="Enter Captcha" value={captchaInput} onChange={(e)=>setCaptchaInput(e.target.value)} style={inputStyle} required disabled={isLoading} />
                   </div>
                   <button type="submit" style={maroonBtnStyle} disabled={isLoading}>
-                    {isLoading ? 'Processing...' : 'Login'}
+                    {isLoading ? 'Processing...' : userRole === 'admin' ? 'Admin Login' : 'Candidate Login'}
                   </button>
                   <p style={{ textAlign: 'center', marginTop: '15px', fontSize: '14px', color: '#444' }}>
                     New User? <span onClick={() => { if(!isLoading) { setModalView('register'); resetFormState(); } }} style={{ color: 'black', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}>Register Now</span>

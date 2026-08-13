@@ -6,7 +6,7 @@ import Dashboard from './pages/Dashboard';
 import CourseDetail from './pages/CourseDetail';
 import AdminDashboard from './pages/AdminDashboard';
 import SemMaterial from './pages/SemMaterial';
-import ForgotPassword from './pages/ForgotPassword'; // 👈 Added Missing Import
+import ForgotPassword from './pages/ForgotPassword';
 
 // 🟢 Role-based route guards
 import AdminRoute from './components/AdminRoute';
@@ -60,7 +60,6 @@ function App() {
 
     const resetTimer = () => {
       const now = Date.now();
-      // Throttle event triggers within 1 second
       if (now - lastActivityRef.current > 1000) {
         lastActivityRef.current = now;
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -68,7 +67,6 @@ function App() {
       }
     };
 
-    // Multi-tab sync: Trigger logout if logged out in another tab
     const handleStorageChange = (e) => {
       if ((e.key === 'isLoggedIn' || e.key === 'token') && e.newValue === null) {
         sessionStorage.clear();
@@ -81,7 +79,6 @@ function App() {
     activityEvents.forEach(event => window.addEventListener(event, resetTimer, { passive: true }));
     window.addEventListener('storage', handleStorageChange);
 
-    // Initial Timer Setup
     timeoutRef.current = setTimeout(() => handleAutoLogout(true), INACTIVITY_LIMIT);
 
     return () => {
@@ -111,7 +108,7 @@ function App() {
         {/* Password Reset Route */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* Student/Candidate Protected Routes */}
+        {/* Student Protected Routes */}
         <Route element={<StudentRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/course/:courseId" element={<CourseDetail />} />
