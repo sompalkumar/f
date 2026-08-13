@@ -1,19 +1,31 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// 🌐 Centralized API Base URL Import
+import { API_BASE_URL } from '../config'; // Apne folder structure ke hisab se path adjust kar lein (e.g. './config')
+
 function Navbar({ onTabChange, activeTab, onLoginClick }) {
   const navigate = useNavigate();
-  const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
-  const userRole = sessionStorage.getItem('userRole') || localStorage.getItem('userRole');
 
-  // 🚪 बैकएंड API के साथ सुरक्षात्मक लॉगआउट फंक्शन
+  // 🟢 Session aur Local Storage dono checks Sync
+  const isLoggedIn = 
+    sessionStorage.getItem('isLoggedIn') === 'true' || 
+    localStorage.getItem('isLoggedIn') === 'true';
+
+  const userRole = 
+    sessionStorage.getItem('userRole') || 
+    localStorage.getItem('userRole');
+
+  // 🚪 Backend API ke saath Secure Logout Function
   const handleLogout = async () => {
-    const logId = sessionStorage.getItem('logId');
+    const logId = 
+      sessionStorage.getItem('logId') || 
+      localStorage.getItem('logId');
 
-    // 1. अगर logId मौजूद है तो बैकएंड पर लॉगआउट टाइम दर्ज करें
+    // 1. Agar logId hai to Backend API hit karke duration calculate karein
     if (logId) {
       try {
-        await fetch('https://bca-35ms.onrender.com/api/logout', {
+        await fetch(`${API_BASE_URL}/api/logout`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ logId })
@@ -23,18 +35,18 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
       }
     }
 
-    // 2. स्टोरेज को पूरी तरह साफ करें
+    // 2. Clear all Session & Local Storage
     localStorage.clear();
     sessionStorage.clear();
 
-    // 3. यूजर को होम पेज पर भेजें
+    // 3. User ko Home page par redirect karein
     window.location.replace('/');
   };
 
   return (
     <nav style={{
       display: 'flex',
-      justify: 'space-between',
+      justifyContent: 'space-between', // 🟢 FIXED: 'justify' corrected to 'justifyContent'
       alignItems: 'center',
       padding: '12px 30px',
       backgroundColor: '#06dfd1',
@@ -44,7 +56,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
       zIndex: 1000,
       fontFamily: 'Arial, sans-serif'
     }}>
-      {/* लोगो / टाइटल */}
+      {/* Logo / Title */}
       <h2 
         style={{ margin: 0, fontSize: '22px', cursor: 'pointer', fontWeight: 'bold', color: '#1a1a1a' }} 
         onClick={() => { 
@@ -55,7 +67,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
         📚 BCA Portal
       </h2>
 
-      {/* 🛡️ बीच के ऑप्शंस: केवल तभी दिखेंगे जब यूजर लॉगिन नहीं होगा */}
+      {/* 🛡️ Middle Navigation Links: Tabhi dikhenge jab user logged out ho */}
       {!isLoggedIn && (
         <div style={{ display: 'flex', gap: '8px' }}>
           <button onClick={() => onTabChange && onTabChange('home')} style={navLinkStyle(activeTab === 'home')}>Home</button>
@@ -65,7 +77,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
         </div>
       )}
 
-      {/* दाहिने कोने के बटन्स */}
+      {/* Right Side Buttons */}
       <div>
         {!isLoggedIn ? (
           <button 
@@ -86,7 +98,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
           </button>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {/* एडमिन बटन */}
+            {/* Admin Panel Button */}
             {userRole === 'admin' && (
               <button 
                 onClick={() => navigate('/admin-dashboard')} 
@@ -96,7 +108,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
               </button>
             )}
 
-            {/* डैशबोर्ड बटन */}
+            {/* Dashboard Button */}
             <button 
               onClick={() => navigate('/dashboard')} 
               style={actionButtonStyle}
@@ -104,7 +116,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
               📊 Dashboard
             </button>
 
-            {/* लॉगआउट बटन */}
+            {/* Logout Button */}
             <button 
               onClick={handleLogout} 
               style={{
@@ -122,7 +134,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
   );
 }
 
-// 🎨 लिंक्स की स्टाइलिंग
+// 🎨 Links Styling Helper
 const navLinkStyle = (isActive) => ({
   padding: '8px 16px',
   backgroundColor: isActive ? 'rgba(255, 255, 255, 0.3)' : 'transparent',
@@ -136,7 +148,7 @@ const navLinkStyle = (isActive) => ({
   outline: 'none'
 });
 
-// 🎨 एक्शन बटन्स (Admin, Dashboard, Logout) की एकसमान स्टाइलिंग
+// 🎨 Action Buttons Styling
 const actionButtonStyle = {
   padding: '8px 16px',
   backgroundColor: '#ffffff',

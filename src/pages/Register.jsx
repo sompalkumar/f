@@ -56,7 +56,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     return strongPasswordRegex.test(pass);
   };
 
-  // 🔑 लॉगिन हैंडलर
+  // 🔑 फिक्स किया गया लॉगिन हैंडलर
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateMobile(mobile)) { alert('⚠️ कृपया एक वैध 10 अंकों का मोबाइल नंबर दर्ज करें!'); return; }
@@ -75,17 +75,43 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
         body: JSON.stringify({ mobile, password, role: userRole })
       });
       const data = await response.json();
+
       if (response.ok) {
-        sessionStorage.setItem('userToken', data.token || '');
+        // पुरानी हिस्ट्री साफ़ करें
+        localStorage.clear();
+        sessionStorage.clear();
+
+        const tokenValue = data.token || '';
+        const roleValue = data.role || userRole;
+        const nameValue = data.name || '';
+        const logIdValue = data.logId || '';
+        const courseValue = data.course || 'bca';
+
+        // ✅ 1. LocalStorage और SessionStorage दोनों में एक जैसा सही डेटा सेव करें
+        localStorage.setItem('token', tokenValue);
+        localStorage.setItem('userToken', tokenValue);
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userName', nameValue);
+        localStorage.setItem('logId', logIdValue);
+        localStorage.setItem('userRole', roleValue);
+        localStorage.setItem('userCourse', courseValue);
+
+        sessionStorage.setItem('token', tokenValue);
+        sessionStorage.setItem('userToken', tokenValue);
         sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('userName', data.name || '');
-        sessionStorage.setItem('logId', data.logId || '');
-        sessionStorage.setItem('userRole', data.role || userRole);
-        sessionStorage.setItem('userCourse', data.course || 'bca');
+        sessionStorage.setItem('userName', nameValue);
+        sessionStorage.setItem('logId', logIdValue);
+        sessionStorage.setItem('userRole', roleValue);
+        sessionStorage.setItem('userCourse', courseValue);
 
         setShowPortalModal(false);
-        if (data.role === 'admin') { window.location.replace('/admin-dashboard'); }
-        else { window.location.replace('/dashboard'); }
+
+        // ✅ 2. रिडायरेक्शन लॉजिक
+        if (roleValue === 'admin') { 
+          window.location.replace('/admin-dashboard'); 
+        } else { 
+          window.location.replace('/dashboard'); 
+        }
       } else { 
         alert(data.message || 'लॉगिन विफल!'); 
         refreshCaptcha();

@@ -1,22 +1,30 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
-function StudentRoute() {
-  const userRole = localStorage.getItem('userRole') || sessionStorage.getItem('userRole');
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+const StudentRoute = () => {
+  const isLoggedIn = 
+    sessionStorage.getItem('isLoggedIn') === 'true' || 
+    localStorage.getItem('isLoggedIn') === 'true';
 
-  // 1. अगर यूजर लॉगिन ही नहीं है तो लॉगिन पेज पर भेजें
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
+  const token = 
+    sessionStorage.getItem('token') || 
+    localStorage.getItem('token');
+
+  const userRole = 
+    sessionStorage.getItem('userRole') || 
+    localStorage.getItem('userRole');
+
+  // Agar login nahi hai, to Home/Register par redirect karo
+  if (!isLoggedIn || !token) {
+    return <Navigate to="/" replace />;
   }
 
-  // 2. अगर एडमिन लॉगिन है तो उसे एडमिन डैशबोर्ड पर भेजें (लॉगिन पेज पर नहीं)
-  if (userRole === 'admin') {
-    return <Navigate to="/admin-dashboard" replace />;
+  // Student Route 'student' aur 'admin' dono ke liye valid hai (Taaki Admin student view dekh sake)
+  if (userRole === 'student' || userRole === 'admin') {
+    return <Outlet />;
   }
 
-  // 3. अगर छात्र है तो एक्सेस दें
-  return <Outlet />;
-}
+  return <Navigate to="/" replace />;
+};
 
 export default StudentRoute;

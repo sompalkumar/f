@@ -4,24 +4,34 @@ import { useNavigate } from 'react-router-dom';
 function Dashboard() {
   const navigate = useNavigate();
 
-  // 🟢 Session, Local Storage दोनों जगह से डेटा चेक करें
+  // 🟢 Session aur Local Storage dono jagah se Credentials fetch karein
   const isLoggedIn = 
     sessionStorage.getItem('isLoggedIn') === 'true' || 
     localStorage.getItem('isLoggedIn') === 'true';
+
+  const token = 
+    sessionStorage.getItem('token') || 
+    localStorage.getItem('token');
 
   const userName = 
     sessionStorage.getItem('userName') || 
     localStorage.getItem('userName') || 
     'Student';
 
-  // 🛡️ 1. सुरक्षा जांच: अगर यूजर लॉगिन नहीं है तो /login पर रिडायरेक्ट करें
-  useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/login', { replace: true });
-    }
-  }, [isLoggedIn, navigate]);
+  // 🛡️ User Role ('student' ya 'admin')
+  const userRole = 
+    sessionStorage.getItem('userRole') || 
+    localStorage.getItem('userRole') || 
+    'student';
 
-  // कोर्सेज की लिस्ट (BCA, B.Com, Arts, Science)
+  // 🛡️ 1. Security Check: Agar user logged in nahi hai ya token missing hai toh Root (/) par bhejen
+  useEffect(() => {
+    if (!isLoggedIn || !token) {
+      navigate('/', { replace: true });
+    }
+  }, [isLoggedIn, token, navigate]);
+
+  // Courses List
   const courses = [
     { id: 'bca', name: '💻 BCA (Bachelor of Computer Applications)' },
     { id: 'bcom', name: '📊 B.Com (Bachelor of Commerce)' },
@@ -29,13 +39,26 @@ function Dashboard() {
     { id: 'science', name: '🔬 Science (Bachelor of Science)' }
   ];
 
-  // अगर लॉगिन नहीं है तो कुछ भी रेंडर न करें
-  if (!isLoggedIn) {
+  // Agar login nahi hai ya token missing hai toh UI render hone se rokein
+  if (!isLoggedIn || !token) {
     return null; 
   }
 
   return (
     <div style={containerStyle}>
+      {/* 👑 Agar Admin logged-in hai toh Admin Panel par jaane ka Quick Shortcut Button */}
+      {userRole === 'admin' && (
+        <div style={adminNoticeStyle}>
+          <span>👑 Logged in as <strong>Admin</strong></span>
+          <button 
+            onClick={() => navigate('/admin-dashboard')} 
+            style={adminBtnStyle}
+          >
+            Go to Admin Panel ⚙️
+          </button>
+        </div>
+      )}
+
       <div style={headerStyle}>
         <h2 style={{ margin: 0, color: '#333' }}>Welcome, {userName}! 👋</h2>
         <p style={{ color: '#666', marginTop: '8px' }}>
@@ -70,6 +93,30 @@ const containerStyle = {
   fontFamily: 'Arial, sans-serif'
 };
 
+const adminNoticeStyle = {
+  backgroundColor: '#fff3cd',
+  color: '#856404',
+  border: '1px solid #ffeeba',
+  padding: '12px 20px',
+  borderRadius: '8px',
+  marginBottom: '20px',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  fontWeight: '500'
+};
+
+const adminBtnStyle = {
+  backgroundColor: '#333',
+  color: '#fff',
+  border: 'none',
+  padding: '8px 14px',
+  borderRadius: '6px',
+  cursor: 'pointer',
+  fontWeight: 'bold',
+  fontSize: '13px'
+};
+
 const headerStyle = {
   marginBottom: '25px',
   textAlign: 'center'
@@ -90,7 +137,7 @@ const cardStyle = {
   boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
   display: 'flex',
   flexDirection: 'column',
-  justify: 'space-between',
+  justifyContent: 'space-between',
   alignItems: 'center'
 };
 

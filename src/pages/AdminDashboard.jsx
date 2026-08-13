@@ -1,9 +1,22 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 
 function AdminDashboard() {
-  const userRole = localStorage.getItem('userRole') || sessionStorage.getItem('userRole');
-  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  const navigate = useNavigate();
+
+  // 🟢 Storage se Credentials fetch karein
+  const isLoggedIn = 
+    sessionStorage.getItem('isLoggedIn') === 'true' || 
+    localStorage.getItem('isLoggedIn') === 'true';
+
+  const userRole = 
+    sessionStorage.getItem('userRole') || 
+    localStorage.getItem('userRole');
+
+  const token = 
+    sessionStorage.getItem('token') || 
+    localStorage.getItem('token');
 
   const [logs, setLogs] = useState([]);
   const [uploadedMaterials, setUploadedMaterials] = useState([]);
@@ -18,7 +31,29 @@ function AdminDashboard() {
   const [filterCourse, setFilterCourse] = useState('all');
   const [filterSemester, setFilterSemester] = useState('all');
 
-  // 🔴 1. Authorization Header के साथ Logs प्राप्त करें
+  // 🛡️ 1. Complete Role Guard Check
+  useEffect(() => {
+    // A. Login nahi hai -> Login page par bhejo
+    if (!isLoggedIn || !token) {
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    // B. Logged in hai par Candidate hai -> Standard Candidate Dashboard par bhejo
+    if (userRole !== 'admin') {
+      alert('⚠️ Unauthorized! Admin Panel Access Restricted.');
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+
+    // C. Admin hai -> APIs call karein
+    fetchLiveLogs();
+    fetchUploadedMaterials();
+    const interval = setInterval(fetchLiveLogs, 4000);
+    return () => clearInterval(interval);
+  }, [isLoggedIn, userRole, token, navigate]);
+
+  // 🔴 Authorization Header के साथ Logs प्राप्त करें
   const fetchLiveLogs = async () => {
     if (!token) return;
     try {
@@ -32,7 +67,7 @@ function AdminDashboard() {
       if (response.status === 401 || response.status === 403) {
         sessionStorage.clear(); 
         localStorage.clear(); 
-        window.location.replace('/'); 
+        navigate('/login', { replace: true }); 
         return;
       }
 
@@ -43,7 +78,7 @@ function AdminDashboard() {
     }
   };
 
-  // 🔴 2. Authorization Header के साथ Materials प्राप्त करें
+  // 🔴 Authorization Header के साथ Materials प्राप्त करें
   const fetchUploadedMaterials = async () => {
     if (!token) return;
     try {
@@ -65,18 +100,7 @@ function AdminDashboard() {
     }
   };
 
-  useEffect(() => {
-    if (userRole !== 'admin' || !token) { 
-      window.location.replace('/'); 
-    } else {
-      fetchLiveLogs();
-      fetchUploadedMaterials();
-      const interval = setInterval(fetchLiveLogs, 4000);
-      return () => clearInterval(interval);
-    }
-  }, [userRole, token]);
-
-  // 🔴 3. Delete API में Authorization Header जोड़ा
+  // 🔴 Delete API
   const handleDeleteMaterial = async (id, fileTitle) => {
     const confirmDelete = window.confirm(`🗑️ क्या आप सच में "${fileTitle}" को हमेशा के लिए डिलीट करना चाहते हैं?`);
     if (!confirmDelete) return;
@@ -101,7 +125,7 @@ function AdminDashboard() {
     }
   };
 
-  // 🔴 4. Force Logout API में Authorization Header जोड़ा
+  // 🔴 Force Logout API
   const handleLogoutAllStudents = async () => {
     const confirmAction = window.confirm("⚠️ Do you really want to immediately log out all logged-in students?");
     if (!confirmAction) return;
@@ -123,7 +147,7 @@ function AdminDashboard() {
     }
   };
 
-  // 🔴 5. File Upload API में Authorization Header जोड़ा
+  // 🔴 File Upload API
   const handleFileUpload = async (e) => {
     e.preventDefault();
     if (!file) { 
@@ -140,7 +164,7 @@ function AdminDashboard() {
       const response = await fetch(`${API_BASE_URL}/api/upload-material`, { 
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}` // FormData के साथ Content-Type की ज़रूरत नहीं होती
+          'Authorization': `Bearer ${token}`
         },
         body: formData 
       });
@@ -167,6 +191,11 @@ function AdminDashboard() {
     return matchCourse && matchSemester;
   });
 
+  // Agar Unauthorized ya Logged in nahi hai toh rendering block karein
+  if (!isLoggedIn || userRole !== 'admin') {
+    return null;
+  }
+
   return (
     <div style={containerStyle}>
       {/* हेडर */}
@@ -178,8 +207,13 @@ function AdminDashboard() {
             <p style={{ margin: '4px 0 0 0', color: 'black', fontSize: '14px' }}>BCA Portal Management</p>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={handleLogoutAllStudents} style={logoutAllBtnStyle}>⚠️ Force Logout All Students</button>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button onClick={() => navigate('/dashboard')} style={candidateViewBtnStyle}>
+            👁️ Candidate Dashboard
+          </button>
+          <button onClick={handleLogoutAllStudents} style={logoutAllBtnStyle}>
+            ⚠️ Force Logout All
+          </button>
         </div>
       </div>
 
@@ -324,6 +358,7 @@ function AdminDashboard() {
 const containerStyle = { padding: '30px 20px', maxWidth: '950px', margin: '0 auto', fontFamily: 'Arial, sans-serif', backgroundColor: '#f4f6f9', minHeight: '100vh', boxSizing: 'border-box' };
 const headerStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', flexWrap: 'wrap', gap: '10px' };
 const avatarStyle = { width: '50px', height: '40px', backgroundColor: '#fde9c9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' };
+const candidateViewBtnStyle = { padding: '10px 16px', backgroundColor: '#333333', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' };
 const logoutAllBtnStyle = { padding: '10px 20px', backgroundColor: '#ff4d4d', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' };
 const cardStyle = { marginTop: '25px', backgroundColor: '#ffffff', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', border: '1px solid #eaeaea' };
 const cardTitleStyle = { margin: '0 0 20px 0', color: 'black', fontSize: '18px', fontWeight: '700' };

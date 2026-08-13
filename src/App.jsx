@@ -1,26 +1,30 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Register from './pages/Register'; 
 import Dashboard from './pages/Dashboard';
 import CourseDetail from './pages/CourseDetail';
 import AdminDashboard from './pages/AdminDashboard';
-import SemMaterial from './pages/SemMaterial'; // 💡 पिछला SemMaterial रूट भी जोड़ दिया गया है
+import SemMaterial from './pages/SemMaterial';
+import ForgotPassword from './pages/ForgotPassword'; // 👈 Added Missing Import
 
 // 🟢 Role-based route guards
 import AdminRoute from './components/AdminRoute';
 import StudentRoute from './components/StudentRoute';
 
-// 🌐 सेंट्रल API Base URL कॉन्फ़िगरेशन
+// 🌐 Central API Base URL Configuration
 import { API_BASE_URL } from './config';
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [showPortalModal, setShowPortalModal] = useState(false);
 
-  // 🚪 ऑटो-लॉगआउट हैंडलर
+  const timeoutRef = useRef(null);
+  const lastActivityRef = useRef(Date.now());
+
+  // 🚪 Auto-Logout Handler
   const handleAutoLogout = useCallback(async (isExpiredByInactivity = true) => {
-    const logId = sessionStorage.getItem('logId');
+    const logId = sessionStorage.getItem('logId') || localStorage.getItem('logId');
     
     if (logId) {
       try {
@@ -34,7 +38,7 @@ function App() {
       }
     }
 
-    // डेटा साफ़ करें
+    // Clear all persistent storage
     localStorage.clear();
     sessionStorage.clear();
 
@@ -44,42 +48,44 @@ function App() {
     window.location.replace('/');
   }, []);
 
-  // 🛡️ 5 मिनट का ऑटोमैटिक इनएक्टिविटी लॉगआउट टाइमर + मल्टी-टैब सिंक
+  // 🛡️ 5-Minute Inactivity Timer + Multi-Tab Sync
   useEffect(() => {
-    const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+    const isLoggedIn = 
+      sessionStorage.getItem('isLoggedIn') === 'true' || 
+      localStorage.getItem('isLoggedIn') === 'true';
+
     if (!isLoggedIn) return; 
 
-    const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 मिनट
-    let timeoutId;
-    let lastActivityTime = Date.now();
+    const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes
 
     const resetTimer = () => {
       const now = Date.now();
-      // Throttling: 1 सेकंड से पहले बार-बार रीसेट न करें (Performance Fix)
-      if (now - lastActivityTime > 1000) {
-        lastActivityTime = now;
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => handleAutoLogout(true), INACTIVITY_LIMIT);
+      // Throttle event triggers within 1 second
+      if (now - lastActivityRef.current > 1000) {
+        lastActivityRef.current = now;
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => handleAutoLogout(true), INACTIVITY_LIMIT);
       }
     };
 
-    // मल्टी-टैब सिंक: अगर किसी दूसरे टैब में लॉगआउट हुआ हो तो तुरंत यह टैब भी साफ़ हो जाए
+    // Multi-tab sync: Trigger logout if logged out in another tab
     const handleStorageChange = (e) => {
-      if (e.key === 'isLoggedIn' && e.newValue === null) {
+      if ((e.key === 'isLoggedIn' || e.key === 'token') && e.newValue === null) {
+        sessionStorage.clear();
+        localStorage.clear();
         window.location.replace('/');
       }
     };
 
-    // 'mousemove' को हटाकर केवल ज़रूरी इवेंट्स रखे गए हैं ताकि लेग न हो
     const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
     activityEvents.forEach(event => window.addEventListener(event, resetTimer, { passive: true }));
     window.addEventListener('storage', handleStorageChange);
 
-    // टाइमर शुरू करें
-    timeoutId = setTimeout(() => handleAutoLogout(true), INACTIVITY_LIMIT);
+    // Initial Timer Setup
+    timeoutRef.current = setTimeout(() => handleAutoLogout(true), INACTIVITY_LIMIT);
 
     return () => {
-      clearTimeout(timeoutId);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       activityEvents.forEach(event => window.removeEventListener(event, resetTimer));
       window.removeEventListener('storage', handleStorageChange);
     };
@@ -102,14 +108,17 @@ function App() {
           />
         } />
 
-        {/* Student Protected Routes */}
+        {/* Password Reset Route */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+
+        {/* Student/Candidate Protected Routes */}
         <Route element={<StudentRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/course/:courseId" element={<CourseDetail />} />
           <Route path="/course/:courseId/sem/:semId" element={<SemMaterial />} />
         </Route>
 
-        {/* Admin Protected Routes */}
+        {/* Strict Admin Protected Routes */}
         <Route element={<AdminRoute />}>
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
         </Route>

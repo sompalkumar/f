@@ -1,26 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
-// 🔗 API Base URL
-const API_BASE_URL = 'https://bca-35ms.onrender.com';
+// 🌐 Centralized API Base URL Import
+import { API_BASE_URL } from '../config'; // Apne folder structure ke hisab se path verify kar lein (e.g. './config')
 
 function Login() {
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false); // ⏳ लोडिंग स्टेट
+  const [loading, setLoading] = useState(false); // ⏳ Loading state
   const navigate = useNavigate();
 
-  // 🛡️ सुरक्षा: चेक करें कि यूजर पहले से लॉगिन है या नहीं
+  // 🛡️ Guard Check: Agar user pehle se logged-in hai to uske role ke aadhar par sahi Dashboard par bhejo
   useEffect(() => {
-    const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+    const isLoggedIn = 
+      sessionStorage.getItem('isLoggedIn') === 'true' || 
+      localStorage.getItem('isLoggedIn') === 'true';
 
-    // अगर पहले से लॉगिन है तो सीधे डैशबोर्ड पर भेजें
+    const userRole = 
+      sessionStorage.getItem('userRole') || 
+      localStorage.getItem('userRole');
+
     if (isLoggedIn) {
-      navigate('/dashboard', { replace: true });
+      if (userRole === 'admin') {
+        navigate('/admin-dashboard', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
       return;
     }
 
-    // ब्राउज़र बैक बटन कंट्रोल
+    // Browser back button handling
     const blockBackButton = () => {
       window.history.pushState(null, null, window.location.href);
     };
@@ -33,34 +42,54 @@ function Login() {
     };
   }, [navigate]);
 
-  // 🔑 लॉगिन फ़ंक्शन
+  // 🔑 Login Handler
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true); // बटन को डिसएबल करें और लोडिंग शुरू करें
+    setLoading(true);
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile, password, role: 'student' })
+        body: JSON.stringify({ mobile, password })
       });
 
       const data = await response.json();
 
       if (response.ok) {
+        // 🟢 FIXED: All critical Auth Credentials stored in Storage
+        const userRole = data.role || data.userRole || 'student';
+        const token = data.token || '';
+        const userName = data.name || data.userName || '';
+        const logId = data.logId || '';
+
+        // Session Storage Sets
         sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('userName', data.name || '');
-        sessionStorage.setItem('logId', data.logId || '');
+        sessionStorage.setItem('token', token);
+        sessionStorage.setItem('userRole', userRole);
+        sessionStorage.setItem('userName', userName);
+        sessionStorage.setItem('logId', logId);
+
+        // Local Storage Sync
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('token', token);
+        localStorage.setItem('userRole', userRole);
 
         alert('Login successful!');
-        navigate('/dashboard', { replace: true });
+
+        // 🟢 Role-based Smart Navigation
+        if (userRole === 'admin') {
+          navigate('/admin-dashboard', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
       } else {
         alert(data.message || 'Invalid credentials');
       }
     } catch (error) {
       alert('सर्वर से कनेक्ट नहीं हो पा रहा है! कृपया कुछ सेकंड बाद पुनः प्रयास करें (Render Cold Start)।');
     } finally {
-      setLoading(false); // लोडिंग समाप्त
+      setLoading(false);
     }
   };
 
@@ -77,7 +106,7 @@ function Login() {
       backgroundColor: '#ffffff'
     }}>
       
-      {/* 🎓 ग्रेजुएशन टोपी की इमेज */}
+      {/* 🎓 Cap Icon */}
       <div style={{ marginBottom: '20px' }}>
         <img 
           src="/login-cap.png" 
@@ -87,7 +116,7 @@ function Login() {
       </div>
 
       <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '25px', color: '#333' }}>
-        Student Login
+        Portal Login
       </h2>
 
       <form onSubmit={handleLogin}>

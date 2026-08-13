@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { API_BASE_URL } from '../config'; // सही इम्पोर्ट
+import { API_BASE_URL } from '../config';
 
 function CourseDetail() {
   const { courseId } = useParams(); 
@@ -8,23 +8,37 @@ function CourseDetail() {
   
   const [selectedSem, setSelectedSem] = useState(null);
   const [dbMaterials, setDbMaterials] = useState([]);
+  const [loading, setLoading] = useState(false);
   
-  // 🟢 लाइव इमेज प्रीव्यू (पॉप-अप) कंट्रोल
+  // 🟢 Live Image Preview (Lightbox)
   const [previewImage, setPreviewImage] = useState(null);
 
-  const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true' || localStorage.getItem('isLoggedIn') === 'true';
+  const isLoggedIn = 
+    sessionStorage.getItem('isLoggedIn') === 'true' || 
+    localStorage.getItem('isLoggedIn') === 'true';
 
-  // 🟢 लॉगिन चेक (बिना लॉगिन के होम/लॉगिन पेज पर भेजें)
+  // 🟢 Login Check
   useEffect(() => {
     if (!isLoggedIn) {
       navigate('/', { replace: true });
     }
   }, [isLoggedIn, navigate]);
 
-  // 🟢 डेटाबेस से मटेरियल खींचना
+  // 🟢 Fetch Materials from Backend
   useEffect(() => {
     if (selectedSem && courseId) {
-      fetch(`${API_BASE_URL}/api/materials/${courseId}/${selectedSem}`)
+      setLoading(true);
+      setDbMaterials([]); // Reset old materials while fetching
+
+      const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+
+      fetch(`${API_BASE_URL}/api/materials/${courseId}/${selectedSem}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        }
+      })
         .then(res => {
           if (res.status === 401 || res.status === 403) {
             sessionStorage.clear(); 
@@ -33,23 +47,35 @@ function CourseDetail() {
             navigate('/', { replace: true });
             return null;
           }
+          if (!res.ok) {
+            throw new Error(`Server returned status ${res.status}`);
+          }
           return res.json();
         })
         .then(data => { 
           if (data) setDbMaterials(data); 
         })
-        .catch(err => console.error("API Error:", err));
+        .catch(err => console.error("API Error:", err))
+        .finally(() => setLoading(false));
     }
   }, [selectedSem, courseId, navigate]);
 
   const semesters = [1, 2, 3, 4, 5, 6];
 
-  // 🟢 व्यू बटन ऐक्शन
+  // Helper function to get full file URL
+  const getFullFileUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
+  // 🟢 View File Action
   const handleViewFile = (fileUrl, fileType) => {
+    const fullUrl = getFullFileUrl(fileUrl);
     if (fileType === 'pdf') {
-      window.open(fileUrl, '_blank');
+      window.open(fullUrl, '_blank');
     } else {
-      setPreviewImage(fileUrl);
+      setPreviewImage(fullUrl);
     }
   };
 
@@ -82,46 +108,56 @@ function CourseDetail() {
               <span>{selectedSem === sem ? '▲ Hide Materials' : '▼ View Materials'}</span>
             </div>
             
-            {/* सेमेस्टर के अंदर की लिस्ट */}
+            {/* Expanded Semester Content */}
             {selectedSem === sem && (
               <div style={{ padding: '15px', backgroundColor: '#fff', borderTop: '1px solid #ddd' }}>
                 <h4 style={{ margin: '0 0 12px 0', color: 'black', fontWeight: 'bold' }}>Available Materials:</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {dbMaterials.length > 0 ? (
-                    dbMaterials.map((mat) => (
-                      <div key={mat._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 15px', backgroundColor: '#f9f9f9', borderRadius: '8px', border: '1px solid #eee', flexWrap: 'wrap', gap: '10px' }}>
-                        <span style={{ fontWeight: '600', color: '#333' }}>
-                          {mat.fileType === 'pdf' ? '📄' : '🖼️'} {mat.title}
-                        </span>
-                        
-                        {/* एक्शन बटन्स */}
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button 
-                            onClick={() => handleViewFile(mat.fileUrl, mat.fileType)}
-                            style={{ padding: '6px 14px', backgroundColor: '#ff6f00', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
-                          >
-                            View
-                          </button>
+                
+                {loading ? (
+                  <p style={{ color: '#06dfd1', fontWeight: 'bold', margin: 0, textAlign: 'center' }}>
+                    ⏳ Loading materials...
+                  </p>
+                ) : dbMaterials.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {dbMaterials.map((mat) => {
+                      const fileLink = getFullFileUrl(mat.fileUrl);
+                      return (
+                        <div key={mat._id || mat.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 15px', backgroundColor: '#f9f9f9', borderRadius: '8px', border: '1px solid #eee', flexWrap: 'wrap', gap: '10px' }}>
+                          <span style={{ fontWeight: '600', color: '#333' }}>
+                            {mat.fileType === 'pdf' ? '📄' : '🖼️'} {mat.title}
+                          </span>
                           
-                          <a href={mat.fileUrl} target="_blank" rel="noreferrer" download>
-                            <button style={{ padding: '6px 14px', backgroundColor: '#d1a933', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>
-                              Download
+                          {/* Action Buttons */}
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button 
+                              onClick={() => handleViewFile(mat.fileUrl, mat.fileType)}
+                              style={{ padding: '6px 14px', backgroundColor: '#ff6f00', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
+                            >
+                              View
                             </button>
-                          </a>
+                            
+                            <a href={fileLink} target="_blank" rel="noreferrer" download>
+                              <button style={{ padding: '6px 14px', backgroundColor: '#d1a933', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>
+                                Download
+                              </button>
+                            </a>
+                          </div>
                         </div>
-                      </div>
-                    ))
-                  ) : ( 
-                    <p style={{ color: '#888', margin: 0, fontSize: '14px' }}>No material has been uploaded yet for this semester.</p> 
-                  )}
-                </div>
+                      );
+                    })}
+                  </div>
+                ) : ( 
+                  <p style={{ color: '#888', margin: 0, fontSize: '14px', textAlign: 'center' }}>
+                    No material has been uploaded yet for this semester.
+                  </p> 
+                )}
               </div>
             )}
           </div>
         ))}
       </div>
 
-      {/* 🖼️ लाइव इमेज प्रीव्यू पॉप-अप बॉक्स (Lightbox) */}
+      {/* 🖼️ Live Image Preview Lightbox */}
       {previewImage && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000, backdropFilter: 'blur(5px)' }}>
           <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', position: 'relative', maxWidth: '90%', maxHeight: '90%', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>

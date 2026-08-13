@@ -1,19 +1,27 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
-// आपकी Render Backend API URL यहाँ जोड़ दी गई है
-const API_BASE_URL = 'https://bca-35ms.onrender.com';
+// 🌐 Centralized API Base URL Import
+import { API_BASE_URL } from '../config';
 
 function ForgotPassword() {
   const [mobile, setMobile] = useState('');
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [isOtpSent, setIsOtpSent] = useState(false); // स्क्रीन कंट्रोल करने के लिए
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
   const navigate = useNavigate();
 
-  // स्टेप 1: बैकएंड से OTP मंगवाना
+  // Step 1: Request OTP from Backend
   const handleSendOtp = async (e) => {
     e.preventDefault();
+    if (!mobile || mobile.length < 10) {
+      alert('कृपया एक वैध 10-अंकों का मोबाइल नंबर दर्ज करें!');
+      return;
+    }
+
+    setLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/api/send-otp`, {
         method: 'POST',
@@ -23,19 +31,28 @@ function ForgotPassword() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.message);
-        setIsOtpSent(true); // OTP बॉक्स स्क्रीन पर दिखाओ
+        alert(data.message || 'OTP सफलतापूर्वक भेजा गया!');
+        setIsOtpSent(true);
       } else {
         alert(data.message || 'OTP भेजने में विफल');
       }
     } catch (error) {
+      console.error('Send OTP Error:', error);
       alert('सर्वर से कनेक्शन नहीं हो पा रहा है!');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // स्टेप 2: OTP वेरीफाई करके पासवर्ड बदलना
+  // Step 2: Verify OTP and Reset Password
   const handleVerifyAndReset = async (e) => {
     e.preventDefault();
+    if (!otp || !newPassword) {
+      alert('कृपया OTP और नया पासवर्ड दोनों दर्ज करें!');
+      return;
+    }
+
+    setLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/api/verify-otp-reset`, {
         method: 'POST',
@@ -45,13 +62,16 @@ function ForgotPassword() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.message);
-        navigate('/login'); // सीधे लॉगिन पेज पर भेजें
+        alert(data.message || 'पासवर्ड सफलतापूर्वक बदल दिया गया है!');
+        navigate('/login');
       } else {
         alert(data.message || 'OTP या पासवर्ड रीसेट विफल');
       }
     } catch (error) {
+      console.error('Reset Password Error:', error);
       alert('सर्वर से कनेक्शन टूट गया!');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,7 +91,7 @@ function ForgotPassword() {
         Reset Password with OTP
       </h2>
 
-      {/* फॉर्म 1: अगर OTP नहीं भेजा गया है तो सिर्फ मोबाइल नंबर मांगेगा */}
+      {/* Screen 1: Mobile Number Input */}
       {!isOtpSent ? (
         <form onSubmit={handleSendOtp}>
           <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px' }}>
@@ -96,23 +116,52 @@ function ForgotPassword() {
               required 
             />
           </div>
-          <button type="submit" style={{ width: '100%', padding: '12px', backgroundColor: '#6ccd04', color: 'black', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}>
-            Send OTP
+          <button 
+            type="submit" 
+            disabled={loading}
+            style={{ 
+              width: '100%', 
+              padding: '12px', 
+              backgroundColor: loading ? '#ccc' : '#6ccd04', 
+              color: 'black', 
+              border: 'none', 
+              borderRadius: '8px', 
+              cursor: loading ? 'not-allowed' : 'pointer', 
+              fontSize: '16px', 
+              fontWeight: 'bold' 
+            }}
+          >
+            {loading ? 'Sending OTP...' : 'Send OTP'}
           </button>
         </form>
       ) : (
-        /* फॉर्म 2: OTP बटन दबाने के बाद यह स्क्रीन खुलेगी */
+        /* Screen 2: OTP & New Password Input */
         <form onSubmit={handleVerifyAndReset}>
-          <p style={{ fontSize: '14px', color: 'green', marginBottom: '20px', fontWeight: '600' }}>
-            आपके मोबाइल पर भेजा गया OTP दर्ज करें
+          <p style={{ fontSize: '14px', color: 'green', marginBottom: '10px', fontWeight: '600' }}>
+            आपके मोबाइल ({mobile}) पर भेजा गया OTP दर्ज करें
           </p>
           
+          <button 
+            type="button" 
+            onClick={() => setIsOtpSent(false)} 
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: '#007bff', 
+              cursor: 'pointer', 
+              fontSize: '12px', 
+              textDecoration: 'underline', 
+              marginBottom: '20px' 
+            }}
+          >
+            ✏️ Change Mobile Number
+          </button>
+
           <div style={{ marginBottom: '15px' }}>
             <input 
               type="text" 
-              placeholder="Enter 4-Digit OTP" 
+              placeholder="Enter OTP" 
               value={otp} 
-              maxLength="4"
               onChange={(e) => setOtp(e.target.value)} 
               style={{ 
                 width: '100%', 
@@ -150,8 +199,22 @@ function ForgotPassword() {
             />
           </div>
 
-          <button type="submit" style={{ width: '100%', padding: '12px', backgroundColor: '#6ccd04', color: 'black', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}>
-            Verify & Update Password
+          <button 
+            type="submit" 
+            disabled={loading}
+            style={{ 
+              width: '100%', 
+              padding: '12px', 
+              backgroundColor: loading ? '#ccc' : '#6ccd04', 
+              color: 'black', 
+              border: 'none', 
+              borderRadius: '8px', 
+              cursor: loading ? 'not-allowed' : 'pointer', 
+              fontSize: '16px', 
+              fontWeight: 'bold' 
+            }}
+          >
+            {loading ? 'Verifying...' : 'Verify & Update Password'}
           </button>
         </form>
       )}
