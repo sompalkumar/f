@@ -24,7 +24,7 @@ function Dashboard() {
     localStorage.getItem('userRole') || 
     'student';
 
-  // 🛡️ 1. Security Check: Agar user logged in nahi hai ya token missing hai toh Root (/) par bhejen
+  // 🛡️ Security Check: Agar user logged in nahi hai ya token missing hai toh Root (/) par bhejen
   useEffect(() => {
     if (!isLoggedIn || !token) {
       navigate('/', { replace: true });
@@ -45,112 +45,184 @@ function Dashboard() {
   }
 
   return (
-    <div style={containerStyle}>
-      {/* 👑 Agar Admin logged-in hai toh Admin Panel par jaane ka Quick Shortcut Button */}
-      {userRole === 'admin' && (
-        <div style={adminNoticeStyle}>
-          <span>👑 Logged in as <strong>Admin</strong></span>
-          <button 
-            onClick={() => navigate('/admin-dashboard')} 
-            style={adminBtnStyle}
-          >
-            Go to Admin Panel ⚙️
-          </button>
-        </div>
-      )}
+    <>
+      {/* 📱 Mobile, Tablet & Desktop fully responsive styles */}
+      <style>{`
+        .db-container {
+          padding: clamp(15px, 4vw, 30px) clamp(10px, 3vw, 20px);
+          max-width: 900px;
+          width: 100%;
+          margin: 0 auto;
+          box-sizing: border-box;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
 
-      <div style={headerStyle}>
-        <h2 style={{ margin: 0, color: '#333' }}>Welcome, {userName}! 👋</h2>
-        <p style={{ color: '#666', marginTop: '8px' }}>
-          Please select your course to see the list of semesters:
-        </p>
-      </div>
-      
-      <div style={gridStyle}>
-        {courses.map((course) => (
-          <div key={course.id} style={cardStyle}>
-            <h3 style={{ fontSize: '18px', color: '#333', marginBottom: '15px' }}>
-              {course.name}
-            </h3>
+        .db-admin-notice {
+          background-color: #fff3cd;
+          color: #856404;
+          border: 1px solid #ffeeba;
+          padding: 12px 16px;
+          border-radius: 8px;
+          margin-bottom: 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          font-weight: 500;
+          box-sizing: border-box;
+          width: 100%;
+        }
+
+        .db-admin-btn {
+          background-color: #333;
+          color: #fff;
+          border: none;
+          padding: 8px 14px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 13px;
+          white-space: nowrap;
+          transition: background-color 0.2s;
+        }
+
+        .db-admin-btn:hover {
+          background-color: #000;
+        }
+
+        .db-header {
+          margin-bottom: 25px;
+          text-align: center;
+          padding: 0 10px;
+        }
+
+        .db-title {
+          margin: 0;
+          color: #333;
+          font-size: clamp(20px, 5vw, 28px);
+          font-weight: 700;
+        }
+
+        .db-subtitle {
+          color: #666;
+          margin-top: 8px;
+          font-size: clamp(13px, 3.5vw, 16px);
+          line-height: 1.5;
+        }
+
+        .db-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 16px;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        .db-card {
+          padding: clamp(16px, 3vw, 24px);
+          border: 1px solid #eaeaea;
+          border-radius: 12px;
+          background-color: #ffffff;
+          text-align: center;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          align-items: center;
+          gap: 15px;
+          box-sizing: border-box;
+          width: 100%;
+        }
+
+        .db-card-title {
+          font-size: clamp(15px, 4vw, 18px);
+          color: #333;
+          margin: 0;
+          line-height: 1.4;
+        }
+
+        .db-button {
+          width: 100%;
+          max-width: 220px;
+          padding: 10px 16px;
+          background-color: #06dfd1;
+          color: #000;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 14px;
+          transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .db-button:active {
+          transform: scale(0.98);
+        }
+
+        /* 📱 Mobile Screens (< 576px) Special Rules */
+        @media screen and (max-width: 576px) {
+          .db-admin-notice {
+            flex-direction: column;
+            text-align: center;
+            padding: 12px;
+          }
+
+          .db-admin-btn {
+            width: 100%;
+            padding: 10px;
+          }
+
+          .db-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .db-button {
+            max-width: 100%;
+          }
+        }
+      `}</style>
+
+      <div className="db-container">
+        {/* 👑 Admin Notice Bar */}
+        {userRole === 'admin' && (
+          <div className="db-admin-notice">
+            <span>👑 Logged in as <strong>Admin</strong></span>
             <button 
-              onClick={() => navigate(`/course/${course.id}`)}
-              style={buttonStyle}
+              onClick={() => navigate('/admin-dashboard')} 
+              className="db-admin-btn"
             >
-              View Semesters
+              Go to Admin Panel ⚙️
             </button>
           </div>
-        ))}
+        )}
+
+        {/* 🎯 Header Section */}
+        <div className="db-header">
+          <h2 className="db-title">Welcome, {userName}! 👋</h2>
+          <p className="db-subtitle">
+            Please select your course to see the list of semesters:
+          </p>
+        </div>
+        
+        {/* 📚 Course Cards Grid */}
+        <div className="db-grid">
+          {courses.map((course) => (
+            <div key={course.id} className="db-card">
+              <h3 className="db-card-title">
+                {course.name}
+              </h3>
+              <button 
+                onClick={() => navigate(`/course/${course.id}`)}
+                className="db-button"
+              >
+                View Semesters
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
-
-// 🎨 Clean Styles Object
-const containerStyle = {
-  padding: '30px 20px',
-  maxWidth: '800px',
-  margin: '0 auto',
-  fontFamily: 'Arial, sans-serif'
-};
-
-const adminNoticeStyle = {
-  backgroundColor: '#fff3cd',
-  color: '#856404',
-  border: '1px solid #ffeeba',
-  padding: '12px 20px',
-  borderRadius: '8px',
-  marginBottom: '20px',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  fontWeight: '500'
-};
-
-const adminBtnStyle = {
-  backgroundColor: '#333',
-  color: '#fff',
-  border: 'none',
-  padding: '8px 14px',
-  borderRadius: '6px',
-  cursor: 'pointer',
-  fontWeight: 'bold',
-  fontSize: '13px'
-};
-
-const headerStyle = {
-  marginBottom: '25px',
-  textAlign: 'center'
-};
-
-const gridStyle = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-  gap: '20px'
-};
-
-const cardStyle = {
-  padding: '24px',
-  border: '1px solid #eaeaea',
-  borderRadius: '10px',
-  backgroundColor: '#ffffff',
-  textAlign: 'center',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
-  alignItems: 'center'
-};
-
-const buttonStyle = {
-  padding: '10px 20px',
-  backgroundColor: '#06dfd1',
-  color: 'black',
-  border: 'none',
-  borderRadius: '6px',
-  cursor: 'pointer',
-  fontWeight: 'bold',
-  fontSize: '14px',
-  transition: 'background-color 0.2s'
-};
 
 export default Dashboard;

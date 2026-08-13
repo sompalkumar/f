@@ -1,28 +1,3 @@
-/* 1. सभी एलिमेंट्स की मार्जिन और पेडिंग रीसेट करें */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-/* 2. स्क्रीन कटने और आड़ा स्क्रॉल आने से रोकें */
-html, body {
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden; /* स्क्रीन से बाहर कंटेंट नहीं जाएगा */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-#root {
-  width: 100%;
-  min-height: 100vh;
-}
-
-/* 3. इमेज और पीडीएफ व्यूअर को मोबाइल में स्क्रीन से बाहर जाने से रोकें */
-img, iframe, embed, object {
-  max-width: 100%;
-  height: auto;
-}
 /* ==========================================
    1. Universal Reset & Base Styles
    ========================================== */
@@ -30,6 +5,8 @@ img, iframe, embed, object {
 *::before,
 *::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 :root {
@@ -66,8 +43,34 @@ img, iframe, embed, object {
 }
 
 /* ==========================================
-   2. Dark Mode Styles 
-   (Supports both System Preference & .dark class)
+   2. Screen Safety & Global Layout
+   ========================================== */
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+#root {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive Images, Videos & PDF Viewers */
+img, iframe, embed, object {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ==========================================
+   3. Dark Mode Styles
+   (Supports System Preference & .dark class)
    ========================================== */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -109,33 +112,11 @@ img, iframe, embed, object {
 }
 
 /* ==========================================
-   3. Body & Main Container
-   ========================================== */
-body {
-  margin: 0;
-  padding: 0;
-  background-color: var(--bg);
-  color: var(--text);
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ==========================================
    4. Typography & Headings
    ========================================== */
-h1,
-h2 {
+h1, h2, h3, h4 {
   font-family: var(--heading);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-h);
 }
 
@@ -143,13 +124,13 @@ h2 {
 h1 {
   font-size: clamp(2.25rem, 5vw, 3.5rem);
   letter-spacing: -1.68px;
-  margin: 32px 0;
+  margin: 24px 0;
 }
 
 /* Fluid h2: 20px on mobile to 24px on desktop automatically */
 h2 {
   font-size: clamp(1.25rem, 3vw, 1.5rem);
-  line-height: 1.18;
+  line-height: 1.2;
   letter-spacing: -0.24px;
   margin: 0 0 8px;
 }
@@ -185,6 +166,6 @@ code {
   }
 
   h1 {
-    margin: 20px 0;
+    margin: 16px 0;
   }
 }
