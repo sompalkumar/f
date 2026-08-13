@@ -44,54 +44,38 @@ function Login() {
 
   // 🔑 Login Handler
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile, password })
+    });
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile, password })
-      });
+    const data = await response.json();
 
-      const data = await response.json();
-
-      if (response.ok) {
-        // 🟢 FIXED: All critical Auth Credentials stored in Storage
-        const userRole = data.role || data.userRole || 'student';
-        const token = data.token || '';
-        const userName = data.name || data.userName || '';
-        const logId = data.logId || '';
-
-        // Session Storage Sets
-        sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('token', token);
-        sessionStorage.setItem('userRole', userRole);
-        sessionStorage.setItem('userName', userName);
-        sessionStorage.setItem('logId', logId);
-
-        // Local Storage Sync
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('token', token);
-        localStorage.setItem('userRole', userRole);
-
-        alert('Login successful!');
-
-        // 🟢 Role-based Smart Navigation
-        if (userRole === 'admin') {
-          navigate('/admin-dashboard', { replace: true });
-        } else {
-          navigate('/dashboard', { replace: true });
-        }
-      } else {
-        alert(data.message || 'Invalid credentials');
+    if (response.ok) {
+      // 🔴 1. अगर एडमिन पोर्टल से लॉगिन हो रहा है और रोल 'admin' नहीं है:
+      if (data.role !== 'admin') {
+        alert('❌ You are not an admin! (आप एडमिन नहीं हैं)');
+        return; // ⛔ यही रोक दें! न Storage में डेटा सेव होगा, न Redirect होगा।
       }
-    } catch (error) {
-      alert('सर्वर से कनेक्ट नहीं हो पा रहा है! कृपया कुछ सेकंड बाद पुनः प्रयास करें (Render Cold Start)।');
-    } finally {
-      setLoading(false);
+
+      // 🟢 2. केवल Admin होने पर ही Session सेव करें और Navigate करें
+      sessionStorage.setItem('isLoggedIn', 'true');
+      sessionStorage.setItem('token', data.token);
+      sessionStorage.setItem('userRole', data.role);
+      sessionStorage.setItem('logId', data.logId);
+
+      navigate('/admin-dashboard');
+    } else {
+      alert(data.message || 'लॉगिन विफल रहा!');
     }
-  };
+  } catch (error) {
+    alert('सर्वर से कनेक्शन नहीं हो पाया!');
+  }
+};
 
   return (
     <div style={{ 
