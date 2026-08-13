@@ -1,20 +1,43 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="hi">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    
-    <!-- 📌 SEO और साइट टाइटिल -->
-    <title>BCA Portal | Student & Study Material Portal</title>
-    <meta name="description" content="BCA Portal - Single platform for student notes, syllabus, previous year question papers, and course management." />
-    <meta name="theme-color" content="#06dfd1" />
-  </head>
-  <body>
-    <!-- 🚀 React App Root Component -->
-    <div id="root"></div>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>BCA Portal | Student & Study Material Portal</title>
 
-    <!-- ⚡ Vite Main Entry Script -->
+  <meta name="description" content="BCA Portal - Single platform for student notes, syllabus, previous year question papers, and course management." />
+    <meta name="theme-color" content="#06dfd1" />
+
+  <!-- 🟢 Step 2: मोबाइल में कटने से रोकने के लिए यह ग्लोबल कोड यहाँ डालें -->
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden; /* स्क्रीन से बाहर आड़ा स्क्रॉल नहीं आएगा */
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    #root {
+      width: 100%;
+      min-height: 100vh;
+    }
+    img, iframe, video {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
+
+ <!-- ⚡ Vite Main Entry Script -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
