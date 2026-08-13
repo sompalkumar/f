@@ -3,41 +3,70 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="/favicon.png" />
+  
+  <!-- 📱 Step 1: Responsive Viewport Meta Tag (हर स्क्रीन साइज के लिए अनिवार्य) -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
   <title>BCA Portal | Student & Study Material Portal</title>
 
   <meta name="description" content="BCA Portal - Single platform for student notes, syllabus, previous year question papers, and course management." />
-    <meta name="theme-color" content="#06dfd1" />
+  <meta name="theme-color" content="#06dfd1" />
 
-  <!-- 🟢 Step 2: मोबाइल में कटने से रोकने के लिए यह ग्लोबल कोड यहाँ डालें -->
+  <!-- 🌐 Global Responsive & Reset CSS -->
   <style>
-    * {
+    /* 1. सभी एलिमेंट्स का साइज सही बॉक्स मॉडल में रखें */
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
+
+    /* 2. मुख्य पेज की चौड़ाई और आड़े स्क्रॉल को रोकना */
     html, body {
       width: 100%;
       max-width: 100vw;
-      overflow-x: hidden; /* स्क्रीन से बाहर आड़ा स्क्रॉल नहीं आएगा */
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow-x: hidden; /* दाएँ-बायें कटने और बेकार स्क्रॉल बार को रोकता है */
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
     }
+
+    /* 3. React के मेन Root कंटेनर की सेटिंग */
     #root {
       width: 100%;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    img, iframe, video {
+
+    /* 4. मीडिया और इमेज का ऑटो-साइज़िंग */
+    img, iframe, video, canvas, svg {
       max-width: 100%;
       height: auto;
+      display: block;
+    }
+
+    /* 5. मोबाइल और टैबलेट स्क्रीन के लिए ऑटो-एडजस्टमेंट मीडिया क्वेरी */
+    @media screen and (max-width: 768px) {
+      h1, h2 {
+        font-size: 1.5rem !important;
+      }
+      
+      h3, h4 {
+        font-size: 1.2rem !important;
+      }
+
+      p, span, label, button {
+        font-size: 0.95rem;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- 🟢 React Application Mount Point -->
   <div id="root"></div>
-</body>
-</html>
 
- <!-- ⚡ Vite Main Entry Script -->
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+  <!-- ⚡ Vite Main Entry Script (HTML Body के अंदर बिल्कुल सही जगह) -->
+  <script type="module" src="/src/main.jsx"></script>
+</body>
 </html>
