@@ -47,16 +47,16 @@
    ========================================== */
 html, body {
   width: 100%;
-  max-width: 100vw;
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
   background-color: var(--bg);
   color: var(--text);
 }
 
+/* यहाँ बदलाव किया गया है: max-width और margin 0 auto हटा दिया गया है */
 #root {
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
