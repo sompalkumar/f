@@ -146,11 +146,7 @@ function CourseDetail() {
                               View
                             </button>
                             
-                            <a href={fileLink} target="_blank" rel="noreferrer" download>
-                              <button style={{ padding: '6px 14px', backgroundColor: '#d1a933', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>
-                                Download
-                              </button>
-                            </a>
+                          
                           </div>
                         </div>
                       );
