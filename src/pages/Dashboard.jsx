@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -8,6 +9,10 @@ function Dashboard() {
   const [isPdfOpen, setIsPdfOpen] = useState(false);
   const [currentPdfUrl, setCurrentPdfUrl] = useState('');
   const [currentPdfTitle, setCurrentPdfTitle] = useState('');
+
+  // 🟢 Dynamic Uploaded Materials State
+  const [materials, setMaterials] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // 🟢 Session aur Local Storage dono jagah se Credentials fetch karein
   const isLoggedIn = 
@@ -33,8 +38,40 @@ function Dashboard() {
   useEffect(() => {
     if (!isLoggedIn || !token) {
       navigate('/', { replace: true });
+      return;
     }
+
+    fetchUploadedMaterials();
   }, [isLoggedIn, token, navigate]);
+
+  // 🔴 Fetch Uploaded Materials from Backend API
+  const fetchUploadedMaterials = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/materials`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 401 || response.status === 403) {
+        sessionStorage.clear();
+        localStorage.clear();
+        navigate('/', { replace: true });
+        return;
+      }
+
+      const data = await response.json();
+      if (response.ok) {
+        setMaterials(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error("Error fetching materials for dashboard:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Courses List
   const courses = [
@@ -44,19 +81,20 @@ function Dashboard() {
     { id: 'science', name: '🔬 Science (Bachelor of Science)' }
   ];
 
-  // 📄 Sample PDF List (यहाँ अपनी Drive Preview लिंक्स पेस्ट करें)
-  const pdfList = [
-    {
-      id: 1,
-      title: '📘 BCA Semester 1 Syllabus Notes',
-      // ध्यान दें: ड्राइव की लिंक के आख़िर में /preview होना चाहिए
-      driveUrl: 'https://drive.google.com/file/d/1ABC123xyz_SampleID/preview'
-    }
-  ];
-
-  // PDF Pop-up खोलने के लिए फंक्शन
+  // PDF Pop-up खोलने के लिए फंक्शन (Google Drive preview converter inline)
   const openPdfModal = (url, title) => {
-    setCurrentPdfUrl(url);
+    let finalPreviewUrl = url;
+
+    // Google Drive Viewer Link Format Cleanup
+    if (url && url.includes('drive.google.com')) {
+      if (url.includes('/view')) {
+        finalPreviewUrl = url.replace(/\/view.*$/, '/preview');
+      } else if (!url.endsWith('/preview')) {
+        finalPreviewUrl = `${url.replace(/\/$/, '')}/preview`;
+      }
+    }
+
+    setCurrentPdfUrl(finalPreviewUrl);
     setCurrentPdfTitle(title);
     setIsPdfOpen(true);
   };
@@ -324,26 +362,57 @@ function Dashboard() {
           ))}
         </div>
 
-        {/* 📄 PDF Demo Section (आप इसे जहाँ चाहें वहाँ उपयोग कर सकते हैं) */}
-        {pdfList.length > 0 && (
-          <div style={{ marginTop: '20px' }}>
-            <h3 style={{ color: '#333' }}>Quick Study Material (PDFs)</h3>
+        {/* 📄 Dynamic Google Drive & Uploaded Materials Section */}
+        <div style={{ marginTop: '30px' }}>
+          <h3 style={{ color: '#333', fontSize: '18px', marginBottom: '15px' }}>
+            📚 Recent Study Materials & Notes
+          </h3>
+          
+          {isLoading ? (
+            <p style={{ textAlign: 'center', color: '#666', padding: '20px' }}>Loading uploaded materials...</p>
+          ) : materials.length > 0 ? (
             <div className="db-grid">
-              {pdfList.map((pdf) => (
-                <div key={pdf.id} className="db-card">
-                  <h3 className="db-card-title">{pdf.title}</h3>
-                  <button 
-                    onClick={() => openPdfModal(pdf.driveUrl, pdf.title)}
-                    className="db-button"
-                    style={{ backgroundColor: '#333', color: '#fff' }}
-                  >
-                    View PDF 👁️
-                  </button>
-                </div>
-              ))}
+              {materials.map((mat) => {
+                // Drive Link pehla preference hoga, otherwise file path use hoga
+                const fileTargetUrl = mat.driveUrl || (mat.filePath ? `${API_BASE_URL}/${mat.filePath}` : '');
+                
+                // Agar material category 'quiz' nahi hai tabhi iframe viewing button active rahega
+                if (mat.category === 'quiz') return null;
+
+                return (
+                  <div key={mat._id || mat.id} className="db-card">
+                    <div style={{ width: '100%' }}>
+                      <span style={{ fontSize: '11px', background: '#06dfd1', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
+                        {mat.course ? mat.course.toUpperCase() : 'BCA'} - SEM {mat.semester || '1'}
+                      </span>
+                      <h3 className="db-card-title" style={{ marginTop: '8px' }}>
+                        {mat.title}
+                      </h3>
+                    </div>
+
+                    {fileTargetUrl ? (
+                      <button 
+                        onClick={() => openPdfModal(fileTargetUrl, mat.title)}
+                        className="db-button"
+                        style={{ backgroundColor: '#333', color: '#fff' }}
+                      >
+                        View PDF 👁️
+                      </button>
+                    ) : (
+                      <button className="db-button" disabled style={{ backgroundColor: '#ccc', cursor: 'not-allowed' }}>
+                        No File Link
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          </div>
-        )}
+          ) : (
+            <p style={{ color: '#777', backgroundColor: '#fff', padding: '15px', borderRadius: '8px', textAlign: 'center' }}>
+              No uploaded study material found yet.
+            </p>
+          )}
+        </div>
       </div>
 
       {/* 🔲 Iframe PDF Pop-up Modal */}
