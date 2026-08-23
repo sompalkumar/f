@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 
+// 🔲 In-App PDF Pop-up Modal Import
+import PdfModal from '../components/PdfModal';
+
 function CourseDetail() {
   const { courseId } = useParams(); 
   const navigate = useNavigate();
@@ -12,6 +15,11 @@ function CourseDetail() {
   
   // 🟢 Live Image Preview (Lightbox)
   const [previewImage, setPreviewImage] = useState(null);
+
+  // 🟢 In-App PDF Modal State
+  const [isPdfOpen, setIsPdfOpen] = useState(false);
+  const [selectedPdfUrl, setSelectedPdfUrl] = useState('');
+  const [selectedPdfTitle, setSelectedPdfTitle] = useState('');
 
   const isLoggedIn = 
     sessionStorage.getItem('isLoggedIn') === 'true' || 
@@ -69,11 +77,13 @@ function CourseDetail() {
     return `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
-  // 🟢 View File Action
-  const handleViewFile = (fileUrl, fileType) => {
+  // 🟢 View File Action (Updated: Same Page Popup Modal without opening new tab)
+  const handleViewFile = (fileUrl, fileType, title) => {
     const fullUrl = getFullFileUrl(fileUrl);
-    if (fileType === 'pdf') {
-      window.open(fullUrl, '_blank');
+    if (fileType === 'pdf' || (fileUrl && fileUrl.toLowerCase().includes('drive.google.com'))) {
+      setSelectedPdfUrl(fullUrl);
+      setSelectedPdfTitle(title || "PDF Viewer");
+      setIsPdfOpen(true);
     } else {
       setPreviewImage(fullUrl);
     }
@@ -130,7 +140,7 @@ function CourseDetail() {
                           {/* Action Buttons */}
                           <div style={{ display: 'flex', gap: '8px' }}>
                             <button 
-                              onClick={() => handleViewFile(mat.fileUrl, mat.fileType)}
+                              onClick={() => handleViewFile(mat.fileUrl, mat.fileType, mat.title)}
                               style={{ padding: '6px 14px', backgroundColor: '#ff6f00', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
                             >
                               View
@@ -175,6 +185,14 @@ function CourseDetail() {
           </div>
         </div>
       )}
+
+      {/* 🔲 In-App Pop-up PDF Modal Component */}
+      <PdfModal 
+        isOpen={isPdfOpen} 
+        onClose={() => setIsPdfOpen(false)} 
+        pdfUrl={selectedPdfUrl} 
+        title={selectedPdfTitle} 
+      />
 
       <div style={{ marginTop: '30px', textAlign: 'center' }}>
         <Link to="/dashboard" style={{ color: '#06dfd1', textDecoration: 'none', fontWeight: 'bold' }}>

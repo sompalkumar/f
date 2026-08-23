@@ -4,14 +4,21 @@ import { useParams, Link } from 'react-router-dom';
 // 🌐 Centralized Backend Base URL
 import { API_BASE_URL } from '../config'; 
 
+// 🔲 In-App PDF Pop-up Modal Import
+import PdfModal from '../components/PdfModal';
+
 function SemMaterial() {
   const { courseId = '', semId = '' } = useParams();
 
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // 📚 Static Fallback Data (Jab tak Backend API setup complete na ho)
+  // 🟢 Modal Controls State
+  const [isPdfOpen, setIsPdfOpen] = useState(false);
+  const [selectedPdfUrl, setSelectedPdfUrl] = useState('');
+  const [selectedPdfTitle, setSelectedPdfTitle] = useState('');
+
+  // 📚 Static Fallback Data
   const localFallbackData = {
     bca: {
       1: [
@@ -29,10 +36,8 @@ function SemMaterial() {
   useEffect(() => {
     const fetchMaterials = async () => {
       setLoading(true);
-      setError(null);
 
       try {
-        // Backend API se materials fetch karne ki koshish
         const response = await fetch(`${API_BASE_URL}/api/materials/${courseId}/${semId}`);
         
         if (response.ok) {
@@ -47,7 +52,6 @@ function SemMaterial() {
         console.warn('Backend materials fetch failed, using fallback data:', err);
       }
 
-      // Fallback Data assignment agar API fetch fail / empty ho
       const safeCourse = courseId.toLowerCase();
       const fallback = localFallbackData[safeCourse]?.[semId] || [
         { id: 1, title: `Syllabus Sem ${semId}`, fileName: `Syllabus_Sem_${semId}.pdf`, size: '1.5 MB' },
@@ -62,11 +66,20 @@ function SemMaterial() {
     fetchMaterials();
   }, [courseId, semId]);
 
-  // Download URL construct karne ka helper function
-  const getDownloadUrl = (fileName, fileUrl) => {
-    if (fileUrl) return fileUrl; // Agar backend direct Cloudinary/S3 URL bhej raha hai
-    if (fileName && fileName.startsWith('http')) return fileName;
-    return `${API_BASE_URL}/uploads/${fileName}`; // Default Backend upload path
+  // Target PDF URL Resolve karne ke liye Helper Function
+  const getPdfUrl = (file) => {
+    if (file.driveUrl) return file.driveUrl;
+    if (file.fileUrl) return file.fileUrl;
+    if (file.fileName && file.fileName.startsWith('http')) return file.fileName;
+    return `${API_BASE_URL}/uploads/${file.fileName}`;
+  };
+
+  // PDF Popup Open karne ke liye Handler
+  const handleViewPdf = (file) => {
+    const targetUrl = getPdfUrl(file);
+    setSelectedPdfUrl(targetUrl);
+    setSelectedPdfTitle(file.title);
+    setIsPdfOpen(true);
   };
 
   return (
@@ -119,31 +132,29 @@ function SemMaterial() {
                 <div>
                   <div style={{ fontWeight: 'bold', color: '#2c3e50' }}>{file.title}</div>
                   <div style={{ fontSize: '12px', color: '#6c757d', marginTop: '3px' }}>
-                    File: {file.fileName} {file.size ? `| Size: ${file.size}` : ''}
+                    File: {file.fileName || 'Document'} {file.size ? `| Size: ${file.size}` : ''}
                   </div>
                 </div>
 
-                {/* Download Button */}
-                <a 
-                  href={getDownloadUrl(file.fileName, file.fileUrl)} 
-                  download 
-                  target="_blank" 
-                  rel="noopener noreferrer"
+                {/* In-App PDF View Button */}
+                <button 
+                  onClick={() => handleViewPdf(file)}
                   style={{
                     backgroundColor: '#28a745',
                     color: '#fff',
                     padding: '8px 16px',
                     borderRadius: '6px',
-                    textDecoration: 'none',
+                    border: 'none',
                     fontSize: '14px',
                     fontWeight: 'bold',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '5px'
+                    gap: '5px',
+                    cursor: 'pointer'
                   }}
                 >
-                  📥 Download
-                </a>
+                  👁️ View PDF
+                </button>
               </div>
             ))}
           </div>
@@ -169,6 +180,14 @@ function SemMaterial() {
           🏠 Main Dashboard
         </Link>
       </div>
+
+      {/* 🔲 In-App Pop-up PDF Modal Component */}
+      <PdfModal 
+        isOpen={isPdfOpen} 
+        onClose={() => setIsPdfOpen(false)} 
+        pdfUrl={selectedPdfUrl} 
+        title={selectedPdfTitle} 
+      />
 
     </div>
   );
