@@ -43,7 +43,7 @@ function App() {
     sessionStorage.clear();
 
     if (isExpiredByInactivity) {
-      alert('⏰ आपकी सेशन समय-सीमा (5 मिनट) समाप्त हो गई है!');
+      alert('🔒 Session Expired: Your session has timed out due to inactivity. Please log in again to continue.');
     }
     window.location.replace('/');
   }, []);
