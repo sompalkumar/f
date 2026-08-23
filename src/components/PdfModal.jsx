@@ -22,56 +22,41 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     return processedUrl;
   };
 
-  // Google Drive File ID Extractor
+  // Extract Drive File ID
   const getDriveFileId = (url) => {
     if (!url) return null;
     const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
     return match ? match[1] : null;
   };
 
-  // 🚀 DIRECT IN-APP BLOB DOWNLOAD (No New Tab Redirection)
-  const handleDirectDownload = async () => {
+  // Safe Download Handler without Identity Exposure
+  const handleDirectDownload = () => {
     if (!pdfUrl) return;
     setDownloading(true);
 
-    try {
-      let downloadLink = pdfUrl;
-
-      // Google Drive Direct Export Link Conversion
-      const fileId = getDriveFileId(pdfUrl);
-      if (fileId) {
-        downloadLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
-      }
-
-      // Fetching File as Blob to Force Direct Browser Save
-      const response = await fetch(downloadLink);
-      const blob = await response.blob();
+    const fileId = getDriveFileId(pdfUrl);
+    
+    if (fileId) {
+      // Direct Export Endpoint (Bypasses Google UI/Identity Page)
+      const directDownloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
       
-      // Creating In-Memory Blob Object URL
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = `${title || 'Study_Material'}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.warn("Direct blob download restricted, executing fallback export download:", error);
-      
-      // Fallback Direct Download Trigger
-      const fileId = getDriveFileId(pdfUrl);
-      if (fileId) {
-        const directExportUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-        const hiddenFrame = document.createElement('iframe');
-        hiddenFrame.style.display = 'none';
-        hiddenFrame.src = directExportUrl;
-        document.body.appendChild(hiddenFrame);
-        setTimeout(() => document.body.removeChild(hiddenFrame), 6000);
-      } else {
-        window.location.href = pdfUrl;
-      }
-    } finally {
+      const hiddenIframe = document.createElement('iframe');
+      hiddenIframe.style.display = 'none';
+      hiddenIframe.src = directDownloadUrl;
+      document.body.appendChild(hiddenIframe);
+
+      setTimeout(() => {
+        document.body.removeChild(hiddenIframe);
+        setDownloading(false);
+      }, 4000);
+    } else {
+      // For non-Google Drive Direct File Links
+      const a = document.createElement('a');
+      a.href = pdfUrl;
+      a.download = `${title || 'Document'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       setDownloading(false);
     }
   };
@@ -96,7 +81,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
       }}
       onClick={onClose}
     >
-      {/* Modal Container */}
       <div 
         style={{
           backgroundColor: '#1e1e1e',
@@ -130,7 +114,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           </h3>
           <div style={{ display: 'flex', gap: '10px' }}>
             
-            {/* Direct In-App Download Button */}
             <button 
               onClick={handleDirectDownload} 
               disabled={downloading}
@@ -148,7 +131,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
               {downloading ? '⏳ Downloading...' : '⬇ Download PDF'}
             </button>
 
-            {/* Close Button */}
             <button 
               onClick={onClose}
               style={{
@@ -167,13 +149,12 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           </div>
         </div>
 
-        {/* Modal Body */}
+        {/* Preview Body */}
         <div style={{ flex: 1, width: '100%', height: '100%', backgroundColor: '#525659', position: 'relative', overflow: 'hidden' }}>
           
-          {/* Pop-Out Arrow Protection Blocker */}
+          {/* Top-Right Arrow Blocker */}
           {isGoogleDrive && (
             <div 
-              title="External redirect is disabled for security"
               style={{
                 position: 'absolute',
                 top: '0px',
@@ -191,7 +172,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
             />
           )}
 
-          {/* PDF View Iframe */}
           <iframe 
             src={embedUrl} 
             title="PDF Preview"
