@@ -152,17 +152,30 @@ function AdminDashboard() {
     }
   };
 
-  // 🔴 File / Drive / Quiz Upload Handler
+  // 🔴 File / Drive / Quiz Upload Handler (DYNAMIC FIX APPLIED HERE)
   const handleFileUpload = async (e) => {
     e.preventDefault();
 
-    if (!file && !driveUrl && category !== 'quiz') { 
-      alert('⚠️ कृपया एक लोकल फ़ाइल चुनें या Google Drive Link पेस्ट करें!'); 
-      return; 
+    if (!title.trim()) {
+      alert('⚠️ कृपया Title / Topic Name लिखें!');
+      return;
+    }
+
+    // Dynamic checks according to Category
+    if (category === 'quiz') {
+      if (!quizQuestion.trim() || !optionA.trim() || !optionB.trim() || !optionC.trim() || !optionD.trim()) {
+        alert('⚠️ कृपया क्विज का प्रश्न और चारों ऑप्शंस भरें!');
+        return;
+      }
+    } else {
+      if (!file && !driveUrl.trim()) {
+        alert('⚠️ कृपया एक लोकल फ़ाइल चुनें या Google Drive Link पेस्ट करें!');
+        return;
+      }
     }
 
     let finalDriveUrl = driveUrl;
-    if (driveUrl.includes('/view')) {
+    if (driveUrl && driveUrl.includes('/view')) {
       finalDriveUrl = driveUrl.replace(/\/view.*$/, '/preview');
     }
 
@@ -172,13 +185,13 @@ function AdminDashboard() {
     formData.append('semester', semester);
     formData.append('category', category); // 'notes', 'pyq', 'quiz'
     
-    if (finalDriveUrl) formData.append('driveUrl', finalDriveUrl);
-    if (file) formData.append('pdfFile', file);
-
     if (category === 'quiz') {
       formData.append('question', quizQuestion);
       formData.append('options', JSON.stringify([optionA, optionB, optionC, optionD]));
       formData.append('correctOption', correctOption);
+    } else {
+      if (finalDriveUrl) formData.append('driveUrl', finalDriveUrl);
+      if (file) formData.append('pdfFile', file);
     }
 
     try {
