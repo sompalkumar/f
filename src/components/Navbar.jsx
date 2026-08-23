@@ -41,110 +41,154 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
 
   return (
     <>
-      {/* 📱💻 रिस्पॉन्सिव CSS रूल्स - मोबाइल और लैपटॉप के लिए */}
+      {/* 📱💻 Ultra-Modern Glassmorphic Navbar Styling */}
       <style>{`
         .navbar-container {
           display: flex;
           flex-wrap: wrap;
           justify-content: space-between;
           align-items: center;
-          padding: 10px 16px;
-          background-color: #06dfd1;
+          padding: 12px 24px;
+          background: rgba(15, 23, 42, 0.75);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
           width: 100%;
           box-sizing: border-box;
           position: sticky;
           top: 0;
           z-index: 1000;
-          font-family: Arial, sans-serif;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
 
         .nav-logo {
           margin: 0;
-          font-size: 18px;
+          font-size: 20px;
           cursor: pointer;
-          font-weight: bold;
-          color: #1a1a1a;
+          font-weight: 800;
+          background: linear-gradient(135deg, #06b6d4, #10b981);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
           white-space: nowrap;
+          letter-spacing: -0.5px;
+          transition: transform 0.2s ease;
+        }
+
+        .nav-logo:hover {
+          transform: scale(1.03);
         }
 
         .nav-links-container {
           display: flex;
-          gap: 8px;
+          gap: 6px;
           align-items: center;
         }
 
         .nav-btn {
-          padding: 8px 14px;
-          color: #1a1a1a;
+          padding: 8px 16px;
+          color: #94a3b8;
           border: none;
-          border-radius: 20px;
+          border-radius: 12px;
           cursor: pointer;
-          font-size: 13px;
+          font-size: 13.5px;
           font-weight: 600;
-          transition: 0.2s;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
           outline: none;
           white-space: nowrap;
+          background: transparent;
+        }
+
+        .nav-btn:hover {
+          color: #f8fafc;
+          background: rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-btn.active {
+          color: #06b6d4;
+          background: rgba(6, 182, 212, 0.12);
+          border: 1px solid rgba(6, 182, 212, 0.25);
         }
 
         .login-btn {
-          padding: 8px 18px;
-          background-color: white;
-          color: #1a1a1a;
+          padding: 9px 20px;
+          background: linear-gradient(135deg, #06b6d4, #10b981);
+          color: #ffffff;
           border: none;
-          border-radius: 20px;
+          border-radius: 12px;
           cursor: pointer;
-          font-weight: bold;
-          font-size: 13px;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+          font-weight: 700;
+          font-size: 13.5px;
+          box-shadow: 0 4px 15px rgba(6, 182, 212, 0.25);
           white-space: nowrap;
+          transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
+          background: linear-gradient(135deg, #0891b2, #059669);
         }
 
         .action-btn {
-          padding: 8px 12px;
-          background-color: #ffffff;
-          color: #1a1a1a;
-          border: none;
-          border-radius: 6px;
-          font-weight: bold;
+          padding: 8px 14px;
+          background: rgba(255, 255, 255, 0.08);
+          color: #e2e8f0;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 10px;
+          font-weight: 600;
           font-size: 13px;
           cursor: pointer;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           white-space: nowrap;
+          transition: all 0.2s ease;
         }
 
-        /* 📱 मोबाइल स्क्रीन के लिए विशेष एडजस्टमेंट (768px से छोटे डिवाइस) */
+        .action-btn:hover {
+          background: rgba(255, 255, 255, 0.15);
+          color: #ffffff;
+          border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .logout-btn {
+          background: rgba(239, 68, 68, 0.15);
+          color: #fca5a5;
+          border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .logout-btn:hover {
+          background: rgba(239, 68, 68, 0.9);
+          color: #ffffff;
+          box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        /* 📱 Mobile Responsiveness Adjustments */
         @media screen and (max-width: 768px) {
           .navbar-container {
-            padding: 8px 10px;
-            gap: 8px;
+            padding: 10px 14px;
+            gap: 10px;
           }
 
           .nav-logo {
-            font-size: 16px;
+            font-size: 18px;
           }
 
           .nav-links-container {
             width: 100%;
             justify-content: center;
-            order: 3; /* मोबाइल में लिंक्स को सबसे नीचे लाएगा */
+            order: 3;
             margin-top: 4px;
             flex-wrap: wrap;
             gap: 4px;
           }
 
           .nav-btn {
-            padding: 5px 8px;
-            font-size: 11px;
-            border-radius: 12px;
-          }
-
-          .login-btn {
-            padding: 6px 12px;
-            font-size: 12px;
-          }
-
-          .action-btn {
             padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 8px;
+          }
+
+          .login-btn, .action-btn {
+            padding: 7px 12px;
             font-size: 12px;
           }
         }
@@ -168,29 +212,25 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
           <div className="nav-links-container">
             <button 
               onClick={() => onTabChange && onTabChange('home')} 
-              className="nav-btn"
-              style={{ backgroundColor: activeTab === 'home' ? 'rgba(255, 255, 255, 0.4)' : 'transparent' }}
+              className={`nav-btn ${activeTab === 'home' ? 'active' : ''}`}
             >
               Home
             </button>
             <button 
               onClick={() => onTabChange && onTabChange('chairman')} 
-              className="nav-btn"
-              style={{ backgroundColor: activeTab === 'chairman' ? 'rgba(255, 255, 255, 0.4)' : 'transparent' }}
+              className={`nav-btn ${activeTab === 'chairman' ? 'active' : ''}`}
             >
               Chairman's Message
             </button>
             <button 
               onClick={() => onTabChange && onTabChange('students')} 
-              className="nav-btn"
-              style={{ backgroundColor: activeTab === 'students' ? 'rgba(255, 255, 255, 0.4)' : 'transparent' }}
+              className={`nav-btn ${activeTab === 'students' ? 'active' : ''}`}
             >
               For Students
             </button>
             <button 
               onClick={() => onTabChange && onTabChange('about')} 
-              className="nav-btn"
-              style={{ backgroundColor: activeTab === 'about' ? 'rgba(255, 255, 255, 0.4)' : 'transparent' }}
+              className={`nav-btn ${activeTab === 'about' ? 'active' : ''}`}
             >
               About Us
             </button>
@@ -207,7 +247,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
               Login or Register
             </button>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               {/* Admin Panel Button */}
               {userRole === 'admin' && (
                 <button 
@@ -229,8 +269,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
               {/* Logout Button */}
               <button 
                 onClick={handleLogout} 
-                className="action-btn"
-                style={{ backgroundColor: '#ff4d4d', color: 'white' }}
+                className="action-btn logout-btn"
               >
                 Logout
               </button>
