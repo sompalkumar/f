@@ -77,7 +77,7 @@ function CourseDetail() {
     return `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
-  // 🟢 View File Action (Updated: Same Page Popup Modal without opening new tab)
+  // 🟢 View File Action
   const handleViewFile = (fileUrl, fileType, title) => {
     const fullUrl = getFullFileUrl(fileUrl);
     if (fileType === 'pdf' || (fileUrl && fileUrl.toLowerCase().includes('drive.google.com'))) {
@@ -90,112 +90,300 @@ function CourseDetail() {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
-      <h2 style={{ textTransform: 'uppercase', color: '#06dfd1', textAlign: 'center', fontWeight: 'bold' }}>
-        📚 {courseId} Course Panel
-      </h2>
-      <p style={{ textAlign: 'center', color: '#666', marginBottom: '25px' }}>
-        Click on any semester below to view its study material:
-      </p>
-      
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {semesters.map((sem) => (
-          <div key={sem} style={{ border: '1px solid #ddd', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
-            <div 
-              onClick={() => setSelectedSem(selectedSem === sem ? null : sem)} 
-              style={{ 
-                padding: '15px', 
-                backgroundColor: selectedSem === sem ? '#06dfd1' : '#f8f9fa', 
-                color: selectedSem === sem ? 'black' : '#06dfd1', 
-                fontWeight: 'bold', 
-                cursor: 'pointer', 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                userSelect: 'none' 
-              }}
-            >
-              <span>{sem}. Sem-{sem}</span>
-              <span>{selectedSem === sem ? '▲ Hide Materials' : '▼ View Materials'}</span>
-            </div>
-            
-            {/* Expanded Semester Content */}
-            {selectedSem === sem && (
-              <div style={{ padding: '15px', backgroundColor: '#fff', borderTop: '1px solid #ddd' }}>
-                <h4 style={{ margin: '0 0 12px 0', color: 'black', fontWeight: 'bold' }}>Available Materials:</h4>
+    <>
+      <style>{`
+        .cd-wrapper {
+          min-height: calc(100vh - 60px);
+          background-image: url('/udhnacollege.jpg');
+          background-size: cover;
+          background-position: center;
+          background-attachment: fixed;
+          padding: clamp(20px, 4vw, 40px) clamp(10px, 3vw, 20px);
+          box-sizing: border-box;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .cd-container {
+          max-width: 650px;
+          margin: 0 auto;
+          box-sizing: border-box;
+        }
+
+        .cd-header {
+          background: rgba(255, 255, 255, 0.35);
+          backdrop-filter: blur(25px) saturate(190%);
+          -webkit-backdrop-filter: blur(25px) saturate(190%);
+          padding: 22px 20px;
+          border-radius: 28px;
+          border: 1.5px solid rgba(255, 255, 255, 0.75);
+          box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+          text-align: center;
+          margin-bottom: 25px;
+        }
+
+        .cd-title {
+          text-transform: uppercase;
+          color: #1d1d1f;
+          font-weight: 800;
+          margin: 0 0 8px 0;
+          font-size: clamp(20px, 4.5vw, 26px);
+        }
+
+        .cd-subtitle {
+          color: #2d2d2f;
+          margin: 0;
+          font-size: 14px;
+          font-weight: 500;
+        }
+
+        .cd-sem-card {
+          border: 1.5px solid rgba(255, 255, 255, 0.75);
+          border-radius: 20px;
+          overflow: hidden;
+          background: rgba(255, 255, 255, 0.3);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+          transition: all 0.3s ease;
+        }
+
+        .cd-sem-header {
+          padding: 16px 20px;
+          font-weight: 700;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          user-select: none;
+          transition: all 0.3s ease;
+        }
+
+        .cd-sem-header.active {
+          background: rgba(255, 255, 255, 0.65);
+          color: #1d1d1f;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .cd-sem-header.inactive {
+          background: rgba(255, 255, 255, 0.25);
+          color: #1d1d1f;
+        }
+
+        .cd-sem-header:hover {
+          background: rgba(255, 255, 255, 0.5);
+        }
+
+        .cd-sem-body {
+          padding: 18px;
+          background: rgba(255, 255, 255, 0.2);
+        }
+
+        .cd-mat-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 12px 16px;
+          background: rgba(255, 255, 255, 0.45);
+          backdrop-filter: blur(15px);
+          -webkit-backdrop-filter: blur(15px);
+          border-radius: 14px;
+          border: 1px solid rgba(255, 255, 255, 0.8);
+          flex-wrap: wrap;
+          gap: 10px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .cd-btn-view {
+          padding: 8px 18px;
+          background: rgba(255, 255, 255, 0.8);
+          border: 1px solid rgba(255, 255, 255, 0.9);
+          color: #1d1d1f;
+          border-radius: 50px;
+          cursor: pointer;
+          font-weight: 700;
+          font-size: 13px;
+          transition: all 0.2s ease;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .cd-btn-view:hover {
+          background: rgba(255, 255, 255, 0.98);
+          transform: translateY(-1px);
+        }
+
+        .cd-back-btn {
+          display: inline-block;
+          background: rgba(255, 255, 255, 0.4);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1.5px solid rgba(255, 255, 255, 0.75);
+          color: #1d1d1f;
+          text-decoration: none;
+          font-weight: 700;
+          padding: 12px 24px;
+          border-radius: 50px;
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+          transition: all 0.3s ease;
+        }
+
+        .cd-back-btn:hover {
+          background: rgba(255, 255, 255, 0.75);
+          transform: translateY(-2px);
+        }
+
+        /* 🖼️ Glass Image Lightbox */
+        .cd-img-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 3000;
+          padding: 15px;
+          box-sizing: border-box;
+        }
+
+        .cd-img-card {
+          background: rgba(255, 255, 255, 0.45);
+          backdrop-filter: blur(30px);
+          -webkit-backdrop-filter: blur(30px);
+          border: 1.5px solid rgba(255, 255, 255, 0.8);
+          padding: 20px;
+          border-radius: 24px;
+          position: relative;
+          max-width: 90%;
+          max-height: 90%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+        }
+
+        .cd-close-btn {
+          position: absolute;
+          top: -12px;
+          right: -12px;
+          width: 36px;
+          height: 36px;
+          background: rgba(255, 255, 255, 0.85);
+          color: #1d1d1f;
+          border: 1px solid rgba(255, 255, 255, 0.9);
+          border-radius: 50%;
+          cursor: pointer;
+          font-weight: 800;
+          font-size: 16px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      `}</style>
+
+      <div className="cd-wrapper">
+        <div className="cd-container">
+          <div className="cd-header">
+            <h2 className="cd-title">
+              📚 {courseId} Course Panel
+            </h2>
+            <p className="cd-subtitle">
+              Click on any semester below to view its study material:
+            </p>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {semesters.map((sem) => (
+              <div key={sem} className="cd-sem-card">
+                <div 
+                  onClick={() => setSelectedSem(selectedSem === sem ? null : sem)} 
+                  className={`cd-sem-header ${selectedSem === sem ? 'active' : 'inactive'}`}
+                >
+                  <span>{sem}. Sem-{sem}</span>
+                  <span>{selectedSem === sem ? '▲ Hide Materials' : '▼ View Materials'}</span>
+                </div>
                 
-                {loading ? (
-                  <p style={{ color: '#06dfd1', fontWeight: 'bold', margin: 0, textAlign: 'center' }}>
-                    ⏳ Loading materials...
-                  </p>
-                ) : dbMaterials.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {dbMaterials.map((mat) => {
-                      const fileLink = getFullFileUrl(mat.fileUrl);
-                      return (
-                        <div key={mat._id || mat.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 15px', backgroundColor: '#f9f9f9', borderRadius: '8px', border: '1px solid #eee', flexWrap: 'wrap', gap: '10px' }}>
-                          <span style={{ fontWeight: '600', color: '#333' }}>
-                            {mat.fileType === 'pdf' ? '📄' : '🖼️'} {mat.title}
-                          </span>
-                          
-                          {/* Action Buttons */}
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            <button 
-                              onClick={() => handleViewFile(mat.fileUrl, mat.fileType, mat.title)}
-                              style={{ padding: '6px 14px', backgroundColor: '#ff6f00', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
-                            >
-                              View
-                            </button>
+                {/* Expanded Semester Content */}
+                {selectedSem === sem && (
+                  <div className="cd-sem-body">
+                    <h4 style={{ margin: '0 0 14px 0', color: '#1d1d1f', fontWeight: '800', fontSize: '15px' }}>
+                      Available Materials:
+                    </h4>
+                    
+                    {loading ? (
+                      <p style={{ color: '#1d1d1f', fontWeight: '700', margin: 0, textAlign: 'center', padding: '10px' }}>
+                        ⏳ Loading materials...
+                      </p>
+                    ) : dbMaterials.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {dbMaterials.map((mat) => (
+                          <div key={mat._id || mat.id} className="cd-mat-item">
+                            <span style={{ fontWeight: '700', color: '#1d1d1f', fontSize: '14px' }}>
+                              {mat.fileType === 'pdf' ? '📄' : '🖼️'} {mat.title}
+                            </span>
                             
-                          
+                            {/* Action Buttons */}
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <button 
+                                onClick={() => handleViewFile(mat.fileUrl, mat.fileType, mat.title)}
+                                className="cd-btn-view"
+                              >
+                                View
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        ))}
+                      </div>
+                    ) : ( 
+                      <p style={{ color: '#444', margin: 0, fontSize: '14px', textAlign: 'center', fontWeight: '500', padding: '10px' }}>
+                        No material has been uploaded yet for this semester.
+                      </p> 
+                    )}
                   </div>
-                ) : ( 
-                  <p style={{ color: '#888', margin: 0, fontSize: '14px', textAlign: 'center' }}>
-                    No material has been uploaded yet for this semester.
-                  </p> 
                 )}
               </div>
-            )}
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* 🖼️ Live Image Preview Lightbox */}
-      {previewImage && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000, backdropFilter: 'blur(5px)' }}>
-          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', position: 'relative', maxWidth: '90%', maxHeight: '90%', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
-            <button 
-              onClick={() => setPreviewImage(null)} 
-              style={{ position: 'absolute', top: '-15px', right: '-15px', width: '35px', height: '35px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '50%', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px', boxShadow: '0 2px 5px rgba(0,0,0,0.2)', outline: 'none' }}
-            >
-              ✕
-            </button>
-            <img 
-              src={previewImage} 
-              alt="Preview Notice" 
-              style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', borderRadius: '6px' }} 
-            />
+          {/* 🖼️ Live Image Preview Lightbox */}
+          {previewImage && (
+            <div className="cd-img-overlay">
+              <div className="cd-img-card">
+                <button 
+                  onClick={() => setPreviewImage(null)} 
+                  className="cd-close-btn"
+                >
+                  ✕
+                </button>
+                <img 
+                  src={previewImage} 
+                  alt="Preview Notice" 
+                  style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', borderRadius: '12px' }} 
+                />
+              </div>
+            </div>
+          )}
+
+          {/* 🔲 In-App Pop-up PDF Modal Component */}
+          <PdfModal 
+            isOpen={isPdfOpen} 
+            onClose={() => setIsPdfOpen(false)} 
+            pdfUrl={selectedPdfUrl} 
+            title={selectedPdfTitle} 
+          />
+
+          <div style={{ marginTop: '35px', textAlign: 'center' }}>
+            <Link to="/dashboard" className="cd-back-btn">
+              ⬅ Back to Dashboard
+            </Link>
           </div>
         </div>
-      )}
-
-      {/* 🔲 In-App Pop-up PDF Modal Component */}
-      <PdfModal 
-        isOpen={isPdfOpen} 
-        onClose={() => setIsPdfOpen(false)} 
-        pdfUrl={selectedPdfUrl} 
-        title={selectedPdfTitle} 
-      />
-
-      <div style={{ marginTop: '30px', textAlign: 'center' }}>
-        <Link to="/dashboard" style={{ color: '#06dfd1', textDecoration: 'none', fontWeight: 'bold' }}>
-          ⬅ Back to Dashboard
-        </Link>
       </div>
-    </div>
+    </>
   );
 }
 

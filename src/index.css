@@ -11,20 +11,22 @@
 
 :root {
   /* Colors - Light Theme (Default) */
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #ffffff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --text: #2d2b30;
+  --text-h: #0f0c13;
+  --border: rgba(255, 255, 255, 0.6);
+  --code-bg: rgba(255, 255, 255, 0.35);
+  --accent: #9d3bfb;
+  --accent-bg: rgba(170, 59, 255, 0.15);
+  --accent-border: rgba(255, 255, 255, 0.8);
+  --social-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.15) 100%);
+  
+  /* Liquid Glass Shadow & Insets */
+  --shadow: 0 12px 32px 0 rgba(31, 38, 135, 0.12);
+  --glass-inset: inset 0 3px 5px rgba(255, 255, 255, 0.9), inset 0 -3px 5px rgba(0, 0, 0, 0.08);
 
   /* Typography Fonts */
-  --sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, Consolas, 'Courier New', monospace;
 
   /* Base Typography */
@@ -32,7 +34,6 @@
   letter-spacing: 0.18px;
   color-scheme: light dark;
   color: var(--text);
-  background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -43,18 +44,25 @@
 }
 
 /* ==========================================
-   2. Screen Safety & Global Layout
+   2. Colorful Mesh Gradient & Global Layout
    ========================================== */
 html, body {
   width: 100%;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background-color: var(--bg);
+  /* 🌈 Reference image vibrant pastel background */
+  background: 
+    radial-gradient(at 10% 10%, #ffd1dc 0px, transparent 50%),
+    radial-gradient(at 90% 10%, #d4f0f0 0px, transparent 50%),
+    radial-gradient(at 50% 50%, #e0c3fc 0px, transparent 50%),
+    radial-gradient(at 10% 90%, #8ec5fc 0px, transparent 50%),
+    radial-gradient(at 90% 90%, #fde9c9 0px, transparent 50%);
+  background-color: #fce4ec;
+  background-attachment: fixed;
   color: var(--text);
 }
 
-/* यहाँ बदलाव किया गया है: max-width और margin 0 auto हटा दिया गया है */
 #root {
   width: 100%;
   min-height: 100vh;
@@ -69,21 +77,31 @@ img, iframe, embed, object {
 }
 
 /* ==========================================
-   3. Dark Mode Styles
-   (Supports System Preference & .dark class)
+   3. Glassmorphism Dark Mode Styles
    ========================================== */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+    --text: #e2e8f0;
+    --text-h: #ffffff;
+    --border: rgba(255, 255, 255, 0.2);
+    --code-bg: rgba(0, 0, 0, 0.3);
+    --accent: #d8b4fe;
+    --accent-bg: rgba(192, 132, 252, 0.2);
+    --accent-border: rgba(255, 255, 255, 0.4);
+    --social-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    --shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.37);
+    --glass-inset: inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  html, body {
+    background: 
+      radial-gradient(at 10% 10%, #2d124d 0px, transparent 50%),
+      radial-gradient(at 90% 10%, #112d42 0px, transparent 50%),
+      radial-gradient(at 50% 50%, #3b1d54 0px, transparent 50%),
+      radial-gradient(at 10% 90%, #0d2b45 0px, transparent 50%),
+      radial-gradient(at 90% 90%, #301847 0px, transparent 50%);
+    background-color: #0f0c1b;
+    background-attachment: fixed;
   }
 
   #social .button-icon {
@@ -91,19 +109,33 @@ img, iframe, embed, object {
   }
 }
 
-/* Manual Dark Mode Class Overrides (for JS Toggle) */
+/* Manual Dark Mode Overrides */
 :root.dark,
 [data-theme="dark"] {
-  --text: #9ca3af;
-  --text-h: #f3f4f6;
-  --bg: #16171d;
-  --border: #2e303a;
-  --code-bg: #1f2028;
-  --accent: #c084fc;
-  --accent-bg: rgba(192, 132, 252, 0.15);
-  --accent-border: rgba(192, 132, 252, 0.5);
-  --social-bg: rgba(47, 48, 58, 0.5);
-  --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  --text: #e2e8f0;
+  --text-h: #ffffff;
+  --border: rgba(255, 255, 255, 0.2);
+  --code-bg: rgba(0, 0, 0, 0.3);
+  --accent: #d8b4fe;
+  --accent-bg: rgba(192, 132, 252, 0.2);
+  --accent-border: rgba(255, 255, 255, 0.4);
+  --social-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+  --shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.37);
+  --glass-inset: inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+}
+
+:root.dark html,
+:root.dark body,
+[data-theme="dark"] html,
+[data-theme="dark"] body {
+  background: 
+    radial-gradient(at 10% 10%, #2d124d 0px, transparent 50%),
+    radial-gradient(at 90% 10%, #112d42 0px, transparent 50%),
+    radial-gradient(at 50% 50%, #3b1d54 0px, transparent 50%),
+    radial-gradient(at 10% 90%, #0d2b45 0px, transparent 50%),
+    radial-gradient(at 90% 90%, #301847 0px, transparent 50%);
+  background-color: #0f0c1b;
+  background-attachment: fixed;
 }
 
 :root.dark #social .button-icon,
@@ -116,18 +148,17 @@ img, iframe, embed, object {
    ========================================== */
 h1, h2, h3, h4 {
   font-family: var(--heading);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-h);
+  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.4);
 }
 
-/* Fluid h1: 36px on mobile to 56px on desktop automatically */
 h1 {
   font-size: clamp(2.25rem, 5vw, 3.5rem);
   letter-spacing: -1.68px;
   margin: 24px 0;
 }
 
-/* Fluid h2: 20px on mobile to 24px on desktop automatically */
 h2 {
   font-size: clamp(1.25rem, 3vw, 1.5rem);
   line-height: 1.2;
@@ -140,21 +171,47 @@ p {
 }
 
 /* ==========================================
-   5. Code & Counter UI Elements
+   5. Code & Liquid Glossy Counter Elements
    ========================================== */
-code,
-.counter {
+code {
   font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
+  font-size: 15px;
+  line-height: 1.35;
+  padding: 4px 10px;
+  background: var(--code-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 8px;
+  border: 1px solid var(--border);
   color: var(--text-h);
 }
 
-code {
-  font-size: 15px;
-  line-height: 1.35;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* 🔘 Glossy Water-Drop Button Style for Counter */
+.counter {
+  font-family: var(--sans);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 22px;
+  border-radius: 50px;
+  font-weight: 600;
+  color: var(--text-h);
+  background: var(--social-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1.5px solid var(--accent-border);
+  box-shadow: var(--shadow), var(--glass-inset);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.counter:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15), inset 0 4px 6px rgba(255, 255, 255, 1), inset 0 -3px 5px rgba(0, 0, 0, 0.1);
+}
+
+.counter:active {
+  transform: translateY(1px) scale(0.98);
 }
 
 /* ==========================================

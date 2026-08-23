@@ -63,11 +63,10 @@ function Login() {
         if (userRole !== 'admin') {
           alert('❌ You are not an admin! You cannot log in from here. (आप एडमिन नहीं हैं, आप यहाँ से लॉगिन नहीं कर सकते।)');
           
-          // किसी भी पुराने डेटा को साफ़ करें और यहीं रोक दें
           sessionStorage.clear();
           localStorage.clear();
           setLoading(false);
-          return; // ⛔ यही रोक दें! न Storage में डेटा सेव होगा, न Redirect होगा।
+          return;
         }
 
         // 🟢 2. केवल Admin होने पर ही Session सेव करें और Admin Dashboard पर भेजें
@@ -89,118 +88,170 @@ function Login() {
   };
 
   return (
-    <div style={{ 
-      maxWidth: '450px', 
-      margin: '40px auto', 
-      padding: '40px 30px', 
-      border: '1px solid #aba9a9', 
-      borderRadius: '15px',
-      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.15)',
-      textAlign: 'center',
-      fontFamily: 'Arial, sans-serif',
-      backgroundColor: '#ffffff'
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px'
     }}>
-      
-      {/* 🎓 Cap Icon */}
-      <div style={{ marginBottom: '20px' }}>
-        <img 
-          src="/login-cap.png" 
-          alt="Graduation Cap" 
-          style={{ width: '70px', height: 'auto' }}
-        />
-      </div>
-
-      <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '25px', color: '#333' }}>
-        Portal Login
-      </h2>
-
-      <form onSubmit={handleLogin}>
-        <div style={{ marginBottom: '15px' }}>
-          <input 
-            type="tel" 
-            placeholder="Mobile Number" 
-            value={mobile} 
-            onChange={(e) => setMobile(e.target.value)} 
-            autoComplete="username"
-            style={{ 
-              width: '100%', 
-              padding: '12px 15px', 
-              boxSizing: 'border-box',
-              border: '1px solid #ccc',
-              borderRadius: '8px',
-              backgroundColor: '#f9f9f9',
-              color: '#333',
-              fontSize: '15px',
-              outline: 'none'
-            }} 
-            required 
-          />
-        </div>
-
+      {/* 🧪 Main Glass Card Container */}
+      <div style={{ 
+        width: '100%',
+        maxWidth: '420px', 
+        padding: '40px 30px', 
+        background: 'rgba(255, 255, 255, 0.25)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        borderRadius: '28px',
+        border: '1.5px solid rgba(255, 255, 255, 0.7)',
+        boxShadow: `
+          0 20px 40px rgba(0, 0, 0, 0.08),
+          inset 0 3px 5px rgba(255, 255, 255, 0.9),
+          inset 0 -3px 5px rgba(0, 0, 0, 0.08)`,
+        textAlign: 'center',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      }}>
+        
+        {/* 🎓 Cap Icon with Glass Glow */}
         <div style={{ marginBottom: '20px' }}>
-          <input 
-            type="password" 
-            placeholder="Password" 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
-            autoComplete="current-password"
+          <img 
+            src="/login-cap.png" 
+            alt="Graduation Cap" 
             style={{ 
-              width: '100%', 
-              padding: '12px 15px', 
-              boxSizing: 'border-box',
-              border: '1px solid #ccc',
-              borderRadius: '8px',
-              backgroundColor: '#f9f9f9',
-              color: '#333',
-              fontSize: '15px',
-              outline: 'none'
-            }} 
-            required 
+              width: '75px', 
+              height: 'auto',
+              margin: '0 auto',
+              filter: 'drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15))'
+            }}
           />
         </div>
 
-        <button 
-          type="submit" 
-          disabled={loading}
-          style={{ 
-            width: '100%', 
-            padding: '12px', 
-            backgroundColor: loading ? '#a5d6a7' : '#4CAF50', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '8px', 
-            cursor: loading ? 'not-allowed' : 'pointer',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-            transition: 'background-color 0.3s'
-          }}
-        >
-          {loading ? 'Logging in...' : 'Log In'}
-        </button>
-      </form>
+        <h2 style={{ 
+          fontSize: '26px', 
+          fontWeight: '700', 
+          marginBottom: '25px', 
+          color: '#1d1d1f',
+          textShadow: '0 2px 4px rgba(255, 255, 255, 0.5)'
+        }}>
+          Portal Login
+        </h2>
 
-      <div style={{ marginTop: '20px' }}>
-        <Link 
-          to="/forgot-password" 
-          style={{ fontSize: '14px', color: '#4CAF50', textDecoration: 'none', fontWeight: 'bold' }}
-        >
-          Forgot Password?
-        </Link>
+        <form onSubmit={handleLogin}>
+          {/* 📱 Mobile Input Box */}
+          <div style={{ marginBottom: '18px' }}>
+            <input 
+              type="tel" 
+              placeholder="Mobile Number" 
+              value={mobile} 
+              onChange={(e) => setMobile(e.target.value)} 
+              autoComplete="username"
+              style={{ 
+                width: '100%', 
+                padding: '14px 18px', 
+                boxSizing: 'border-box',
+                border: '1.5px solid rgba(255, 255, 255, 0.8)',
+                borderRadius: '50px',
+                background: 'rgba(255, 255, 255, 0.4)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                color: '#1d1d1f',
+                fontSize: '15px',
+                fontWeight: '500',
+                outline: 'none',
+                boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.06)',
+                transition: 'all 0.25s ease'
+              }} 
+              required 
+            />
+          </div>
+
+          {/* 🔒 Password Input Box */}
+          <div style={{ marginBottom: '25px' }}>
+            <input 
+              type="password" 
+              placeholder="Password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              autoComplete="current-password"
+              style={{ 
+                width: '100%', 
+                padding: '14px 18px', 
+                boxSizing: 'border-box',
+                border: '1.5px solid rgba(255, 255, 255, 0.8)',
+                borderRadius: '50px',
+                background: 'rgba(255, 255, 255, 0.4)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                color: '#1d1d1f',
+                fontSize: '15px',
+                fontWeight: '500',
+                outline: 'none',
+                boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.06)',
+                transition: 'all 0.25s ease'
+              }} 
+              required 
+            />
+          </div>
+
+          {/* 🔘 3D Liquid Glossy Log In Button */}
+          <button 
+            type="submit" 
+            disabled={loading}
+            style={{ 
+              width: '100%', 
+              padding: '14px', 
+              background: loading 
+                ? 'rgba(255, 255, 255, 0.4)' 
+                : 'linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.3) 100%)', 
+              color: '#1d1d1f', 
+              border: '1.5px solid rgba(255, 255, 255, 0.9)', 
+              borderRadius: '50px', 
+              cursor: loading ? 'not-allowed' : 'pointer',
+              fontSize: '16px',
+              fontWeight: '700',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: `
+                0 8px 20px rgba(0, 0, 0, 0.08),
+                inset 0 3px 5px rgba(255, 255, 255, 0.9),
+                inset 0 -3px 5px rgba(0, 0, 0, 0.1)`,
+              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          >
+            {loading ? 'Logging in...' : 'Log In'}
+          </button>
+        </form>
+
+        {/* 🔗 Forgot Password Link */}
+        <div style={{ marginTop: '22px' }}>
+          <Link 
+            to="/forgot-password" 
+            style={{ 
+              fontSize: '14px', 
+              color: '#4a154b', 
+              textDecoration: 'none', 
+              fontWeight: '600' 
+            }}
+          >
+            Forgot Password?
+          </Link>
+        </div>
+
+        <hr style={{ border: '0', borderTop: '1px solid rgba(255, 255, 255, 0.5)', margin: '22px 0' }} />
+
+        {/* 🔗 Register Link */}
+        <p style={{ fontSize: '14px', color: '#424245', fontWeight: '500' }}>
+          Don't have an account?{' '}
+          <Link 
+            to="/" 
+            style={{ color: '#007bff', textDecoration: 'none', fontWeight: '700' }}
+          >
+            Register Now
+          </Link>
+        </p>
+
       </div>
-
-      <hr style={{ border: '0', borderTop: '1px solid #eee', margin: '20px 0' }} />
-
-      <p style={{ fontSize: '14px', color: '#666' }}>
-        Don't have an account?{' '}
-        <Link 
-          to="/" 
-          style={{ color: '#4CAF50', textDecoration: 'none', fontWeight: 'bold' }}
-        >
-          Register Now
-        </Link>
-      </p>
-
     </div>
   );
 }

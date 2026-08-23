@@ -76,155 +76,272 @@ function ForgotPassword() {
   };
 
   return (
-    <div style={{ 
-      maxWidth: '400px', 
-      margin: '40px auto', 
-      padding: '30px 20px', 
-      border: '1px solid #eee', 
-      borderRadius: '15px',
-      boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-      textAlign: 'center',
-      fontFamily: 'Arial, sans-serif',
-      backgroundColor: '#fff'
-    }}>
-      <h2 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '20px', color: '#222' }}>
-        Reset Password with OTP
-      </h2>
+    <>
+      <style>{`
+        /* Dynamic Animated Liquid Glass Background */
+        body {
+          margin: 0;
+          padding: 0;
+          background: linear-gradient(-45deg, #0f172a, #1e1b4b, #311042, #022c22);
+          background-size: 400% 400%;
+          animation: liquidBg 15s ease infinite;
+          min-height: 100vh;
+        }
 
-      {/* Screen 1: Mobile Number Input */}
-      {!isOtpSent ? (
-        <form onSubmit={handleSendOtp}>
-          <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px' }}>
-            अपना रजिस्टर्ड मोबाइल नंबर दर्ज करें
-          </p>
-          <div style={{ marginBottom: '20px' }}>
-            <input 
-              type="tel" 
-              placeholder="Mobile Number" 
-              value={mobile} 
-              onChange={(e) => setMobile(e.target.value)} 
-              style={{ 
-                width: '100%', 
-                padding: '12px', 
-                boxSizing: 'border-box', 
-                border: '1px solid #ccc', 
-                borderRadius: '8px', 
-                backgroundColor: '#282525', 
-                color: '#fff', 
-                fontSize: '15px' 
-              }} 
-              required 
-            />
+        @keyframes liquidBg {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        .fp-wrapper {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          box-sizing: border-box;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* Glassmorphic Container */
+        .fp-card {
+          max-width: 420px;
+          width: 100%;
+          background: rgba(255, 255, 255, 0.06);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 24px;
+          padding: clamp(24px, 5vw, 36px);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+          text-align: center;
+          color: #f8fafc;
+          box-sizing: border-box;
+          transition: transform 0.3s ease;
+        }
+
+        .fp-icon {
+          width: 60px;
+          height: 60px;
+          background: linear-gradient(135deg, #10b981, #06b6d4);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 28px;
+          margin: 0 auto 18px auto;
+          box-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .fp-title {
+          font-size: clamp(20px, 4vw, 24px);
+          font-weight: 800;
+          margin-bottom: 8px;
+          letter-spacing: -0.5px;
+          background: linear-gradient(135deg, #ffffff, #cbd5e1);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .fp-subtitle {
+          font-size: 13.5px;
+          color: #94a3b8;
+          margin-bottom: 24px;
+          line-height: 1.5;
+        }
+
+        .fp-input-group {
+          margin-bottom: 20px;
+          text-align: left;
+        }
+
+        .fp-input {
+          width: 100%;
+          padding: 14px 16px;
+          box-sizing: border-box;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 12px;
+          background: rgba(15, 23, 42, 0.6);
+          color: #ffffff;
+          font-size: 15px;
+          outline: none;
+          transition: all 0.3s ease;
+        }
+
+        .fp-input::placeholder {
+          color: #64748b;
+        }
+
+        .fp-input:focus {
+          border-color: #10b981;
+          box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+          background: rgba(15, 23, 42, 0.8);
+        }
+
+        .fp-input-otp {
+          letter-spacing: 6px;
+          text-align: center;
+          font-weight: bold;
+          font-size: 18px;
+        }
+
+        .fp-change-btn {
+          background: none;
+          border: none;
+          color: #38bdf8;
+          cursor: pointer;
+          font-size: 12.5px;
+          text-decoration: none;
+          margin-bottom: 18px;
+          display: inline-block;
+          font-weight: 600;
+          transition: color 0.2s ease;
+        }
+
+        .fp-change-btn:hover {
+          color: #7dd3fc;
+          text-decoration: underline;
+        }
+
+        /* 3D Action Button */
+        .fp-submit-btn {
+          width: 100%;
+          padding: 14px;
+          background: linear-gradient(135deg, #10b981, #059669);
+          color: #ffffff;
+          border: none;
+          border-radius: 12px;
+          cursor: pointer;
+          font-size: 15px;
+          font-weight: 700;
+          transition: all 0.3s ease;
+          box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .fp-submit-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 15px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .fp-submit-btn:disabled {
+          background: #334155;
+          color: #94a3b8;
+          cursor: not-allowed;
+          box-shadow: none;
+        }
+
+        .fp-back-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          color: #94a3b8;
+          text-decoration: none;
+          font-size: 13.5px;
+          font-weight: 600;
+          margin-top: 24px;
+          transition: all 0.2s ease;
+        }
+
+        .fp-back-link:hover {
+          color: #10b981;
+          transform: translateX(-3px);
+        }
+      `}</style>
+
+      <div className="fp-wrapper">
+        <div className="fp-card">
+          <div className="fp-icon">🔑</div>
+          <h2 className="fp-title">Reset Password</h2>
+
+          {/* Screen 1: Mobile Number Input */}
+          {!isOtpSent ? (
+            <form onSubmit={handleSendOtp}>
+              <p className="fp-subtitle">
+                अपना रजिस्टर्ड मोबाइल नंबर दर्ज करें
+              </p>
+              
+              <div className="fp-input-group">
+                <input 
+                  type="tel" 
+                  placeholder="Mobile Number" 
+                  value={mobile} 
+                  onChange={(e) => setMobile(e.target.value)} 
+                  className="fp-input"
+                  required 
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="fp-submit-btn"
+              >
+                {loading ? 'Sending OTP...' : 'Send OTP 📲'}
+              </button>
+            </form>
+          ) : (
+            /* Screen 2: OTP & New Password Input */
+            <form onSubmit={handleVerifyAndReset}>
+              <p className="fp-subtitle" style={{ color: '#34d399', fontWeight: '500' }}>
+                आपके मोबाइल ({mobile}) पर भेजा गया OTP दर्ज करें
+              </p>
+              
+              <div>
+                <button 
+                  type="button" 
+                  onClick={() => setIsOtpSent(false)} 
+                  className="fp-change-btn"
+                >
+                  ✏️ Change Mobile Number
+                </button>
+              </div>
+
+              <div className="fp-input-group">
+                <input 
+                  type="text" 
+                  placeholder="Enter OTP" 
+                  value={otp} 
+                  onChange={(e) => setOtp(e.target.value)} 
+                  className="fp-input fp-input-otp"
+                  maxLength={6}
+                  required 
+                />
+              </div>
+
+              <div className="fp-input-group">
+                <input 
+                  type="password" 
+                  placeholder="Enter New Password" 
+                  value={newPassword} 
+                  onChange={(e) => setNewPassword(e.target.value)} 
+                  className="fp-input"
+                  required 
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="fp-submit-btn"
+              >
+                {loading ? 'Verifying...' : 'Verify & Update Password 🔓'}
+              </button>
+            </form>
+          )}
+
+          <div>
+            <Link to="/login" className="fp-back-link">
+              ⬅ Back to Login
+            </Link>
           </div>
-          <button 
-            type="submit" 
-            disabled={loading}
-            style={{ 
-              width: '100%', 
-              padding: '12px', 
-              backgroundColor: loading ? '#ccc' : '#6ccd04', 
-              color: 'black', 
-              border: 'none', 
-              borderRadius: '8px', 
-              cursor: loading ? 'not-allowed' : 'pointer', 
-              fontSize: '16px', 
-              fontWeight: 'bold' 
-            }}
-          >
-            {loading ? 'Sending OTP...' : 'Send OTP'}
-          </button>
-        </form>
-      ) : (
-        /* Screen 2: OTP & New Password Input */
-        <form onSubmit={handleVerifyAndReset}>
-          <p style={{ fontSize: '14px', color: 'green', marginBottom: '10px', fontWeight: '600' }}>
-            आपके मोबाइल ({mobile}) पर भेजा गया OTP दर्ज करें
-          </p>
-          
-          <button 
-            type="button" 
-            onClick={() => setIsOtpSent(false)} 
-            style={{ 
-              background: 'none', 
-              border: 'none', 
-              color: '#007bff', 
-              cursor: 'pointer', 
-              fontSize: '12px', 
-              textDecoration: 'underline', 
-              marginBottom: '20px' 
-            }}
-          >
-            ✏️ Change Mobile Number
-          </button>
-
-          <div style={{ marginBottom: '15px' }}>
-            <input 
-              type="text" 
-              placeholder="Enter OTP" 
-              value={otp} 
-              onChange={(e) => setOtp(e.target.value)} 
-              style={{ 
-                width: '100%', 
-                padding: '12px', 
-                boxSizing: 'border-box', 
-                border: '1px solid #ccc', 
-                borderRadius: '8px', 
-                backgroundColor: '#282525', 
-                color: '#fff', 
-                fontSize: '15px', 
-                letterSpacing: '5px', 
-                textAlign: 'center' 
-              }} 
-              required 
-            />
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <input 
-              type="password" 
-              placeholder="Enter New Password" 
-              value={newPassword} 
-              onChange={(e) => setNewPassword(e.target.value)} 
-              style={{ 
-                width: '100%', 
-                padding: '12px', 
-                boxSizing: 'border-box', 
-                border: '1px solid #ccc', 
-                borderRadius: '8px', 
-                backgroundColor: '#282525', 
-                color: '#fff', 
-                fontSize: '15px' 
-              }} 
-              required 
-            />
-          </div>
-
-          <button 
-            type="submit" 
-            disabled={loading}
-            style={{ 
-              width: '100%', 
-              padding: '12px', 
-              backgroundColor: loading ? '#ccc' : '#6ccd04', 
-              color: 'black', 
-              border: 'none', 
-              borderRadius: '8px', 
-              cursor: loading ? 'not-allowed' : 'pointer', 
-              fontSize: '16px', 
-              fontWeight: 'bold' 
-            }}
-          >
-            {loading ? 'Verifying...' : 'Verify & Update Password'}
-          </button>
-        </form>
-      )}
-
-      <div style={{ marginTop: '20px' }}>
-        <Link to="/login" style={{ color: '#6ccd04', textDecoration: 'none', fontSize: '14px', fontWeight: 'bold' }}>
-          ⬅ Back to Login
-        </Link>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
