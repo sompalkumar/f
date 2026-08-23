@@ -242,4 +242,4 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
   );
 }
 
-export default ;
+export default Navbar;
