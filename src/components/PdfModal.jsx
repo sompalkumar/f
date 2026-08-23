@@ -1,158 +1,130 @@
 import React from 'react';
 
-const PdfModal = ({ isOpen, onClose, pdfUrl, title }) => {
+function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   if (!isOpen) return null;
 
-  // 1. Google Drive Preview Link Auto-Formatter
-  let formattedUrl = pdfUrl || '';
-  if (formattedUrl.includes('drive.google.com')) {
-    if (formattedUrl.includes('/view')) {
-      formattedUrl = formattedUrl.replace(/\/view.*$/, '/preview');
-    } else if (!formattedUrl.endsWith('/preview')) {
-      formattedUrl = `${formattedUrl.replace(/\/$/, '')}/preview`;
-    }
-  }
+  // Google Drive preview URL ko auto-fit zoom format me process karna
+  const getEmbedUrl = (url) => {
+    if (!url) return '';
+    let processedUrl = url;
 
-  // 2. Direct Download Link Generator
-  const getDownloadUrl = (url) => {
-    if (!url) return '#';
+    // Google Drive URL handling
     if (url.includes('drive.google.com')) {
-      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      if (match && match[1]) {
-        return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+      if (url.includes('/view')) {
+        processedUrl = url.replace('/view', '/preview');
+      } else if (!url.includes('/preview')) {
+        processedUrl = `${url}/preview`;
       }
     }
-    return url;
+    
+    return processedUrl;
   };
 
+  const embedUrl = getEmbedUrl(pdfUrl);
+
   return (
-    <div style={styles.overlay}>
-      <div style={styles.modal}>
-        {/* Header containing Title, Download, and Close Buttons */}
-        <div style={styles.header}>
-          <h3 style={styles.titleText}>{title || "PDF Viewer"}</h3>
-          <div style={styles.headerActions}>
-            {/* Direct Download Button */}
-            <a 
-              href={getDownloadUrl(pdfUrl)} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              download
-              style={styles.downloadBtn}
+    <div 
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 99999,
+        padding: '10px',
+        boxSizing: 'border-box'
+      }}
+      onClick={onClose}
+    >
+      {/* Modal Container - 90% Screen Width & Height */}
+      <div 
+        style={{
+          backgroundColor: '#1e1e1e',
+          width: '95%',
+          maxWidth: '1100px',
+          height: '92vh',
+          borderRadius: '12px',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+          position: 'relative'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div 
+          style={{
+            padding: '12px 20px',
+            backgroundColor: '#2a2a2a',
+            color: '#fff',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderBottom: '1px solid #333'
+          }}
+        >
+          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 'bold', color: '#06dfd1' }}>
+            📄 {title || 'PDF Preview'}
+          </h3>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            {pdfUrl && (
+              <a 
+                href={pdfUrl} 
+                download 
+                target="_blank" 
+                rel="noreferrer"
+                style={{
+                  backgroundColor: '#06dfd1',
+                  color: '#000',
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  fontSize: '13px',
+                  fontWeight: 'bold'
+                }}
+              >
+                ⬇ Download PDF
+              </a>
+            )}
+            <button 
+              onClick={onClose}
+              style={{
+                backgroundColor: '#dc3545',
+                color: '#fff',
+                border: 'none',
+                padding: '6px 14px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '13px'
+              }}
             >
-              ⬇️ Download PDF
-            </a>
-            <button onClick={onClose} style={styles.closeBtn}>✕ Close</button>
+              ✕ Close
+            </button>
           </div>
         </div>
 
-        {/* Modal Body containing Security Overlay and Iframe */}
-        <div style={styles.body}>
-          {/* 🛡️ SECURITY FIX: Top-Right Pop-out Arrow Blocker */}
-          <div 
-            style={styles.securityBlocker} 
-            title="External tab redirect is disabled for security."
-          />
-
-          <iframe
-            src={formattedUrl}
-            width="100%"
-            height="100%"
-            style={{ border: 'none' }}
+        {/* Modal Body - Full Viewport Iframe */}
+        <div style={{ flex: 1, width: '100%', height: '100%', backgroundColor: '#525659', position: 'relative' }}>
+          <iframe 
+            src={embedUrl} 
             title="PDF Preview"
-            allow="autoplay"
-          ></iframe>
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              display: 'block'
+            }}
+          />
         </div>
       </div>
     </div>
   );
-};
-
-// CSS Styles
-const styles = {
-  overlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 99999,
-    padding: '10px',
-    boxSizing: 'border-box',
-  },
-  modal: {
-    backgroundColor: '#fff',
-    width: '95%',
-    maxWidth: '950px',
-    height: '88vh',
-    borderRadius: '8px',
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-    position: 'relative',
-  },
-  header: {
-    padding: '12px 20px',
-    backgroundColor: '#1a1a1a',
-    color: '#fff',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    zIndex: 10,
-  },
-  titleText: {
-    margin: 0,
-    fontSize: '16px',
-    fontWeight: '600',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxWidth: '50%',
-  },
-  headerActions: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  downloadBtn: {
-    backgroundColor: '#06dfd1',
-    color: '#000',
-    padding: '6px 14px',
-    borderRadius: '4px',
-    textDecoration: 'none',
-    fontWeight: 'bold',
-    fontSize: '13px',
-  },
-  closeBtn: {
-    backgroundColor: '#ff4d4d',
-    color: '#fff',
-    border: 'none',
-    padding: '6px 14px',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    fontSize: '13px',
-  },
-  body: {
-    flex: 1,
-    position: 'relative',
-    backgroundColor: '#222',
-  },
-  securityBlocker: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: '65px',
-    height: '60px',
-    backgroundColor: 'transparent',
-    zIndex: 999,
-    cursor: 'not-allowed',
-  }
-};
+}
 
 export default PdfModal;
