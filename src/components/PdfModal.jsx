@@ -5,41 +5,29 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
 
   if (!isOpen) return null;
 
-  const isGoogleDrive = pdfUrl && pdfUrl.includes('drive.google.com');
-
-  // Embed Preview URL Generator
-  const getEmbedUrl = (url) => {
-    if (!url) return '';
-    let processedUrl = url;
-
-    if (isGoogleDrive) {
-      if (url.includes('/view')) {
-        processedUrl = url.replace('/view', '/preview');
-      } else if (!url.includes('/preview')) {
-        processedUrl = `${url}/preview`;
-      }
-    }
-    return processedUrl;
-  };
-
-  // Extract Drive File ID
-  const getDriveFileId = (url) => {
+  // 🔍 Extract Google Drive File ID safely using Regex
+  const extractDriveFileId = (url) => {
     if (!url) return null;
-    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    const match = url.match(/(?:d\/|id=|file\/d\/|src=)([\w-]{25,})/);
     return match ? match[1] : null;
   };
 
-  // Safe Download Handler without Identity Exposure
+  const fileId = extractDriveFileId(pdfUrl);
+  const isGoogleDrive = Boolean(pdfUrl && (pdfUrl.includes('drive.google.com') || fileId));
+
+  // 🛠 Construct Clean Embed URL
+  const embedUrl = isGoogleDrive && fileId 
+    ? `https://drive.google.com/file/d/${fileId}/preview` 
+    : pdfUrl;
+
+  // ⬇️ Direct In-App Download Function (No External Redirects)
   const handleDirectDownload = () => {
     if (!pdfUrl) return;
     setDownloading(true);
 
-    const fileId = getDriveFileId(pdfUrl);
-    
     if (fileId) {
-      // Direct Export Endpoint (Bypasses Google UI/Identity Page)
+      // Direct Export Endpoint
       const directDownloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-      
       const hiddenIframe = document.createElement('iframe');
       hiddenIframe.style.display = 'none';
       hiddenIframe.src = directDownloadUrl;
@@ -48,9 +36,8 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
       setTimeout(() => {
         document.body.removeChild(hiddenIframe);
         setDownloading(false);
-      }, 4000);
+      }, 3000);
     } else {
-      // For non-Google Drive Direct File Links
       const a = document.createElement('a');
       a.href = pdfUrl;
       a.download = `${title || 'Document'}.pdf`;
@@ -60,8 +47,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
       setDownloading(false);
     }
   };
-
-  const embedUrl = getEmbedUrl(pdfUrl);
 
   return (
     <div 
@@ -96,7 +81,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header Section */}
+        {/* Header */}
         <div 
           style={{
             padding: '12px 20px',
@@ -113,7 +98,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
             📄 {title || 'PDF Preview'}
           </h3>
           <div style={{ display: 'flex', gap: '10px' }}>
-            
             <button 
               onClick={handleDirectDownload} 
               disabled={downloading}
@@ -149,18 +133,18 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           </div>
         </div>
 
-        {/* Preview Body */}
+        {/* Modal Body */}
         <div style={{ flex: 1, width: '100%', height: '100%', backgroundColor: '#525659', position: 'relative', overflow: 'hidden' }}>
           
-          {/* Top-Right Arrow Blocker */}
+          {/* Top-Right Arrow Click Guard (Protects Admin Identity) */}
           {isGoogleDrive && (
             <div 
               style={{
                 position: 'absolute',
                 top: '0px',
                 right: '0px',
-                width: '70px',
-                height: '70px',
+                width: '75px',
+                height: '75px',
                 backgroundColor: 'transparent',
                 zIndex: 9999,
                 cursor: 'not-allowed'
