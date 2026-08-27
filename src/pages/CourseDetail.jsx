@@ -94,19 +94,47 @@ function CourseDetail() {
       <style>{`
         .cd-wrapper {
           min-height: calc(100vh - 60px);
+          position: relative;
+          padding: clamp(20px, 4vw, 40px) clamp(10px, 3vw, 20px);
+          box-sizing: border-box;
+          overflow: hidden;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .cd-wrapper::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
           background-image: url('/udhnacollege.jpg');
           background-size: cover;
           background-position: center;
           background-attachment: fixed;
-          padding: clamp(20px, 4vw, 40px) clamp(10px, 3vw, 20px);
-          box-sizing: border-box;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          filter: blur(12px);
+          -webkit-filter: blur(12px);
+          transform: scale(1.05);
+          z-index: -2;
+        }
+
+        .cd-wrapper::after {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.2);
+          z-index: -1;
         }
 
         .cd-container {
           max-width: 650px;
           margin: 0 auto;
           box-sizing: border-box;
+          position: relative;
+          z-index: 1;
         }
 
         .cd-header {
