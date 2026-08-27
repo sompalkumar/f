@@ -239,16 +239,9 @@ function AdminDashboard() {
         body {
           margin: 0;
           padding: 0;
-          background: linear-gradient(-45deg, #18150c, #0f172a, #262110, #0c1928);
-          background-size: 400% 400%;
-          animation: liquidBg 15s ease infinite;
+          background-color: #0f172a;
+          background-image: radial-gradient(circle at 50% 0%, rgba(234, 179, 8, 0.08) 0%, transparent 60%);
           min-height: 100vh;
-        }
-
-        @keyframes liquidBg {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
         }
 
         .adm-container {
@@ -262,21 +255,20 @@ function AdminDashboard() {
           color: #f8fafc;
         }
 
+        /* Clean Box without permanent glowing shadows */
         .adm-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: rgba(30, 27, 20, 0.75);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(245, 158, 11, 0.35);
+          background: #1e293b;
+          border: 1px solid rgba(234, 179, 8, 0.25);
           padding: clamp(16px, 3vw, 24px);
-          border-radius: 20px;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(234, 179, 8, 0.12);
+          border-radius: 16px;
           flex-wrap: wrap;
           gap: 15px;
           width: 100%;
           box-sizing: border-box;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .adm-avatar-box {
@@ -286,16 +278,15 @@ function AdminDashboard() {
         }
 
         .adm-avatar {
-          width: 54px;
-          height: 54px;
-          background: linear-gradient(135deg, #0284c7, #38bdf8);
+          width: 50px;
+          height: 50px;
+          background: #0284c7;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 24px;
-          box-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
-          border: 2px solid rgba(255, 255, 255, 0.3);
+          font-size: 22px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
           flex-shrink: 0;
         }
 
@@ -306,53 +297,54 @@ function AdminDashboard() {
           width: auto;
         }
 
+        /* Pure Sky Blue Button (No Glow by default) */
         .adm-candidate-btn {
           padding: 12px 18px;
-          background: linear-gradient(135deg, #0284c7, #0ea5e9);
+          background-color: #0284c7;
           color: #ffffff;
-          border: 1px solid rgba(186, 230, 253, 0.4);
-          border-radius: 12px;
+          border: 1px solid #0369a1;
+          border-radius: 10px;
           cursor: pointer;
           font-weight: 600;
           font-size: 13px;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
+          transition: all 0.2s ease-in-out;
+          box-shadow: none;
         }
 
+        /* Glow ONLY when hovered */
         .adm-candidate-btn:hover {
-          transform: translateY(-2px);
-          background: linear-gradient(135deg, #0ea5e9, #38bdf8);
-          box-shadow: 0 12px 25px rgba(56, 189, 248, 0.55);
+          background-color: #0ea5e9;
+          border-color: #38bdf8;
+          box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
         }
 
         .adm-logout-btn {
           padding: 12px 18px;
-          background: linear-gradient(135deg, #dc2626, #991b1b);
+          background-color: #dc2626;
           color: #ffffff;
-          border: 1px solid rgba(252, 165, 165, 0.3);
-          border-radius: 12px;
+          border: 1px solid #b91c1c;
+          border-radius: 10px;
           cursor: pointer;
           font-weight: 600;
           font-size: 13px;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 8px 20px rgba(220, 38, 38, 0.35);
+          transition: all 0.2s ease-in-out;
+          box-shadow: none;
         }
 
+        /* Red Glow ONLY when hovered */
         .adm-logout-btn:hover {
-          transform: translateY(-2px);
-          background: linear-gradient(135deg, #ef4444, #b91c1c);
-          box-shadow: 0 12px 25px rgba(239, 68, 68, 0.55);
+          background-color: #ef4444;
+          box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
         }
 
+        /* Clean Card Boxes */
         .adm-card {
           margin-top: 25px;
-          background: rgba(26, 23, 16, 0.65);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
+          background: #1e293b;
           padding: clamp(20px, 4vw, 30px);
-          border-radius: 20px;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 15px rgba(234, 179, 8, 0.05);
-          border: 1px solid rgba(245, 158, 11, 0.25);
+          border-radius: 16px;
+          border: 1px solid rgba(234, 179, 8, 0.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
           box-sizing: border-box;
           width: 100%;
         }
@@ -363,7 +355,6 @@ function AdminDashboard() {
           font-size: clamp(18px, 4vw, 21px);
           font-weight: 700;
           letter-spacing: 0.5px;
-          text-shadow: 0 0 12px rgba(253, 224, 71, 0.25);
           display: flex;
           align-items: center;
           gap: 8px;
@@ -382,23 +373,25 @@ function AdminDashboard() {
           margin-bottom: 8px;
         }
 
+        /* Flat & Clean Input Box (No initial glow) */
         .adm-input {
           width: 100%;
           padding: 12px 15px;
           box-sizing: border-box;
-          border: 1px solid rgba(234, 179, 8, 0.25);
-          border-radius: 10px;
+          border: 1px solid #334155;
+          border-radius: 8px;
           font-size: 14px;
           color: #ffffff;
           outline: none;
-          background: rgba(15, 23, 42, 0.7);
-          transition: all 0.3s ease;
+          background: #0f172a;
+          transition: all 0.2s ease-in-out;
+          box-shadow: none;
         }
 
-        .adm-input:focus {
+        /* Glow ONLY on hover or focus */
+        .adm-input:hover, .adm-input:focus {
           border-color: #38bdf8;
-          box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
-          background: rgba(15, 23, 42, 0.9);
+          box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
         }
 
         .adm-input option {
@@ -421,50 +414,52 @@ function AdminDashboard() {
         .adm-file-input {
           width: 100%;
           padding: 12px;
-          border: 1px dashed rgba(56, 189, 248, 0.5);
-          border-radius: 10px;
+          border: 1px dashed #475569;
+          border-radius: 8px;
           box-sizing: border-box;
           font-size: 13px;
-          background: rgba(15, 23, 42, 0.5);
+          background: #0f172a;
           color: #cbd5e1;
-          transition: all 0.3s ease;
+          transition: all 0.2s ease-in-out;
         }
         
         .adm-file-input:hover {
           border-color: #38bdf8;
-          background: rgba(56, 189, 248, 0.1);
+          box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
         }
 
+        /* Flat Sky-Blue Upload Button */
         .adm-upload-btn {
           width: 100%;
           padding: 14px 20px;
-          border: 1px solid rgba(186, 230, 253, 0.4);
-          border-radius: 12px;
+          border: 1px solid #0369a1;
+          border-radius: 10px;
           cursor: pointer;
           font-weight: 700;
-          background: linear-gradient(135deg, #0284c7, #0ea5e9);
+          background-color: #0284c7;
           color: #ffffff;
           font-size: 15px;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 10px 25px rgba(14, 165, 233, 0.45);
+          transition: all 0.2s ease-in-out;
+          box-shadow: none;
         }
 
+        /* Upload Button Glow ONLY when hovered */
         .adm-upload-btn:hover {
-          transform: translateY(-2px);
-          background: linear-gradient(135deg, #0ea5e9, #38bdf8);
-          box-shadow: 0 15px 30px rgba(56, 189, 248, 0.6);
+          background-color: #0ea5e9;
+          border-color: #38bdf8;
+          box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
         }
 
         .adm-filter-bar {
           display: flex;
           gap: 12px;
-          background: rgba(15, 23, 42, 0.65);
+          background: #0f172a;
           padding: 14px;
-          border-radius: 12px;
+          border-radius: 10px;
           margin-bottom: 20px;
           flex-wrap: wrap;
           align-items: center;
-          border: 1px solid rgba(234, 179, 8, 0.2);
+          border: 1px solid rgba(234, 179, 8, 0.15);
         }
 
         .adm-mat-item {
@@ -472,45 +467,43 @@ function AdminDashboard() {
           justify-content: space-between;
           align-items: center;
           padding: 14px 18px;
-          background: rgba(254, 240, 138, 0.04);
-          border-radius: 12px;
-          border: 1px solid rgba(234, 179, 8, 0.15);
+          background: #0f172a;
+          border-radius: 10px;
+          border: 1px solid #334155;
           gap: 10px;
           flex-wrap: wrap;
-          transition: all 0.3s ease;
+          transition: all 0.2s ease-in-out;
         }
 
         .adm-mat-item:hover {
-          background: rgba(254, 240, 138, 0.08);
-          border-color: rgba(56, 189, 248, 0.4);
-          transform: translateX(4px);
+          border-color: #38bdf8;
+          box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
         }
 
         .adm-delete-btn {
           padding: 8px 16px;
-          background: linear-gradient(135deg, #e11d48, #be123c);
+          background-color: #e11d48;
           color: white;
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          border-radius: 8px;
+          border: 1px solid #be123c;
+          border-radius: 6px;
           cursor: pointer;
           font-weight: 600;
           font-size: 12px;
-          transition: all 0.3s ease;
-          box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+          transition: all 0.2s ease-in-out;
+          box-shadow: none;
         }
 
         .adm-delete-btn:hover {
-          transform: translateY(-2px);
-          background: linear-gradient(135deg, #f43f5e, #e11d48);
-          box-shadow: 0 8px 18px rgba(244, 63, 94, 0.5);
+          background-color: #f43f5e;
+          box-shadow: 0 0 12px rgba(244, 63, 94, 0.5);
         }
 
         .adm-table-wrapper {
           overflow-x: auto;
           width: 100%;
-          border-radius: 12px;
+          border-radius: 10px;
           -webkit-overflow-scrolling: touch;
-          border: 1px solid rgba(234, 179, 8, 0.2);
+          border: 1px solid #334155;
         }
 
         .adm-table {
@@ -636,7 +629,7 @@ function AdminDashboard() {
             </div>
 
             {category === 'quiz' ? (
-              <div style={{ backgroundColor: 'rgba(234, 179, 8, 0.08)', padding: '18px', borderRadius: '14px', marginBottom: '18px', border: '1px solid rgba(234, 179, 8, 0.3)', boxShadow: 'inset 0 0 15px rgba(234, 179, 8, 0.05)' }}>
+              <div style={{ backgroundColor: '#0f172a', padding: '18px', borderRadius: '12px', marginBottom: '18px', border: '1px solid rgba(234, 179, 8, 0.2)' }}>
                 <h4 style={{ margin: '0 0 14px 0', color: '#fde047', fontSize: '15px' }}>❓ Add Quiz Question & Options</h4>
                 
                 <div className="adm-input-group">
@@ -767,7 +760,7 @@ function AdminDashboard() {
           <div className="adm-table-wrapper">
             <table className="adm-table">
               <thead>
-                <tr style={{ background: 'linear-gradient(135deg, #0284c7, #0ea5e9)', color: '#ffffff' }}>
+                <tr style={{ backgroundColor: '#0284c7', color: '#ffffff' }}>
                   <th className="adm-th">Name</th>
                   <th className="adm-th">Mobile</th>
                   <th className="adm-th">Login Time</th>
@@ -776,7 +769,7 @@ function AdminDashboard() {
               </thead>
               <tbody>
                 {logs.map((log, i) => (
-                  <tr key={log._id || i} style={{ borderBottom: '1px solid rgba(234, 179, 8, 0.15)', background: i % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.02)' }}>
+                  <tr key={log._id || i} style={{ borderBottom: '1px solid #334155', background: i % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.02)' }}>
                     <td className="adm-td" style={{ fontWeight: '600' }}>{log.userName}</td>
                     <td className="adm-td" style={{ color: '#cbd5e1' }}>{log.mobile}</td>
                     <td className="adm-td" style={{ color: '#cbd5e1' }}>{new Date(log.loginTime).toLocaleString()}</td>
