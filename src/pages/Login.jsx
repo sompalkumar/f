@@ -1,408 +1,479 @@
 import React, { useState, useEffect } from 'react';
+
 import { useNavigate, Link } from 'react-router-dom';
 
+
+
 // 🌐 Centralized API Base URL Import
+
 import { API_BASE_URL } from '../config';
 
+
+
 function Login() {
+
   const [mobile, setMobile] = useState('');
+
   const [password, setPassword] = useState('');
-  const [userRole, setUserRole] = useState('candidate');
-  const [loading, setLoading] = useState(false);
+
+  const [loading, setLoading] = useState(false); // ⏳ Loading state
+
   const navigate = useNavigate();
 
+
+
   // 🛡️ Guard Check: Agar user pehle se logged-in hai to uske role ke aadhar par sahi Dashboard par bhejo
+
   useEffect(() => {
-    const isLoggedIn = 
-      sessionStorage.getItem('isLoggedIn') === 'true' || 
+
+    const isLoggedIn =
+
+      sessionStorage.getItem('isLoggedIn') === 'true' ||
+
       localStorage.getItem('isLoggedIn') === 'true';
 
-    const storedRole = 
-      sessionStorage.getItem('userRole') || 
+
+
+    const userRole =
+
+      sessionStorage.getItem('userRole') ||
+
       localStorage.getItem('userRole');
 
+
+
     if (isLoggedIn) {
-      if (storedRole === 'admin') {
+
+      if (userRole === 'admin') {
+
         navigate('/admin-dashboard', { replace: true });
+
       } else {
+
         navigate('/dashboard', { replace: true });
+
       }
+
       return;
+
     }
+
+
 
     // Browser back button handling
+
     const blockBackButton = () => {
+
       window.history.pushState(null, null, window.location.href);
+
     };
+
+
 
     window.history.pushState(null, null, window.location.href);
+
     window.addEventListener('popstate', blockBackButton);
 
+
+
     return () => {
+
       window.removeEventListener('popstate', blockBackButton);
+
     };
+
   }, [navigate]);
 
-  // 📱 Mobile Input Sanitization (only 10 digits allowed)
-  const handleMobileChange = (e) => {
-    const value = e.target.value.replace(/\D/g, '');
-    if (value.length <= 10) {
-      setMobile(value);
-    }
-  };
+
 
   // 🔑 Login Handler
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    
-    if (mobile.length !== 10) {
-      alert('कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें!');
-      return;
-    }
 
-    setLoading(true);
-    
+  const handleLogin = async (e) => {
+
+    e.preventDefault();
+
+    setLoading(true); // ⏳ Loading chalu karein
+
+   
+
     try {
+
       const response = await fetch(`${API_BASE_URL}/api/login`, {
+
         method: 'POST',
+
         headers: { 'Content-Type': 'application/json' },
+
         body: JSON.stringify({ mobile, password })
+
       });
+
+
 
       const data = await response.json();
 
+
+
       if (response.ok) {
-        const backendRole = data.role || data.userRole || 'candidate';
 
-        // 🛑 Role Security Validation Logic Fix
-        if (userRole === 'admin') {
-          if (backendRole !== 'admin') {
-            alert('❌ Access Denied! Only authorized Admins can login from Admin Tab.');
-            setLoading(false);
-            return;
-          }
-        } else {
-          if (backendRole === 'admin') {
-            alert('⚠️ आप एक एडमिन हैं। कृपया Admin Tab चुनकर लॉगिन करें!');
-            setLoading(false);
-            return;
-          }
+        const userRole = data.role || data.userRole;
+
+
+
+        // 🔴 1. अगर यूज़र एडमिन नहीं है तो लॉगिन तुरंत ब्लॉक करें
+
+        if (userRole !== 'admin') {
+
+          alert('❌ You are not an admin! You cannot log in from here.');
+
+         
+
+          sessionStorage.clear();
+
+          localStorage.clear();
+
+          setLoading(false);
+
+          return;
+
         }
 
-        // 🟢 Session Saving Logic
+
+
+        // 🟢 2. केवल Admin होने पर ही Session सेव करें और Admin Dashboard पर भेजें
+
         sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('token', data.token || '');
-        sessionStorage.setItem('userRole', backendRole);
-        if (data.name || data.userName) {
-          sessionStorage.setItem('userName', data.name || data.userName);
-        }
+
+        sessionStorage.setItem('token', data.token);
+
+        sessionStorage.setItem('userRole', userRole);
+
         if (data.logId) sessionStorage.setItem('logId', data.logId);
 
-        // 🔀 Role-Based Dynamic Redirection
-        if (backendRole === 'admin') {
-          navigate('/admin-dashboard', { replace: true });
-        } else {
-          navigate('/dashboard', { replace: true });
-        }
+
+
+        navigate('/admin-dashboard', { replace: true });
+
       } else {
+
         alert(data.message || 'लॉगिन विफल रहा!');
+
       }
+
     } catch (error) {
+
       console.error('Login Error:', error);
+
       alert('सर्वर से कनेक्शन नहीं हो पाया!');
+
     } finally {
-      setLoading(false);
+
+      setLoading(false); // ⏳ Loading बंद करें
+
     }
+
   };
 
-  // Close button handler (Home page navigation)
-  const handleClose = () => {
-    navigate('/');
-  };
+
 
   return (
-    <>
-      <style>{`
-        /* 🌌 Page Background Container */
-        .login-page-wrapper {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 20px;
-          background: #0f172a;
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-          box-sizing: border-box;
-          position: relative;
-          overflow: hidden;
-        }
 
-        /* 📦 Futuristic Glassmorphic Card (Updated Padding & Width) */
-        .login-card {
-          width: 100%;
-          max-width: 460px;
-          padding: 42px 30px 30px 30px;
-          background: rgba(30, 41, 59, 0.85);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          border-radius: 24px;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-          text-align: center;
-          box-sizing: border-box;
-          position: relative;
-          animation: cardAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+    <div style={{
 
-        @keyframes cardAppear {
-          from { opacity: 0; transform: translateY(12px) scale(0.98); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
+      minHeight: '100vh',
 
-        /* ❌ Repositioned & Scaled Close Button */
-        .close-btn {
-          position: absolute;
-          top: 12px;
-          right: 12px;
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          font-size: 13px;
-          cursor: pointer;
-          color: #94a3b8;
-          outline: none;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s ease;
-          z-index: 10;
-        }
+      display: 'flex',
 
-        .close-btn:hover {
-          background: rgba(255, 255, 255, 0.2);
-          color: #ffffff;
-        }
+      alignItems: 'center',
 
-        /* 🔄 Tab Switcher */
-        .tabs-container {
-          display: flex;
-          margin-bottom: 22px;
-          background: rgba(15, 23, 42, 0.6);
-          padding: 4px;
-          border-radius: 50px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+      justifyContent: 'center',
 
-        .tab-btn {
-          flex: 1;
-          text-align: center;
-          padding: 9px 0;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 700;
-          color: #94a3b8;
-          border-radius: 50px;
-          transition: all 0.3s ease;
-        }
+      padding: '20px',
 
-        .tab-btn.active {
-          color: #ffffff;
-          background: linear-gradient(135deg, #06b6d4, #10b981);
-          box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
-        }
+      backgroundColor: '#0a192f'
 
-        .login-field-group {
-          margin-bottom: 20px;
-          text-align: left;
-        }
+    }}>
 
-        .login-input {
-          width: 100%;
-          padding: 13px 16px;
-          box-sizing: border-box;
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          border-radius: 12px;
-          background: rgba(15, 23, 42, 0.6);
-          color: #f8fafc;
-          font-size: 14px;
-          font-weight: 500;
-          outline: none;
-          transition: all 0.25s ease;
-        }
+      {/* 🟦 Clean Navy Blue Card Container */}
 
-        .login-input:focus {
-          border-color: #06b6d4;
-          box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
-          background: rgba(15, 23, 42, 0.85);
-        }
+      <div style={{
 
-        .login-input::placeholder {
-          color: #64748b;
-        }
+        width: '100%',
 
-        .login-btn {
-          width: 100%;
-          padding: 13px;
-          background: linear-gradient(135deg, #06b6d4, #10b981);
-          color: #ffffff;
-          border: none;
-          border-radius: 12px;
-          cursor: pointer;
-          font-size: 15px;
-          font-weight: 700;
-          box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
-          transition: all 0.3s ease;
-          margin-top: 6px;
-        }
+        maxWidth: '420px',
 
-        .login-btn:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(6, 182, 212, 0.45);
-          background: linear-gradient(135deg, #0891b2, #059669);
-        }
+        padding: '40px 30px',
 
-        .login-btn:disabled {
-          background: #475569;
-          cursor: not-allowed;
-          box-shadow: none;
-          opacity: 0.7;
-        }
+        background: '#0f2744',
 
-        .forgot-pass-link {
-          display: inline-block;
-          font-size: 13.5px;
-          color: #38bdf8;
-          text-decoration: none;
-          font-weight: 600;
-          margin-top: 20px;
-          transition: color 0.2s ease;
-        }
+        borderRadius: '16px',
 
-        .forgot-pass-link:hover {
-          color: #7dd3fc;
-          text-decoration: underline;
-        }
+        border: '1px solid #1e4976',
 
-        .login-divider {
-          border: 0;
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
-          margin: 24px 0;
-        }
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.4)',
 
-        .register-prompt {
-          font-size: 13.5px;
-          color: #94a3b8;
-          font-weight: 500;
-          margin: 0;
-        }
+        textAlign: 'center',
 
-        .register-link {
-          color: #10b981;
-          text-decoration: none;
-          font-weight: 700;
-          margin-left: 4px;
-          transition: color 0.2s ease;
-        }
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
 
-        .register-link:hover {
-          color: #34d399;
-          text-decoration: underline;
-        }
+      }}>
 
-        @media screen and (max-width: 480px) {
-          .login-card {
-            padding: 36px 20px 24px 20px;
-            border-radius: 20px;
-          }
-          .login-input {
-            padding: 11px 14px;
-            font-size: 13.5px;
-          }
-        }
-      `}</style>
+       
 
-      <div className="login-page-wrapper">
-        <div className="login-card">
-          {/* ❌ Close Button */}
-          <button onClick={handleClose} className="close-btn" aria-label="Close">
-            ✕
+        {/* 🎓 Cap Icon */}
+
+        <div style={{ marginBottom: '20px' }}>
+
+          <img
+
+            src="/login-cap.png"
+
+            alt="Graduation Cap"
+
+            style={{
+
+              width: '75px',
+
+              height: 'auto',
+
+              margin: '0 auto'
+
+            }}
+
+          />
+
+        </div>
+
+
+
+        <h2 style={{
+
+          fontSize: '24px',
+
+          fontWeight: '700',
+
+          marginBottom: '25px',
+
+          color: '#ffffff'
+
+        }}>
+
+          Portal Login
+
+        </h2>
+
+
+
+        <form onSubmit={handleLogin}>
+
+          {/* 📱 Mobile Input Box */}
+
+          <div style={{ marginBottom: '18px' }}>
+
+            <input
+
+              type="tel"
+
+              placeholder="Mobile Number"
+
+              value={mobile}
+
+              onChange={(e) => setMobile(e.target.value)}
+
+              autoComplete="username"
+
+              style={{
+
+                width: '100%',
+
+                padding: '14px 18px',
+
+                boxSizing: 'border-box',
+
+                border: '1px solid #1e4976',
+
+                borderRadius: '8px',
+
+                background: '#0a192f',
+
+                color: '#bae6fd',
+
+                fontSize: '15px',
+
+                fontWeight: '500',
+
+                outline: 'none',
+
+                transition: 'border-color 0.2s ease'
+
+              }}
+
+              required
+
+            />
+
+          </div>
+
+
+
+          {/* 🔒 Password Input Box */}
+
+          <div style={{ marginBottom: '25px' }}>
+
+            <input
+
+              type="password"
+
+              placeholder="Password"
+
+              value={password}
+
+              onChange={(e) => setPassword(e.target.value)}
+
+              autoComplete="current-password"
+
+              style={{
+
+                width: '100%',
+
+                padding: '14px 18px',
+
+                boxSizing: 'border-box',
+
+                border: '1px solid #1e4976',
+
+                borderRadius: '8px',
+
+                background: '#0a192f',
+
+                color: '#bae6fd',
+
+                fontSize: '15px',
+
+                fontWeight: '500',
+
+                outline: 'none',
+
+                transition: 'border-color 0.2s ease'
+
+              }}
+
+              required
+
+            />
+
+          </div>
+
+
+
+          {/* 🔘 Clean Solid Blue Button */}
+
+          <button
+
+            type="submit"
+
+            disabled={loading}
+
+            style={{
+
+              width: '100%',
+
+              padding: '14px',
+
+              background: loading ? '#003366' : '#0077d6',
+
+              color: '#ffffff',
+
+              border: 'none',
+
+              borderRadius: '8px',
+
+              cursor: loading ? 'not-allowed' : 'pointer',
+
+              fontSize: '16px',
+
+              fontWeight: '700',
+
+              boxShadow: '0 4px 12px rgba(0, 119, 214, 0.3)',
+
+              transition: 'background-color 0.2s ease'
+
+            }}
+
+          >
+
+            {loading ? 'Logging in...' : 'Log In'}
+
           </button>
 
-          {/* 🔄 Candidate / Admin Tabs */}
-          <div className="tabs-container">
-            <div 
-              className={`tab-btn ${userRole === 'candidate' ? 'active' : ''}`}
-              onClick={() => setUserRole('candidate')}
-            >
-              Candidate
-            </div>
-            <div 
-              className={`tab-btn ${userRole === 'admin' ? 'active' : ''}`}
-              onClick={() => setUserRole('admin')}
-            >
-              Admin
-            </div>
-          </div>
+        </form>
 
-          <form onSubmit={handleLogin}>
-            {/* 📱 Mobile Input Box */}
-            <div className="login-field-group">
-              <input 
-                type="tel" 
-                placeholder="Mobile Number" 
-                value={mobile} 
-                onChange={handleMobileChange} 
-                autoComplete="username"
-                className="login-input"
-                required 
-              />
-            </div>
 
-            {/* 🔒 Password Input Box */}
-            <div className="login-field-group">
-              <input 
-                type="password" 
-                placeholder="Password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                autoComplete="current-password"
-                className="login-input"
-                required 
-              />
-            </div>
 
-            {/* 🔘 Submit Button */}
-            <button 
-              type="submit" 
-              disabled={loading}
-              className="login-btn"
-            >
-              {loading ? 'Logging in...' : (userRole === 'admin' ? 'Admin Log In' : 'Candidate Log In')}
-            </button>
-          </form>
+        {/* 🔗 Forgot Password Link */}
 
-          {/* 🔗 Forgot Password Link */}
-          <div>
-            <Link to="/forgot-password" className="forgot-pass-link">
-              Forgot Password?
-            </Link>
-          </div>
+        <div style={{ marginTop: '22px' }}>
 
-          <hr className="login-divider" />
+          <Link
 
-          {/* 🔗 Register Link */}
-          <p className="register-prompt">
-            Don't have an account?
-            <Link to="/" className="register-link">
-              Register Now
-            </Link>
-          </p>
+            to="/forgot-password"
+
+            style={{
+
+              fontSize: '14px',
+
+              color: '#38bdf8',
+
+              textDecoration: 'none',
+
+              fontWeight: '600'
+
+            }}
+
+          >
+
+            Forgot Password?
+
+          </Link>
+
         </div>
+
+
+
+        <hr style={{ border: '0', borderTop: '1px solid #1e4976', margin: '22px 0' }} />
+
+
+
+        {/* 🔗 Register Link */}
+
+        <p style={{ fontSize: '14px', color: '#94a3b8', fontWeight: '500' }}>
+
+          Don't have an account?{' '}
+
+          <Link
+
+            to="/"
+
+            style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: '700' }}
+
+          >
+
+            Register Now
+
+          </Link>
+
+        </p>
+
+
+
       </div>
-    </>
+
+    </div>
+
   );
+
 }
+
+
 
 export default Login;
