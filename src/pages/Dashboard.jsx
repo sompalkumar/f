@@ -82,7 +82,7 @@ function Dashboard() {
     { id: 'science', name: '🔬 Science (Bachelor of Science)' }
   ];
 
-  // PDF Pop-up खोलne ke liye function (With Security Cleanup)
+  // PDF Pop-up खोलने के लिए फंक्शन (With Security Cleanup)
   const openPdfModal = (url, title) => {
     let finalPreviewUrl = url;
 
@@ -132,12 +132,38 @@ function Dashboard() {
       <style>{`
         .db-wrapper {
           min-height: calc(100vh - 60px);
+          position: relative;
+          padding: clamp(20px, 4vw, 40px) clamp(10px, 3vw, 20px);
+          box-sizing: border-box;
+          overflow: hidden;
+        }
+
+        .db-wrapper::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
           background-image: url('/udhnacollege.jpg');
           background-size: cover;
           background-position: center;
           background-attachment: fixed;
-          padding: clamp(20px, 4vw, 40px) clamp(10px, 3vw, 20px);
-          box-sizing: border-box;
+          filter: blur(12px);
+          -webkit-filter: blur(12px);
+          transform: scale(1.05);
+          z-index: -2;
+        }
+
+        .db-wrapper::after {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.2);
+          z-index: -1;
         }
 
         .db-container {
@@ -146,6 +172,8 @@ function Dashboard() {
           margin: 0 auto;
           box-sizing: border-box;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          position: relative;
+          z-index: 1;
         }
 
         .db-admin-notice {
