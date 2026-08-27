@@ -97,7 +97,6 @@ function CourseDetail() {
           position: relative;
           padding: clamp(20px, 4vw, 40px) clamp(10px, 3vw, 20px);
           box-sizing: border-box;
-          overflow: hidden;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
