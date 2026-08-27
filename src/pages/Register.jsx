@@ -89,7 +89,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
       const backendRole = data.role || data.userRole || 'candidate';
 
       // 🛑 Strictly enforce Role Access Control
-       {
+      if (userRole === 'admin') {
         if (backendRole !== 'admin') {
           alert('❌ Access Denied! Only authorized Admins can login from Admin Tab.');
           refreshCaptcha();
@@ -97,7 +97,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
           setIsLoading(false);
           return;
         }
-      } {
+      } else {
         if (backendRole === 'admin') {
           alert('⚠️ आप एक एडमिन हैं। कृपया Admin Tab चुनकर लॉगिन करें!');
           refreshCaptcha();
