@@ -104,7 +104,9 @@ function ForgotPassword() {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
+       
         /* Glassmorphic Container */
+       
         .fp-card {
           max-width: 420px;
           width: 100%;
@@ -120,7 +122,6 @@ function ForgotPassword() {
           box-sizing: border-box;
           transition: transform 0.3s ease;
         }
-
         .fp-icon {
           width: 60px;
           height: 60px;

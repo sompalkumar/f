@@ -61,7 +61,7 @@ function Login() {
 
         // 🔴 1. अगर यूज़र एडमिन नहीं है तो लॉगिन तुरंत ब्लॉक करें
         if (userRole !== 'admin') {
-          alert('❌ You are not an admin! You cannot log in from here. (आप एडमिन नहीं हैं, आप यहाँ से लॉगिन नहीं कर सकते।)');
+          alert('❌ You are not an admin! You cannot log in from here.');
           
           sessionStorage.clear();
           localStorage.clear();
@@ -245,7 +245,7 @@ function Login() {
           Don't have an account?{' '}
           <Link 
             to="/" 
-            style={{ color: '#007bff', textDecoration: 'none', fontWeight: '700' }}
+            style={{ color: '#4a154b', textDecoration: 'none', fontWeight: '700' }}
           >
             Register Now
           </Link>
