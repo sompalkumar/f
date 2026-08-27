@@ -87,14 +87,26 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
 
       const backendRole = data.role || data.userRole || 'candidate';
 
-      if (userRole === 'admin' && backendRole !== 'admin') {
-        alert('❌ You are not an admin!');
-        refreshCaptcha();
-        setCaptchaInput('');
-        setIsLoading(false);
-        return;
+      // 🛑 Strictly enforce Role Access Control
+      if (userRole === 'admin') {
+        if (backendRole !== 'admin') {
+          alert('❌ Access Denied! Only authorized Admins can login from Admin Tab.');
+          refreshCaptcha();
+          setCaptchaInput('');
+          setIsLoading(false);
+          return;
+        }
+      } else {
+        if (backendRole === 'admin') {
+          alert('⚠️ आप एक एडमिन हैं। कृपया Admin Tab चुनकर लॉगिन करें!');
+          refreshCaptcha();
+          setCaptchaInput('');
+          setIsLoading(false);
+          return;
+        }
       }
 
+      // Targeted cleanup instead of clearing all app storage
       const authKeys = ['token', 'isLoggedIn', 'userName', 'logId', 'userRole', 'userCourse'];
       authKeys.forEach(key => sessionStorage.removeItem(key));
 
@@ -208,7 +220,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     about: { title: "ℹ️ About Us", desc: "Since its inception, Bca Portal has been setting new records in the field of higher education." }
   };
 
-  // Dynamic Styles (Updated for layout fix)
+  // Dynamic Styles
   const overlayStyle = { 
     position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', 
     backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
