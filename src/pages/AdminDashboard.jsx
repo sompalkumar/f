@@ -301,7 +301,7 @@ function AdminDashboard() {
         .adm-candidate-btn {
           padding: 12px 18px;
           background-color: #35fa09;
-          color: #ffffff;
+          
           border: 1px solid #0369a1;
           border-radius: 10px;
           cursor: pointer;
@@ -321,7 +321,7 @@ function AdminDashboard() {
         .adm-logout-btn {
           padding: 12px 18px;
           background-color: red;
-          color: #ffffff;
+          
           border: 1px solid #b91c1c;
           border-radius: 10px;
           cursor: pointer;
