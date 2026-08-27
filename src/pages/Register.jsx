@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { API_BASE_URL } from '../config'; 
 
 function Register({ activeTab, showPortalModal, setShowPortalModal }) {
@@ -16,21 +16,21 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
   const [captchaInput, setCaptchaInput] = useState('');
   const [currentCaptcha, setCurrentCaptcha] = useState('');
 
-  // 🔄 कैप्चा जनरेट करें
-  useEffect(() => {
-    refreshCaptcha();
-  }, []);
-
-  const refreshCaptcha = () => {
+  // 🔄 Memoized Captcha Generator
+  const refreshCaptcha = useCallback(() => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < 5; i++) { 
       result += chars.charAt(Math.floor(Math.random() * chars.length)); 
     }
     setCurrentCaptcha(result);
-  };
+  }, []);
 
-  // 🧹 सभी फॉर्म फ़ील्ड्स को रीसेट करने के लिए
+  useEffect(() => {
+    refreshCaptcha();
+  }, [refreshCaptcha]);
+
+  // 🧹 Reset form states safely
   const resetFormState = () => {
     setMobile('');
     setPassword('');
@@ -42,22 +42,18 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
   };
 
   const handleMobileChange = (e) => {
-    const val = e.target.value;
-    const cleanVal = val.replace(/\D/g, ''); 
+    const cleanVal = e.target.value.replace(/\D/g, ''); 
     if (cleanVal.length <= 10) { setMobile(cleanVal); }
   };
 
-  const validateMobile = (num) => {
-    const regex = /^[0-9]{10}$/;
-    return regex.test(num);
-  };
+  const validateMobile = (num) => /^[0-9]{10}$/.test(num);
 
   const isPasswordStrong = (pass) => {
     const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return strongPasswordRegex.test(pass);
   };
 
-  // 🔑 लॉगिन हैंडलर
+  // 🔑 Login Handler
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateMobile(mobile)) { 
@@ -91,38 +87,28 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
 
       const backendRole = data.role || data.userRole || 'candidate';
 
-      // 🛡️ रोल मैचिंग चेक
       if (userRole === 'admin' && backendRole !== 'admin') {
-        alert('❌ You are not an admin! (आप एडमिन नहीं हैं)');
+        alert('❌ You are not an admin!');
         refreshCaptcha();
         setCaptchaInput('');
         setIsLoading(false);
         return;
       }
 
-      // 🟢 केवल आवश्यक Storage क्लीनअप एवं सेटर
-      sessionStorage.clear();
-      localStorage.clear();
+      // Targeted cleanup instead of clearing all app storage
+      const authKeys = ['token', 'isLoggedIn', 'userName', 'logId', 'userRole', 'userCourse'];
+      authKeys.forEach(key => sessionStorage.removeItem(key));
 
-      const tokenValue = data.token || '';
-      const nameValue = data.name || data.userName || '';
-      const logIdValue = data.logId || '';
-      const courseValue = data.course || 'bca';
-
-      sessionStorage.setItem('token', tokenValue);
+      sessionStorage.setItem('token', data.token || '');
       sessionStorage.setItem('isLoggedIn', 'true');
-      sessionStorage.setItem('userName', nameValue);
-      sessionStorage.setItem('logId', logIdValue);
+      sessionStorage.setItem('userName', data.name || data.userName || '');
+      sessionStorage.setItem('logId', data.logId || '');
       sessionStorage.setItem('userRole', backendRole);
-      sessionStorage.setItem('userCourse', courseValue);
+      sessionStorage.setItem('userCourse', data.course || 'bca');
 
       setShowPortalModal(false);
 
-      if (backendRole === 'admin') { 
-        window.location.replace('/admin-dashboard'); 
-      } else { 
-        window.location.replace('/dashboard'); 
-      }
+      window.location.replace(backendRole === 'admin' ? '/admin-dashboard' : '/dashboard');
 
     } catch (error) {
       console.error(error);
@@ -132,11 +118,12 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     }
   };
 
-  // 📝 रजिस्ट्रेशन हैंडलर
+  // 📝 Register Handler
   const handleRegister = async (e) => {
     e.preventDefault();
     if (!validateMobile(mobile)) { alert('⚠️ मोबाइल नंबर 10 अंकों का होना चाहिए!'); return; }
     if (!isPasswordStrong(password)) { alert('⚠️ कृपया एक मजबूत पासवर्ड बनाएं!'); return; }
+    
     setIsLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/api/register`, {
@@ -160,10 +147,11 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     }
   };
 
-  // 📲 OTP भेजने का हैंडलर
+  // 📲 OTP Handler
   const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!validateMobile(mobile)) { alert('वैध नंबर डालें!'); return; }
+    
     setIsLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/api/send-otp`, { 
@@ -186,10 +174,11 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     }
   };
 
-  // 🔄 OTP वेरीफाई करके पासवर्ड अपडेट करना
+  // 🔄 Verify OTP Handler
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     if (!isPasswordStrong(password)) { alert('⚠️ मजबूत पासवर्ड डालें।'); return; }
+    
     setIsLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/api/verify-otp-reset`, { 
@@ -220,115 +209,49 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     about: { title: "ℹ️ About Us", desc: "Since its inception, Bca Portal has been setting new records in the field of higher education." }
   };
 
-  // 📱💻 Liquid Glass Styles
+  // Styles
   const overlayStyle = { 
-    position: 'fixed', 
-    top: 0, 
-    left: 0, 
-    width: '100%', 
-    height: '100%', 
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', 
-    backdropFilter: 'blur(8px)',
-    WebkitBackdropFilter: 'blur(8px)',
-    display: 'flex', 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    zIndex: 2000,
-    padding: '15px',
-    boxSizing: 'border-box'
+    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', 
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '15px', boxSizing: 'border-box'
   };
 
   const modalStyle = { 
-    background: 'rgba(255, 255, 255, 0.35)',
-    backdropFilter: 'blur(25px) saturate(190%)',
-    WebkitBackdropFilter: 'blur(25px) saturate(190%)',
-    padding: 'clamp(22px, 4vw, 32px)', 
-    borderRadius: '28px', 
-    width: '100%', 
-    maxWidth: '440px', 
-    maxHeight: '90vh',
-    overflowY: 'auto',
-    border: '1.5px solid rgba(255, 255, 255, 0.75)',
-    boxShadow: `
-      0 20px 40px rgba(0, 0, 0, 0.12),
-      inset 0 2px 4px rgba(255, 255, 255, 0.9),
-      inset 0 -2px 4px rgba(0, 0, 0, 0.05)`, 
-    position: 'relative', 
-    boxSizing: 'border-box', 
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' 
+    background: 'rgba(255, 255, 255, 0.35)', backdropFilter: 'blur(25px) saturate(190%)', WebkitBackdropFilter: 'blur(25px) saturate(190%)',
+    padding: 'clamp(22px, 4vw, 32px)', borderRadius: '28px', width: '100%', maxWidth: '440px', maxHeight: '90vh',
+    overflowY: 'auto', border: '1.5px solid rgba(255, 255, 255, 0.75)',
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.12), inset 0 2px 4px rgba(255, 255, 255, 0.9), inset 0 -2px 4px rgba(0, 0, 0, 0.05)', 
+    position: 'relative', boxSizing: 'border-box', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' 
   };
 
   const closeBtnStyle = { 
-    position: 'absolute', 
-    top: '18px', 
-    right: '18px', 
-    background: 'rgba(255, 255, 255, 0.4)', 
-    border: '1px solid rgba(255, 255, 255, 0.6)', 
-    width: '32px',
-    height: '32px',
-    borderRadius: '50%',
-    fontSize: '16px', 
-    cursor: 'pointer', 
-    color: '#1d1d1f', 
-    outline: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
-    transition: 'all 0.2s ease'
+    position: 'absolute', top: '18px', right: '18px', background: 'rgba(255, 255, 255, 0.4)', border: '1px solid rgba(255, 255, 255, 0.6)', 
+    width: '32px', height: '32px', borderRadius: '50%', fontSize: '16px', cursor: 'pointer', color: '#1d1d1f', outline: 'none',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.08)', transition: 'all 0.2s ease'
   };
 
   const inputGroupStyle = { marginBottom: '16px', textAlign: 'left' };
   const labelStyle = { display: 'block', fontSize: '13px', fontWeight: '600', color: '#1d1d1f', marginBottom: '6px' };
   
   const inputStyle = { 
-    width: '100%', 
-    padding: '12px 16px', 
-    boxSizing: 'border-box', 
-    border: '1.5px solid rgba(255, 255, 255, 0.8)', 
-    borderRadius: '50px', 
-    fontSize: '14px', 
-    fontWeight: '500',
-    color: '#1d1d1f', 
-    backgroundColor: 'rgba(255, 255, 255, 0.45)', 
-    backdropFilter: 'blur(10px)',
-    WebkitBackdropFilter: 'blur(10px)',
-    outline: 'none',
-    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.05)'
+    width: '100%', padding: '12px 16px', boxSizing: 'border-box', border: '1.5px solid rgba(255, 255, 255, 0.8)', 
+    borderRadius: '50px', fontSize: '14px', fontWeight: '500', color: '#1d1d1f', backgroundColor: 'rgba(255, 255, 255, 0.45)', 
+    backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.05)'
   };
 
   const maroonBtnStyle = { 
-    width: '100%', 
-    padding: '13px', 
-    background: isLoading 
-      ? 'rgba(255, 255, 255, 0.4)' 
-      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.35) 100%)', 
-    color: '#1d1d1f', 
-    border: '1.5px solid rgba(255, 255, 255, 0.9)', 
-    borderRadius: '50px', 
-    cursor: isLoading ? 'not-allowed' : 'pointer', 
-    fontSize: '15px', 
-    fontWeight: '700', 
-    marginTop: '10px',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
-    boxShadow: `
-      0 8px 20px rgba(0, 0, 0, 0.08),
-      inset 0 3px 5px rgba(255, 255, 255, 0.9),
-      inset 0 -3px 5px rgba(0, 0, 0, 0.1)`
+    width: '100%', padding: '13px', 
+    background: isLoading ? 'rgba(255, 255, 255, 0.4)' : 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.35) 100%)', 
+    color: '#1d1d1f', border: '1.5px solid rgba(255, 255, 255, 0.9)', borderRadius: '50px', 
+    cursor: isLoading ? 'not-allowed' : 'pointer', fontSize: '15px', fontWeight: '700', marginTop: '10px',
+    backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.08), inset 0 3px 5px rgba(255, 255, 255, 0.9), inset 0 -3px 5px rgba(0, 0, 0, 0.1)'
   };
 
   const tabStyle = (isActive) => ({ 
-    flex: 1, 
-    textAlign: 'center', 
-    padding: '10px 0', 
-    cursor: 'pointer', 
-    fontSize: '14px', 
-    fontWeight: '700', 
-    color: isActive ? '#1d1d1f' : '#555', 
-    background: isActive ? 'rgba(255, 255, 255, 0.75)' : 'transparent',
-    borderRadius: '50px',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    flex: 1, textAlign: 'center', padding: '10px 0', cursor: 'pointer', fontSize: '14px', fontWeight: '700', 
+    color: isActive ? '#1d1d1f' : '#555', background: isActive ? 'rgba(255, 255, 255, 0.75)' : 'transparent',
+    borderRadius: '50px', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     boxShadow: isActive ? '0 4px 12px rgba(0, 0, 0, 0.08)' : 'none'
   });
 
@@ -336,42 +259,21 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     <>
       <style>{`
         .responsive-card {
-          width: 90%;
-          max-width: 650px;
-          padding: 35px 25px;
-          border-radius: 28px;
+          width: 90%; max-width: 650px; padding: 35px 25px; border-radius: 28px;
           border: 1.5px solid rgba(255, 255, 255, 0.75);
-          box-shadow: 
-            0 20px 50px rgba(0, 0, 0, 0.15),
-            inset 0 2px 4px rgba(255, 255, 255, 0.9);
-          background: rgba(255, 255, 255, 0.35);
-          backdrop-filter: blur(25px) saturate(190%);
-          -webkit-backdrop-filter: blur(25px) saturate(190%);
-          text-align: center;
-          box-sizing: border-box;
-          margin: 20px auto;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.9);
+          background: rgba(255, 255, 255, 0.35); backdrop-filter: blur(25px) saturate(190%);
+          -webkit-backdrop-filter: blur(25px) saturate(190%); text-align: center; box-sizing: border-box;
+          margin: 20px auto; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-
         @media screen and (max-width: 480px) {
-          .responsive-card {
-            width: 95%;
-            padding: 25px 18px;
-          }
+          .responsive-card { width: 95%; padding: 25px 18px; }
         }
       `}</style>
 
       <div style={{ 
-        backgroundImage: "url('/udhnacollege.jpg')", 
-        backgroundSize: 'cover', 
-        backgroundPosition: 'center', 
-        backgroundRepeat: 'no-repeat', 
-        minHeight: 'calc(100vh - 60px)', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        padding: '15px', 
-        boxSizing: 'border-box' 
+        backgroundImage: "url('/udhnacollege.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', 
+        minHeight: 'calc(100vh - 60px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '15px', boxSizing: 'border-box' 
       }}>
         
         {/* Main Glass Welcome Card */}
@@ -390,32 +292,29 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
             <div style={modalStyle}>
               <button 
                 onClick={() => { 
-                  if(!isLoading) { 
+                  if (!isLoading) { 
                     setShowPortalModal(false); 
                     setModalView('login'); 
                     resetFormState();
                   } 
                 }} 
                 style={closeBtnStyle}
+                aria-label="Close modal"
               >
                 ✕
               </button>
 
               {modalView === 'login' && (
                 <div style={{ 
-                  display: 'flex', 
-                  marginBottom: '22px', 
-                  background: 'rgba(255, 255, 255, 0.3)', 
-                  padding: '4px', 
-                  borderRadius: '50px',
-                  border: '1px solid rgba(255, 255, 255, 0.6)'
+                  display: 'flex', marginBottom: '22px', background: 'rgba(255, 255, 255, 0.3)', 
+                  padding: '4px', borderRadius: '50px', border: '1px solid rgba(255, 255, 255, 0.6)'
                 }}>
                   <div onClick={() => !isLoading && setUserRole('candidate')} style={tabStyle(userRole === 'candidate')}>Candidate</div>
                   <div onClick={() => !isLoading && setUserRole('admin')} style={tabStyle(userRole === 'admin')}>Admin</div>
                 </div>
               )}
 
-              {/* 🔑 लॉगिन फॉर्म */}
+              {/* 🔑 Login Form */}
               {modalView === 'login' && (
                 <form onSubmit={handleLogin}>
                   <div style={inputGroupStyle}>
@@ -426,31 +325,22 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
                     <label style={labelStyle}>Password *</label>
                     <div style={{ position: 'relative' }}>
                       <input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e)=>setPassword(e.target.value)} style={{ ...inputStyle, paddingRight: '45px' }} required disabled={isLoading} />
-                      <span onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: '16px' }}>{showPassword ? '🕵️' : '🥷'}</span>
+                      <span onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: '16px' }}>
+                        {showPassword ? '👁️' : '🙈'}
+                      </span>
                     </div>
                   </div>
                   <div style={{ textAlign: 'right', marginBottom: '15px' }}>
-                    <span onClick={() => { if(!isLoading) { setModalView('forgot'); resetFormState(); } }} style={{ color: '#4a154b', cursor: 'pointer', fontSize: '13px', fontWeight: '700' }}>Forgot Password?</span>
+                    <span onClick={() => { if (!isLoading) { setModalView('forgot'); resetFormState(); } }} style={{ color: '#4a154b', cursor: 'pointer', fontSize: '13px', fontWeight: '700' }}>Forgot Password?</span>
                   </div>
                   
                   {/* 🛡️ Glossy Captcha Box */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', flexWrap: 'wrap' }}>
                     <div style={{ 
-                      fontSize: '18px', 
-                      fontWeight: 'bold', 
-                      letterSpacing: '3px', 
-                      color: '#1d1d1f', 
-                      background: 'rgba(255, 255, 255, 0.5)', 
-                      padding: '10px 18px', 
-                      borderRadius: '50px', 
-                      border: '1px solid rgba(255, 255, 255, 0.7)',
-                      fontStyle: 'italic', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '10px', 
-                      width: '100%', 
-                      justifyContent: 'space-between', 
-                      boxSizing: 'border-box' 
+                      fontSize: '18px', fontWeight: 'bold', letterSpacing: '3px', color: '#1d1d1f', 
+                      background: 'rgba(255, 255, 255, 0.5)', padding: '10px 18px', borderRadius: '50px', 
+                      border: '1px solid rgba(255, 255, 255, 0.7)', fontStyle: 'italic', display: 'flex', 
+                      alignItems: 'center', gap: '10px', width: '100%', justifyContent: 'space-between', boxSizing: 'border-box' 
                     }}>
                       <span>{currentCaptcha}</span>
                       <span onClick={() => !isLoading && refreshCaptcha()} style={{ color: '#007bff', cursor: 'pointer', fontSize: '13px', fontWeight: '700' }}>🔄 Refresh</span>
@@ -466,12 +356,12 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
                   </button>
 
                   <p style={{ textAlign: 'center', marginTop: '18px', fontSize: '14px', color: '#333', fontWeight: '500' }}>
-                    New User? <span onClick={() => { if(!isLoading) { setModalView('register'); resetFormState(); } }} style={{ color: '#007bff', cursor: 'pointer', fontWeight: '700', textDecoration: 'underline' }}>Register Now</span>
+                    New User? <span onClick={() => { if (!isLoading) { setModalView('register'); resetFormState(); } }} style={{ color: '#007bff', cursor: 'pointer', fontWeight: '700', textDecoration: 'underline' }}>Register Now</span>
                   </p>
                 </form>
               )}
 
-              {/* 📝 रजिस्ट्रेशन फॉर्म */}
+              {/* 📝 Registration Form */}
               {modalView === 'register' && (
                 <form onSubmit={handleRegister}>
                   <h3 style={{ marginBottom: '18px', color: '#1d1d1f', fontWeight: '800', fontSize: '19px' }}>New Candidate Registration</h3>
@@ -501,7 +391,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
                 </form>
               )}
 
-              {/* 🔒 फ़ॉरगॉट पासवर्ड फॉर्म */}
+              {/* 🔒 Forgot Password Form */}
               {modalView === 'forgot' && (
                 <form onSubmit={isOtpSent ? handleVerifyOtp : handleSendOtp}>
                   <div style={{ textAlign: 'left' }}>
