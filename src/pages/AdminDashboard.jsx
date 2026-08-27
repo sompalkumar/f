@@ -27,7 +27,7 @@ function AdminDashboard() {
   const [title, setTitle] = useState('');
   const [course, setCourse] = useState('bca');
   const [semester, setSemester] = useState('1');
-  const [category, setCategory] = useState('notes'); // 'notes', 'pyq', 'quiz'
+  const [category, setCategory] = useState('notes');
   const [driveUrl, setDriveUrl] = useState('');
   const [file, setFile] = useState(null);
 
@@ -236,6 +236,16 @@ function AdminDashboard() {
   return (
     <>
       <style>{`
+        /* Overriding all global blur and unwanted CSS styles */
+        button, select, input {
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          box-shadow: none !important;
+          text-shadow: none !important;
+          filter: none !important;
+          opacity: 1 !important;
+        }
+
         body {
           margin: 0;
           padding: 0;
@@ -249,20 +259,20 @@ function AdminDashboard() {
           max-width: 1050px;
           width: 100%;
           margin: 0 auto;
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          font-family: Arial, Helvetica, sans-serif;
           min-height: 100vh;
           box-sizing: border-box;
         }
 
-        /* Clean Top Bar Header */
+        /* Clean Header Panel */
         .adm-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background-color: #131e3a;
-          border: 1px solid #1e2d5a;
+          background-color: #131e3a !important;
+          border: 1px solid #1e2d5a !important;
           padding: clamp(16px, 3vw, 24px);
-          border-radius: 12px;
+          border-radius: 8px;
           flex-wrap: wrap;
           gap: 15px;
           width: 100%;
@@ -294,49 +304,49 @@ function AdminDashboard() {
           width: auto;
         }
 
-        /* Solid Crisp Sky Blue Button */
+        /* Completely Normal & Crisp Sky Blue Button */
         .adm-candidate-btn {
-          padding: 10px 18px;
-          background-color: #0284c7;
-          color: #ffffff;
-          border: 1px solid #0369a1;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 700;
-          font-size: 13px;
-          transition: background-color 0.2s, box-shadow 0.2s;
+          padding: 10px 18px !important;
+          background-color: #0284c7 !important;
+          color: #ffffff !important;
+          border: 1px solid #0284c7 !important;
+          border-radius: 6px !important;
+          cursor: pointer !important;
+          font-weight: bold !important;
+          font-size: 13px !important;
+          outline: none !important;
         }
 
         .adm-candidate-btn:hover {
-          background-color: #0ea5e9;
-          box-shadow: 0 0 10px #38bdf8;
+          background-color: #0369a1 !important;
+          border-color: #0369a1 !important;
         }
 
-        /* Solid Crisp Red Force Logout Button */
+        /* Completely Normal & Crisp Red Force Logout Button */
         .adm-logout-btn {
-          padding: 10px 18px;
-          background-color: #dc2626;
-          color: #ffffff;
-          border: 1px solid #b91c1c;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 700;
-          font-size: 13px;
-          transition: background-color 0.2s, box-shadow 0.2s;
+          padding: 10px 18px !important;
+          background-color: #dc2626 !important;
+          color: #ffffff !important;
+          border: 1px solid #dc2626 !important;
+          border-radius: 6px !important;
+          cursor: pointer !important;
+          font-weight: bold !important;
+          font-size: 13px !important;
+          outline: none !important;
         }
 
         .adm-logout-btn:hover {
-          background-color: #ef4444;
-          box-shadow: 0 0 10px #ef4444;
+          background-color: #b91c1c !important;
+          border-color: #b91c1c !important;
         }
 
-        /* Clean Card Boxes - No Blur, Clean Dark Navy */
+        /* Clean Normal Card Box */
         .adm-card {
           margin-top: 25px;
-          background-color: #131e3a;
+          background-color: #131e3a !important;
           padding: clamp(20px, 4vw, 30px);
-          border-radius: 12px;
-          border: 1px solid #1e2d5a;
+          border-radius: 8px;
+          border: 1px solid #1e2d5a !important;
           box-sizing: border-box;
           width: 100%;
         }
@@ -345,7 +355,7 @@ function AdminDashboard() {
           margin: 0 0 20px 0;
           color: #eab308;
           font-size: clamp(18px, 4vw, 21px);
-          font-weight: 700;
+          font-weight: bold;
           display: flex;
           align-items: center;
           gap: 8px;
@@ -359,28 +369,26 @@ function AdminDashboard() {
         .adm-label {
           display: block;
           font-size: 13px;
-          font-weight: 600;
+          font-weight: bold;
           color: #fde047;
           margin-bottom: 8px;
         }
 
-        /* Clear Flat Input Box */
+        /* Normal Sharp Input Field */
         .adm-input {
           width: 100%;
           padding: 12px 15px;
           box-sizing: border-box;
-          border: 1px solid #1e2d5a;
-          border-radius: 8px;
+          border: 1px solid #1e2d5a !important;
+          border-radius: 6px !important;
           font-size: 14px;
-          color: #ffffff;
-          outline: none;
-          background-color: #0b1329;
-          transition: border-color 0.2s, box-shadow 0.2s;
+          color: #ffffff !important;
+          outline: none !important;
+          background-color: #0b1329 !important;
         }
 
-        .adm-input:focus, .adm-input:hover {
-          border-color: #0284c7;
-          box-shadow: 0 0 8px #0284c7;
+        .adm-input:focus {
+          border-color: #0284c7 !important;
         }
 
         .adm-input option {
@@ -403,49 +411,41 @@ function AdminDashboard() {
         .adm-file-input {
           width: 100%;
           padding: 12px;
-          border: 1px dashed #1e2d5a;
-          border-radius: 8px;
+          border: 1px dashed #1e2d5a !important;
+          border-radius: 6px !important;
           box-sizing: border-box;
           font-size: 13px;
-          background-color: #0b1329;
+          background-color: #0b1329 !important;
           color: #cbd5e1;
-          transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        
-        .adm-file-input:hover {
-          border-color: #0284c7;
-          box-shadow: 0 0 8px #0284c7;
         }
 
-        /* Solid Blue Upload Button */
+        /* Normal Upload Button */
         .adm-upload-btn {
           width: 100%;
-          padding: 14px 20px;
-          border: 1px solid #0369a1;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 700;
-          background-color: #0284c7;
-          color: #ffffff;
-          font-size: 15px;
-          transition: background-color 0.2s, box-shadow 0.2s;
+          padding: 14px 20px !important;
+          border: 1px solid #0284c7 !important;
+          border-radius: 6px !important;
+          cursor: pointer !important;
+          font-weight: bold !important;
+          background-color: #0284c7 !important;
+          color: #ffffff !important;
+          font-size: 15px !important;
         }
 
         .adm-upload-btn:hover {
-          background-color: #0ea5e9;
-          box-shadow: 0 0 10px #38bdf8;
+          background-color: #0369a1 !important;
         }
 
         .adm-filter-bar {
           display: flex;
           gap: 12px;
-          background-color: #0b1329;
+          background-color: #0b1329 !important;
           padding: 14px;
-          border-radius: 8px;
+          border-radius: 6px;
           margin-bottom: 20px;
           flex-wrap: wrap;
           align-items: center;
-          border: 1px solid #1e2d5a;
+          border: 1px solid #1e2d5a !important;
         }
 
         .adm-mat-item {
@@ -453,42 +453,34 @@ function AdminDashboard() {
           justify-content: space-between;
           align-items: center;
           padding: 14px 18px;
-          background-color: #0b1329;
-          border-radius: 8px;
-          border: 1px solid #1e2d5a;
+          background-color: #0b1329 !important;
+          border-radius: 6px;
+          border: 1px solid #1e2d5a !important;
           gap: 10px;
           flex-wrap: wrap;
-          transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .adm-mat-item:hover {
-          border-color: #0284c7;
-          box-shadow: 0 0 8px #0284c7;
         }
 
         .adm-delete-btn {
-          padding: 8px 16px;
-          background-color: #dc2626;
-          color: #ffffff;
-          border: 1px solid #b91c1c;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: 700;
-          font-size: 12px;
-          transition: background-color 0.2s, box-shadow 0.2s;
+          padding: 8px 16px !important;
+          background-color: #dc2626 !important;
+          color: #ffffff !important;
+          border: 1px solid #dc2626 !important;
+          border-radius: 6px !important;
+          cursor: pointer !important;
+          font-weight: bold !important;
+          font-size: 12px !important;
         }
 
         .adm-delete-btn:hover {
-          background-color: #ef4444;
-          box-shadow: 0 0 8px #ef4444;
+          background-color: #b91c1c !important;
         }
 
         .adm-table-wrapper {
           overflow-x: auto;
           width: 100%;
-          border-radius: 8px;
+          border-radius: 6px;
           -webkit-overflow-scrolling: touch;
-          border: 1px solid #1e2d5a;
+          border: 1px solid #1e2d5a !important;
         }
 
         .adm-table {
@@ -501,9 +493,8 @@ function AdminDashboard() {
           padding: 14px;
           text-align: left;
           font-size: 13px;
-          font-weight: 700;
+          font-weight: bold;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
         }
 
         .adm-td {
@@ -549,7 +540,7 @@ function AdminDashboard() {
           <div className="adm-avatar-box">
             <div className="adm-avatar">👑</div>
             <div>
-              <h2 style={{ color: '#ffffff', margin: 0, fontSize: 'clamp(18px, 4vw, 22px)', fontWeight: '700' }}>Main Admin Control Panel</h2>
+              <h2 style={{ color: '#ffffff', margin: 0, fontSize: 'clamp(18px, 4vw, 22px)', fontWeight: 'bold' }}>Main Admin Control Panel</h2>
               <p style={{ margin: '4px 0 0 0', color: '#eab308', fontSize: '13px', fontWeight: '500' }}>BCA Portal Management System</p>
             </div>
           </div>
@@ -614,7 +605,7 @@ function AdminDashboard() {
             </div>
 
             {category === 'quiz' ? (
-              <div style={{ backgroundColor: '#0b1329', padding: '18px', borderRadius: '8px', marginBottom: '18px', border: '1px solid #1e2d5a' }}>
+              <div style={{ backgroundColor: '#0b1329', padding: '18px', borderRadius: '6px', marginBottom: '18px', border: '1px solid #1e2d5a' }}>
                 <h4 style={{ margin: '0 0 14px 0', color: '#eab308', fontSize: '15px' }}>❓ Add Quiz Question & Options</h4>
                 
                 <div className="adm-input-group">
@@ -666,7 +657,7 @@ function AdminDashboard() {
                   </small>
                 </div>
 
-                <p style={{ textAlign: 'center', margin: '12px 0', fontWeight: 'bold', color: '#94a3b8', fontSize: '12px', letterSpacing: '1px' }}>— OR —</p>
+                <p style={{ textAlign: 'center', margin: '12px 0', fontWeight: 'bold', color: '#94a3b8', fontSize: '12px' }}>— OR —</p>
 
                 <div className="adm-input-group">
                   <label className="adm-label">Select Local File (.pdf, .jpg, .png)</label>
