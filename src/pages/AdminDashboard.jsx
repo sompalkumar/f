@@ -2,12 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 
-const tdStyle = { padding: '14px', fontSize: '13px' };
-
 function AdminDashboard() {
   const navigate = useNavigate();
 
-  // Storage credentials fetch
+  // 🟢 Storage se Credentials fetch karein
   const isLoggedIn = 
     sessionStorage.getItem('isLoggedIn') === 'true' || 
     localStorage.getItem('isLoggedIn') === 'true';
@@ -23,27 +21,39 @@ function AdminDashboard() {
   const [logs, setLogs] = useState([]);
   const [uploadedMaterials, setUploadedMaterials] = useState([]);
 
-  // Upload Form States
+  // अपलोड फॉर्म के लिए स्टेट्स
   const [title, setTitle] = useState('');
   const [course, setCourse] = useState('bca');
   const [semester, setSemester] = useState('1');
-  const [category, setCategory] = useState('notes');
-  const [driveUrl, setDriveUrl] = useState('');
   const [file, setFile] = useState(null);
 
-  // Quiz specific states
-  const [quizQuestion, setQuizQuestion] = useState('');
-  const [optionA, setOptionA] = useState('');
-  const [optionB, setOptionB] = useState('');
-  const [optionC, setOptionC] = useState('');
-  const [optionD, setOptionD] = useState('');
-  const [correctOption, setCorrectOption] = useState('A');
-
-  // Live Filter Bar States
+  // लाइव फ़िल्टर बार के लिए स्टेट्स
   const [filterCourse, setFilterCourse] = useState('all');
   const [filterSemester, setFilterSemester] = useState('all');
 
-  // Fetch Live Logs
+  // 🛡️ 1. Complete Role Guard Check
+  useEffect(() => {
+    // A. Login nahi hai -> Login page par bhejo
+    if (!isLoggedIn || !token) {
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    // B. Logged in hai par Candidate hai -> Standard Candidate Dashboard par bhejo
+    if (userRole !== 'admin') {
+      alert('⚠️ Unauthorized! Admin Panel Access Restricted.');
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+
+    // C. Admin hai -> APIs call karein
+    fetchLiveLogs();
+    fetchUploadedMaterials();
+    const interval = setInterval(fetchLiveLogs, 4000);
+    return () => clearInterval(interval);
+  }, [isLoggedIn, userRole, token, navigate]);
+
+  // 🔴 Authorization Header के साथ Logs प्राप्त करें
   const fetchLiveLogs = async () => {
     if (!token) return;
     try {
@@ -68,7 +78,7 @@ function AdminDashboard() {
     }
   };
 
-  // Fetch Uploaded Materials
+  // 🔴 Authorization Header के साथ Materials प्राप्त करें
   const fetchUploadedMaterials = async () => {
     if (!token) return;
     try {
@@ -79,7 +89,9 @@ function AdminDashboard() {
         }
       });
 
-      if (response.status === 401 || response.status === 403) return;
+      if (response.status === 401 || response.status === 403) {
+        return;
+      }
 
       const data = await response.json();
       if (response.ok) setUploadedMaterials(data);
@@ -88,26 +100,7 @@ function AdminDashboard() {
     }
   };
 
-  // Role Guard Check & Polling
-  useEffect(() => {
-    if (!isLoggedIn || !token) {
-      navigate('/login', { replace: true });
-      return;
-    }
-
-    if (userRole !== 'admin') {
-      alert('⚠️ Unauthorized! Admin Panel Access Restricted.');
-      navigate('/dashboard', { replace: true });
-      return;
-    }
-
-    fetchLiveLogs();
-    fetchUploadedMaterials();
-    const interval = setInterval(fetchLiveLogs, 4000);
-    return () => clearInterval(interval);
-  }, [isLoggedIn, userRole, token, navigate]);
-
-  // Delete Material Handler
+  // 🔴 Delete API
   const handleDeleteMaterial = async (id, fileTitle) => {
     const confirmDelete = window.confirm(`🗑️ क्या आप सच में "${fileTitle}" को हमेशा के लिए डिलीट करना चाहते हैं?`);
     if (!confirmDelete) return;
@@ -122,17 +115,17 @@ function AdminDashboard() {
       });
       const data = await response.json();
       if (response.ok) {
-        alert(data.message || 'फ़ाइल डिलीट हो गई!');
+        alert(data.message);
         fetchUploadedMaterials();
       } else { 
-        alert(data.message || 'डिलीट नहीं हो पाया!'); 
+        alert(data.message); 
       }
     } catch (error) { 
       alert('फ़ाइल डिलीट एरर!'); 
     }
   };
 
-  // Force Logout API
+  // 🔴 Force Logout API
   const handleLogoutAllStudents = async () => {
     const confirmAction = window.confirm("⚠️ Do you really want to immediately log out all logged-in students?");
     if (!confirmAction) return;
@@ -146,69 +139,26 @@ function AdminDashboard() {
       });
       const data = await response.json();
       if (response.ok) { 
-        alert(data.message || 'सबका लॉगआउट पूरा हुआ!'); 
+        alert(data.message); 
         fetchLiveLogs(); 
       }
     } catch (error) { 
-      alert('Connection failed!'); 
+      alert('connection fail!'); 
     }
   };
 
-  // Form Reset Helper
-  const resetFormFields = () => {
-    setTitle(''); 
-    setDriveUrl('');
-    setFile(null); 
-    setQuizQuestion('');
-    setOptionA(''); 
-    setOptionB(''); 
-    setOptionC(''); 
-    setOptionD('');
-    setCorrectOption('A');
-    const fileInput = document.getElementById('fileInput');
-    if (fileInput) fileInput.value = ''; 
-  };
-
-  // Upload Handler
+  // 🔴 File Upload API
   const handleFileUpload = async (e) => {
     e.preventDefault();
-
-    if (!title.trim()) {
-      alert('⚠️ कृपया Title / Topic Name लिखें!');
-      return;
+    if (!file) { 
+      alert('फाइल चुनें!'); 
+      return; 
     }
-
-    if (category === 'quiz') {
-      if (!quizQuestion.trim() || !optionA.trim() || !optionB.trim() || !optionC.trim() || !optionD.trim()) {
-        alert('⚠️ कृपया क्विज का प्रश्न और चारों ऑप्शंस भरें!');
-        return;
-      }
-    } else {
-      if (!file && !driveUrl.trim()) {
-        alert('⚠️ कृपया एक लोकल फ़ाइल चुनें या Google Drive Link पेस्ट करें!');
-        return;
-      }
-    }
-
-    let finalDriveUrl = driveUrl;
-    if (driveUrl && driveUrl.includes('/view')) {
-      finalDriveUrl = driveUrl.replace(/\/view.*$/, '/preview');
-    }
-
     const formData = new FormData();
     formData.append('title', title);
     formData.append('course', course);
     formData.append('semester', semester);
-    formData.append('category', category);
-    
-    if (category === 'quiz') {
-      formData.append('question', quizQuestion);
-      formData.append('options', JSON.stringify([optionA, optionB, optionC, optionD]));
-      formData.append('correctOption', correctOption);
-    } else {
-      if (finalDriveUrl) formData.append('driveUrl', finalDriveUrl);
-      if (file) formData.append('pdfFile', file);
-    }
+    formData.append('pdfFile', file);
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/upload-material`, { 
@@ -220,8 +170,11 @@ function AdminDashboard() {
       });
       const data = await response.json();
       if (response.ok) { 
-        alert(data.message || 'सफलतापूर्वक अपलोड हो गया!'); 
-        resetFormFields();
+        alert(data.message || 'फ़ाइल सफलतापूर्वक अपलोड हो गई!'); 
+        setTitle(''); 
+        setFile(null); 
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) fileInput.value = ''; 
         fetchUploadedMaterials(); 
       } else { 
         alert(data.message || 'अपलोड फ़ेल हो गया!'); 
@@ -231,33 +184,29 @@ function AdminDashboard() {
     }
   };
 
+  // फ़िल्टर लॉजिक
   const filteredMaterials = uploadedMaterials.filter((mat) => {
     const matchCourse = filterCourse === 'all' || mat.course === filterCourse;
     const matchSemester = filterSemester === 'all' || mat.semester === filterSemester;
     return matchCourse && matchSemester;
   });
 
+  // Agar Unauthorized ya Logged in nahi hai toh rendering block karein
   if (!isLoggedIn || userRole !== 'admin') {
     return null;
   }
 
   return (
     <>
+      {/* 📱💻 Mobile & Desktop Fully Responsive CSS Injection */}
       <style>{`
-        body {
-          margin: 0;
-          padding: 0;
-          background-color: #0b1329;
-          min-height: 100vh;
-          color: #ffffff;
-          font-family: Arial, Helvetica, sans-serif;
-        }
-
         .adm-container {
-          padding: clamp(15px, 4vw, 35px);
-          max-width: 1050px;
+          padding: clamp(12px, 3vw, 25px);
+          max-width: 950px;
           width: 100%;
           margin: 0 auto;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          background-color: #f4f6f9;
           min-height: 100vh;
           box-sizing: border-box;
         }
@@ -266,10 +215,10 @@ function AdminDashboard() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background-color: #131e3a;
-          border: 1px solid #1e2d5a;
-          padding: clamp(16px, 3vw, 24px);
-          border-radius: 8px;
+          background-color: #ffffff;
+          padding: clamp(14px, 3vw, 20px);
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
           flex-wrap: wrap;
           gap: 15px;
           width: 100%;
@@ -279,111 +228,99 @@ function AdminDashboard() {
         .adm-avatar-box {
           display: flex;
           align-items: center;
-          gap: 15px;
+          gap: 12px;
         }
 
         .adm-avatar {
-          width: 48px;
-          height: 48px;
-          background-color: #8b2d29;
-          border: 1px solid #712421;
-          border-radius: 6px;
+          width: 45px;
+          height: 45px;
+          background-color: #fde9c9;
+          border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 20px;
+          font-size: 22px;
           flex-shrink: 0;
         }
 
         .adm-btn-group {
           display: flex;
-          gap: 12px;
+          gap: 10px;
           flex-wrap: wrap;
+          width: auto;
         }
 
         .adm-candidate-btn {
-          padding: 10px 18px;
-          background-color: #8b2d29;
-          color: #ffffff;
-          border: 1px solid #712421;
+          padding: 10px 14px;
+          background-color: #333333;
+          color: white;
+          border: none;
           border-radius: 6px;
           cursor: pointer;
           font-weight: bold;
           font-size: 13px;
-        }
-
-        .adm-candidate-btn:hover {
-          background-color: #712421;
+          transition: background-color 0.2s;
         }
 
         .adm-logout-btn {
-          padding: 10px 18px;
-          background-color: #dc2626;
-          color: #ffffff;
-          border: 1px solid #b91c1c;
+          padding: 10px 16px;
+          background-color: #ff4d4d;
+          color: white;
+          border: none;
           border-radius: 6px;
           cursor: pointer;
           font-weight: bold;
           font-size: 13px;
-        }
-
-        .adm-logout-btn:hover {
-          background-color: #b91c1c;
+          transition: background-color 0.2s;
         }
 
         .adm-card {
-          margin-top: 25px;
-          background-color: #131e3a;
-          padding: clamp(20px, 4vw, 30px);
-          border-radius: 8px;
-          border: 1px solid #1e2d5a;
+          margin-top: 20px;
+          background-color: #ffffff;
+          padding: clamp(16px, 4vw, 28px);
+          border-radius: 12px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+          border: 1px solid #eaeaea;
           box-sizing: border-box;
           width: 100%;
         }
 
         .adm-card-title {
-          margin: 0 0 20px 0;
-          color: #fef08a;
-          font-size: clamp(18px, 4vw, 21px);
-          font-weight: bold;
-          display: flex;
-          align-items: center;
-          gap: 8px;
+          margin: 0 0 16px 0;
+          color: #000;
+          font-size: clamp(16px, 4vw, 19px);
+          font-weight: 700;
         }
 
         .adm-input-group {
-          margin-bottom: 18px;
+          margin-bottom: 16px;
           width: 100%;
         }
 
         .adm-label {
           display: block;
           font-size: 13px;
-          font-weight: bold;
-          color: #fde047;
-          margin-bottom: 8px;
+          font-weight: 600;
+          color: #111;
+          margin-bottom: 6px;
         }
 
         .adm-input {
           width: 100%;
-          padding: 12px 15px;
+          padding: 11px;
           box-sizing: border-box;
-          border: 1px solid #1e2d5a;
+          border: 1px solid #ccc;
           border-radius: 6px;
           font-size: 14px;
-          color: #ffffff;
+          color: black;
           outline: none;
-          background-color: #0b1329;
-        }
-
-        .adm-input:focus {
-          border-color: #fde047;
+          background-color: white;
         }
 
         .adm-row-group {
           display: flex;
           gap: 15px;
-          margin-bottom: 18px;
+          margin-bottom: 16px;
           flex-wrap: wrap;
         }
 
@@ -394,99 +331,84 @@ function AdminDashboard() {
 
         .adm-file-input {
           width: 100%;
-          padding: 12px;
-          border: 1px dashed #1e2d5a;
+          padding: 10px;
+          border: 1px dashed #ccc;
           border-radius: 6px;
           box-sizing: border-box;
           font-size: 13px;
-          background-color: #0b1329;
-          color: #cbd5e1;
         }
 
         .adm-upload-btn {
           width: 100%;
-          padding: 14px 20px;
-          border: 1px solid #712421;
+          padding: 12px 20px;
+          border: none;
           border-radius: 6px;
           cursor: pointer;
           font-weight: bold;
-          background-color: #8b2d29;
-          color: #ffffff;
+          background-color: #06dfd1;
+          color: black;
           font-size: 15px;
-        }
-
-        .adm-upload-btn:hover {
-          background-color: #712421;
         }
 
         .adm-filter-bar {
           display: flex;
           gap: 12px;
-          background-color: #0b1329;
-          padding: 14px;
-          border-radius: 6px;
-          margin-bottom: 20px;
+          background-color: #f0f4f1;
+          padding: 12px;
+          border-radius: 8px;
+          margin-bottom: 16px;
           flex-wrap: wrap;
           align-items: center;
-          border: 1px solid #1e2d5a;
         }
 
         .adm-mat-item {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 14px 18px;
-          background-color: #0b1329;
-          border-radius: 6px;
-          border: 1px solid #1e2d5a;
+          padding: 12px;
+          background-color: #f9f9f9;
+          border-radius: 8px;
+          border: 1px solid #eee;
           gap: 10px;
           flex-wrap: wrap;
         }
 
         .adm-delete-btn {
-          padding: 8px 16px;
-          background-color: #dc2626;
-          color: #ffffff;
-          border: 1px solid #b91c1c;
+          padding: 7px 14px;
+          background-color: #dc3545;
+          color: white;
+          border: none;
           border-radius: 6px;
           cursor: pointer;
           font-weight: bold;
           font-size: 12px;
         }
 
-        .adm-delete-btn:hover {
-          background-color: #b91c1c;
-        }
-
         .adm-table-wrapper {
           overflow-x: auto;
           width: 100%;
-          border-radius: 6px;
-          border: 1px solid #1e2d5a;
+          -webkit-overflow-scrolling: touch;
         }
 
         .adm-table {
           width: 100%;
           border-collapse: collapse;
+          margin-top: 10px;
           min-width: 500px;
         }
 
         .adm-th {
-          padding: 14px;
+          padding: 12px 14px;
           text-align: left;
-          font-size: 13px;
-          font-weight: bold;
-          text-transform: uppercase;
-          background-color: #1e2d5a;
-          color: #ffffff;
+          font-size: 14px;
         }
 
         .adm-td {
-          padding: 14px;
+          padding: 12px 14px;
           font-size: 13px;
-          color: #e2e8f0;
         }
 
+        /* 📱 Mobile Specific Rules (< 600px) */
         @media screen and (max-width: 600px) {
           .adm-header {
             flex-direction: column;
@@ -519,13 +441,13 @@ function AdminDashboard() {
       `}</style>
 
       <div className="adm-container">
-        {/* Header */}
+        {/* हेडर */}
         <div className="adm-header">
           <div className="adm-avatar-box">
             <div className="adm-avatar">👑</div>
             <div>
-              <h2 style={{ color: '#ffffff', margin: 0, fontSize: 'clamp(18px, 4vw, 22px)', fontWeight: 'bold' }}>Main Admin Control Panel</h2>
-              <p style={{ margin: '4px 0 0 0', color: '#fde047', fontSize: '13px', fontWeight: '500' }}>BCA Portal Management System</p>
+              <h2 style={{ color: 'black', margin: 0, fontSize: 'clamp(18px, 4vw, 22px)', fontWeight: '700' }}>Main Admin Control Panel</h2>
+              <p style={{ margin: '3px 0 0 0', color: '#555', fontSize: '13px' }}>BCA Portal Management</p>
             </div>
           </div>
           <div className="adm-btn-group">
@@ -538,25 +460,15 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* Upload Form Box */}
+        {/* अपलोड फॉर्म बॉक्स */}
         <div className="adm-card">
-          <h3 className="adm-card-title">➕ Upload Study Material, PYQ & Quiz</h3>
+          <h3 className="adm-card-title">➕ Upload new study material or images</h3>
           <form onSubmit={handleFileUpload}>
-            
             <div className="adm-input-group">
-              <label className="adm-label">Select Content Type *</label>
-              <select value={category} onChange={(e) => setCategory(e.target.value)} className="adm-input" style={{ fontWeight: 'bold', color: '#fde047' }}>
-                <option value="notes">📘 Study Notes / Material</option>
-                <option value="pyq">📝 Previous Year Question Paper (PYQ)</option>
-                <option value="quiz">❓ Interactive Student Quiz</option>
-              </select>
-            </div>
-
-            <div className="adm-input-group">
-              <label className="adm-label">(Title / Topic Name) *</label>
+              <label className="adm-label">(Title Name) *</label>
               <input 
                 type="text" 
-                placeholder="e.g. C++ Notes / 2023 Solved Paper / Network Quiz" 
+                placeholder="e.g. C++ Notes" 
                 value={title} 
                 onChange={(e) => setTitle(e.target.value)} 
                 className="adm-input" 
@@ -588,87 +500,32 @@ function AdminDashboard() {
               </div>
             </div>
 
-            {category === 'quiz' ? (
-              <div style={{ backgroundColor: '#0b1329', padding: '18px', borderRadius: '6px', marginBottom: '18px', border: '1px solid #1e2d5a' }}>
-                <h4 style={{ margin: '0 0 14px 0', color: '#fde047', fontSize: '15px' }}>❓ Add Quiz Question & Options</h4>
-                
-                <div className="adm-input-group">
-                  <label className="adm-label">Question Text *</label>
-                  <input type="text" placeholder="e.g. What is the full form of IP?" value={quizQuestion} onChange={(e) => setQuizQuestion(e.target.value)} className="adm-input" required />
-                </div>
+            <div className="adm-input-group">
+              <label className="adm-label">Select file (.pdf, .jpg, .png) *</label>
+              <input 
+                id="fileInput" 
+                type="file" 
+                accept=".pdf, .jpg, .jpeg, .png" 
+                onChange={(e) => setFile(e.target.files[0])} 
+                className="adm-file-input" 
+                required 
+              />
+            </div>
 
-                <div className="adm-row-group">
-                  <div className="adm-row-item">
-                    <input type="text" placeholder="Option A" value={optionA} onChange={(e) => setOptionA(e.target.value)} className="adm-input" required />
-                  </div>
-                  <div className="adm-row-item">
-                    <input type="text" placeholder="Option B" value={optionB} onChange={(e) => setOptionB(e.target.value)} className="adm-input" required />
-                  </div>
-                </div>
-
-                <div className="adm-row-group">
-                  <div className="adm-row-item">
-                    <input type="text" placeholder="Option C" value={optionC} onChange={(e) => setOptionC(e.target.value)} className="adm-input" required />
-                  </div>
-                  <div className="adm-row-item">
-                    <input type="text" placeholder="Option D" value={optionD} onChange={(e) => setOptionD(e.target.value)} className="adm-input" required />
-                  </div>
-                </div>
-
-                <div className="adm-input-group" style={{ marginBottom: 0 }}>
-                  <label className="adm-label">Correct Option Key *</label>
-                  <select value={correctOption} onChange={(e) => setCorrectOption(e.target.value)} className="adm-input" style={{ color: '#fde047', fontWeight: 'bold' }}>
-                    <option value="A">Option A</option>
-                    <option value="B">Option B</option>
-                    <option value="C">Option C</option>
-                    <option value="D">Option D</option>
-                  </select>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="adm-input-group">
-                  <label className="adm-label">🔗 Google Drive Share Link (Iframe Embed Viewer)</label>
-                  <input 
-                    type="url" 
-                    placeholder="https://drive.google.com/file/d/.../view?usp=sharing" 
-                    value={driveUrl} 
-                    onChange={(e) => setDriveUrl(e.target.value)} 
-                    className="adm-input" 
-                  />
-                  <small style={{ color: '#fde047', fontSize: '11px', display: 'block', marginTop: '6px' }}>
-                    * लिंक खुद ब खुद <b>/preview</b> फॉर्मेट में बदल जाएगी।
-                  </small>
-                </div>
-
-                <p style={{ textAlign: 'center', margin: '12px 0', fontWeight: 'bold', color: '#94a3b8', fontSize: '12px' }}>— OR —</p>
-
-                <div className="adm-input-group">
-                  <label className="adm-label">Select Local File (.pdf, .jpg, .png)</label>
-                  <input 
-                    id="fileInput" 
-                    type="file" 
-                    accept=".pdf, .jpg, .jpeg, .png" 
-                    onChange={(e) => setFile(e.target.files[0])} 
-                    className="adm-file-input" 
-                  />
-                </div>
-              </>
-            )}
-
-            <button type="submit" className="adm-upload-btn">🚀 Upload to Server</button>
+            <button type="submit" className="adm-upload-btn">🚀 Upload to server</button>
           </form>
         </div>
 
-        {/* Uploaded Documents Management */}
+        {/* अपलोडेड दस्तावेज प्रबंधन */}
         <div className="adm-card">
-          <h3 className="adm-card-title">📂 Uploaded Documents & Content Management</h3>
+          <h3 className="adm-card-title">📂 Uploaded Documents Management</h3>
           
+          {/* लाइव फ़िल्टर बार */}
           <div className="adm-filter-bar">
-            <span style={{ fontWeight: 'bold', color: '#fde047', fontSize: '13px', minWidth: '130px' }}>🔍 Live Filter List:</span>
+            <span style={{ fontWeight: 'bold', color: 'black', fontSize: '13px', minWidth: '130px' }}>🔍 Live Filter List:</span>
             
             <div style={{ flex: 1, minWidth: '140px' }}>
-              <select value={filterCourse} onChange={(e) => setFilterCourse(e.target.value)} className="adm-input" style={{ padding: '8px 12px', fontSize: '13px' }}>
+              <select value={filterCourse} onChange={(e) => setFilterCourse(e.target.value)} className="adm-input" style={{ padding: '8px', fontSize: '13px' }}>
                 <option value="all">📁 All Courses (सभी कोर्सेज)</option>
                 <option value="bca">BCA</option>
                 <option value="bcom">B.Com</option>
@@ -678,7 +535,7 @@ function AdminDashboard() {
             </div>
 
             <div style={{ flex: 1, minWidth: '140px' }}>
-              <select value={filterSemester} onChange={(e) => setFilterSemester(e.target.value)} className="adm-input" style={{ padding: '8px 12px', fontSize: '13px' }}>
+              <select value={filterSemester} onChange={(e) => setFilterSemester(e.target.value)} className="adm-input" style={{ padding: '8px', fontSize: '13px' }}>
                 <option value="all">⏱️ All Semesters (सभी सेमेस्टर)</option>
                 <option value="1">Sem-1</option>
                 <option value="2">Sem-2</option>
@@ -690,37 +547,35 @@ function AdminDashboard() {
             </div>
           </div>
 
-          <div style={{ overflowY: 'auto', maxHeight: '280px', display: 'flex', flexDirection: 'column', gap: '10px', paddingRight: '4px' }}>
+          {/* फ़िल्टर की हुई फाइल्स की सूची */}
+          <div style={{ overflowY: 'auto', maxHeight: '280px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {filteredMaterials.length > 0 ? (
               filteredMaterials.map((mat) => (
                 <div key={mat._id} className="adm-mat-item">
                   <div style={{ wordBreak: 'break-word' }}>
-                    <span style={{ fontWeight: 'bold', color: '#ffffff', fontSize: '14px' }}>
-                      {mat.category === 'quiz' ? '❓' : mat.category === 'pyq' ? '📝' : '📄'} {mat.title}
-                    </span>
-                    <div style={{ display: 'flex', gap: '12px', marginTop: '6px', fontSize: '12px', color: '#cbd5e1', flexWrap: 'wrap' }}>
-                      <span><strong style={{ color: '#fde047' }}>Category:</strong> <span style={{ color: '#fde047' }}>{mat.category ? mat.category.toUpperCase() : 'NOTES'}</span></span>
-                      <span><strong style={{ color: '#fde047' }}>Course:</strong> {mat.course?.toUpperCase()}</span>
-                      <span><strong style={{ color: '#fde047' }}>Semester:</strong> Sem-{mat.semester}</span>
-                      {mat.driveUrl && <span style={{ color: '#fde047', fontWeight: 'bold' }}>[Drive Linked]</span>}
+                    <span style={{ fontWeight: 'bold', color: 'black', fontSize: '14px' }}>{mat.fileType === 'pdf' ? '📄' : '🖼️'} {mat.title}</span>
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '4px', fontSize: '12px', color: '#555', flexWrap: 'wrap' }}>
+                      <span><strong>Course:</strong> {mat.course?.toUpperCase()}</span>
+                      <span><strong>Semester:</strong> Sem-{mat.semester}</span>
+                      <span><strong>Type:</strong> {mat.fileType?.toUpperCase()}</span>
                     </div>
                   </div>
                   <button onClick={() => handleDeleteMaterial(mat._id, mat.title)} className="adm-delete-btn">🗑️ Delete</button>
                 </div>
               ))
             ) : ( 
-              <p style={{ color: '#cbd5e1', textAlign: 'center', margin: '20px 0', fontSize: '14px' }}>🔍 No documents found for this filter match.</p> 
+              <p style={{ color: '#888', textAlign: 'center', margin: '20px 0', fontSize: '14px' }}>🔍 No documents found for this filter match.</p> 
             )}
           </div>
         </div>
 
-        {/* Live Student Tracking List */}
+        {/* लाइव छात्र ट्रैकिंग लिस्ट */}
         <div className="adm-card">
           <h3 className="adm-card-title">📊 Student Login Live Tracking List</h3>
           <div className="adm-table-wrapper">
             <table className="adm-table">
               <thead>
-                <tr>
+                <tr style={{ backgroundColor: '#06dfd1', color: 'black' }}>
                   <th className="adm-th">Name</th>
                   <th className="adm-th">Mobile</th>
                   <th className="adm-th">Login Time</th>
@@ -729,20 +584,12 @@ function AdminDashboard() {
               </thead>
               <tbody>
                 {logs.map((log, i) => (
-                  <tr key={log._id || i} style={{ borderBottom: '1px solid #1e2d5a', background: i % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.02)' }}>
-                    <td className="adm-td" style={{ fontWeight: '600' }}>{log.userName}</td>
-                    <td className="adm-td" style={{ color: '#cbd5e1' }}>{log.mobile}</td>
-                    <td className="adm-td" style={{ color: '#cbd5e1' }}>{new Date(log.loginTime).toLocaleString()}</td>
-                    <td style={{ ...tdStyle, fontWeight: 'bold' }}>
-                      {!log.logoutTime ? (
-                        <span style={{ backgroundColor: '#15803d', color: '#ffffff', padding: '4px 10px', borderRadius: '4px' }}>
-                          ● Online
-                        </span>
-                      ) : (
-                        <span style={{ backgroundColor: '#b91c1c', color: '#ffffff', padding: '4px 10px', borderRadius: '4px' }}>
-                          ○ Offline
-                        </span>
-                      )}
+                  <tr key={log._id || i} style={{ borderBottom: '1px solid #eee' }}>
+                    <td className="adm-td">{log.userName}</td>
+                    <td className="adm-td">{log.mobile}</td>
+                    <td className="adm-td">{new Date(log.loginTime).toLocaleString()}</td>
+                    <td style={{ ...tdStyle, color: !log.logoutTime ? 'green' : 'red', fontWeight: 'bold' }}>
+                      {!log.logoutTime ? '● Online' : '○ Offline'}
                     </td>
                   </tr>
                 ))}
@@ -754,5 +601,7 @@ function AdminDashboard() {
     </>
   );
 }
+
+const tdStyle = { padding: '12px 14px', fontSize: '13px' };
 
 export default AdminDashboard;
