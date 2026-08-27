@@ -1,144 +1,262 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 function PdfModal({ isOpen, onClose, pdfUrl, title }) {
+  const [downloading, setDownloading] = useState(false);
+
   if (!isOpen) return null;
+
+  // 🔍 Extract Google Drive File ID safely using Regex
+  const extractDriveFileId = (url) => {
+    if (!url) return null;
+    const match = url.match(/(?:d\/|id=|file\/d\/|src=)([\w-]{25,})/);
+    return match ? match[1] : null;
+  };
+
+  const fileId = extractDriveFileId(pdfUrl);
+  const isGoogleDrive = Boolean(pdfUrl && (pdfUrl.includes('drive.google.com') || fileId));
+
+  // 🛠 Construct Clean Embed URL
+  const embedUrl = isGoogleDrive && fileId 
+    ? `https://drive.google.com/file/d/${fileId}/preview` 
+    : pdfUrl;
+
+  // ⬇️ Direct In-App Download Function (No External Redirects)
+  const handleDirectDownload = () => {
+    if (!pdfUrl) return;
+    setDownloading(true);
+
+    if (fileId) {
+      // Direct Export Endpoint
+      const directDownloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+      const hiddenIframe = document.createElement('iframe');
+      hiddenIframe.style.display = 'none';
+      hiddenIframe.src = directDownloadUrl;
+      document.body.appendChild(hiddenIframe);
+
+      setTimeout(() => {
+        document.body.removeChild(hiddenIframe);
+        setDownloading(false);
+      }, 3000);
+    } else {
+      const a = document.createElement('a');
+      a.href = pdfUrl;
+      a.download = `${title || 'Document'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setDownloading(false);
+    }
+  };
 
   return (
     <>
       <style>{`
-        /* 🔲 Modal Overlay - Top Padding Navbar (60px) ke niche lane ke liye */
-        .pdf-modal-overlay {
+        /* Modal Backdrop - Top Margin added to prevent Navbar overlap */
+        .pdf-modal-backdrop {
           position: fixed;
           top: 0;
           left: 0;
           width: 100vw;
           height: 100vh;
-          background: rgba(0, 0, 0, 0.7);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
+          background: rgba(15, 23, 42, 0.85);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           display: flex;
           justify-content: center;
           align-items: flex-start;
-          padding-top: 75px; /* 🟢 Navbar ke niche space create karega */
-          padding-bottom: 25px;
-          padding-left: 15px;
-          padding-right: 15px;
+          padding-top: 80px; /* 🟢 Navbar ke niche modal shift karne ke liye */
+          padding-bottom: 20px;
+          padding-left: clamp(10px, 2vw, 20px);
+          padding-right: clamp(10px, 2vw, 20px);
           box-sizing: border-box;
-          z-index: 99999; /* 🟢 Z-index navbar se upar rakha gaya hai */
+          z-index: 99999;
+          animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* 🔲 Modal Body Container */
+        @keyframes modalFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        /* Container height adjusted for screen bounds */
         .pdf-modal-container {
-          background: #18181b;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          border-radius: 16px;
+          background: rgba(30, 41, 59, 0.95);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(255, 255, 255, 0.12);
           width: 100%;
-          max-width: 900px;
-          height: calc(100vh - 110px); /* 🟢 Maximum height compact rakhi hai */
+          max-width: 1200px;
+          height: calc(100vh - 100px); /* 🟢 Clear Viewport boundary */
+          border-radius: 20px;
           display: flex;
           flex-direction: column;
           overflow: hidden;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+          position: relative;
+          animation: modalZoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* 🔲 Header - Download aur Close buttons clear dikhne ke liye */
+        @keyframes modalZoomIn {
+          from { transform: scale(0.95); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+
+        /* Header Styling */
         .pdf-modal-header {
+          padding: 14px 20px;
+          background: rgba(15, 23, 42, 0.9);
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 12px 20px;
-          background: #09090b;
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          z-index: 10;
+          gap: 12px;
+          flex-wrap: wrap;
         }
 
         .pdf-modal-title {
-          color: #ffffff;
-          font-size: 14px;
-          font-weight: 600;
           margin: 0;
+          font-size: clamp(14px, 2.5vw, 16px);
+          font-weight: 700;
+          background: linear-gradient(135deg, #38bdf8, #10b981);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          max-width: 60%;
         }
 
-        .pdf-action-btn {
-          padding: 6px 14px;
-          border-radius: 6px;
+        .pdf-btn-group {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+        }
+
+        .pdf-download-btn {
+          background: linear-gradient(135deg, #10b981, #059669);
+          color: #ffffff;
+          padding: 8px 16px;
+          border-radius: 10px;
+          border: 1px solid rgba(255, 255, 255, 0.15);
           font-size: 13px;
-          font-weight: 600;
+          font-weight: 700;
           cursor: pointer;
-          border: none;
-          text-decoration: none;
+          transition: all 0.25s ease;
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          transition: background 0.2s ease;
         }
 
-        .pdf-btn-download {
-          background: #16a34a;
+        .pdf-download-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+          background: linear-gradient(135deg, #34d399, #10b981);
+        }
+
+        .pdf-download-btn:disabled {
+          background: #475569;
+          box-shadow: none;
+          cursor: not-allowed;
+          opacity: 0.7;
+        }
+
+        .pdf-close-btn {
+          background: rgba(239, 68, 68, 0.15);
+          color: #fca5a5;
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          padding: 8px 16px;
+          border-radius: 10px;
+          cursor: pointer;
+          font-weight: 700;
+          font-size: 13px;
+          transition: all 0.2s ease;
+        }
+
+        .pdf-close-btn:hover {
+          background: rgba(239, 68, 68, 0.9);
           color: #ffffff;
+          box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
         }
 
-        .pdf-btn-download:hover {
-          background: #15803d;
-        }
-
-        .pdf-btn-close {
-          background: #dc2626;
-          color: #ffffff;
-        }
-
-        .pdf-btn-close:hover {
-          background: #b91c1c;
-        }
-
-        .pdf-modal-body {
-          flex: 1;
-          width: 100%;
-          height: 100%;
-          background: #27272a;
-        }
-
-        .pdf-modal-body iframe {
-          width: 100%;
-          height: 100%;
-          border: none;
+        @media screen and (max-width: 600px) {
+          .pdf-modal-backdrop {
+            padding-top: 70px;
+          }
+          .pdf-modal-title {
+            max-width: 100%;
+          }
+          .pdf-btn-group {
+            width: 100%;
+            justify-content: flex-end;
+          }
         }
       `}</style>
 
-      <div className="pdf-modal-overlay" onClick={onClose}>
-        <div className="pdf-modal-container" onClick={(e) => e.stopPropagation()}>
-          
+      <div className="pdf-modal-backdrop" onClick={onClose}>
+        <div 
+          className="pdf-modal-container"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
           <div className="pdf-modal-header">
-            <h3 className="pdf-modal-title">📄 {title || 'PDF Viewer'}</h3>
-            
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <a 
-                href={pdfUrl} 
-                download 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="pdf-action-btn pdf-btn-download"
-              >
-                ⬇ Download PDF
-              </a>
+            <h3 className="pdf-modal-title">
+              📄 {title || 'PDF Preview'}
+            </h3>
+            <div className="pdf-btn-group">
               <button 
-                onClick={onClose} 
-                className="pdf-action-btn pdf-btn-close"
+                onClick={handleDirectDownload} 
+                disabled={downloading}
+                className="pdf-download-btn"
+              >
+                {downloading ? '⏳ Downloading...' : '⬇ Download PDF'}
+              </button>
+
+              <button 
+                onClick={onClose}
+                className="pdf-close-btn"
               >
                 ✕ Close
               </button>
             </div>
           </div>
 
-          <div className="pdf-modal-body">
+          {/* Modal Body */}
+          <div style={{ flex: 1, width: '100%', height: '100%', backgroundColor: '#0f172a', position: 'relative', overflow: 'hidden' }}>
+            
+            {/* Top-Right Arrow Click Guard (Protects Admin Identity) */}
+            {isGoogleDrive && (
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: '0px',
+                  right: '0px',
+                  width: '75px',
+                  height: '75px',
+                  backgroundColor: 'transparent',
+                  zIndex: 9999,
+                  cursor: 'not-allowed'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+              />
+            )}
+
             <iframe 
-              src={pdfUrl} 
-              title="PDF Viewer"
+              src={embedUrl} 
+              title="PDF Preview"
+              style={{
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                display: 'block'
+              }}
             />
           </div>
-
         </div>
       </div>
     </>
