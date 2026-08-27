@@ -43,25 +43,6 @@ function AdminDashboard() {
   const [filterCourse, setFilterCourse] = useState('all');
   const [filterSemester, setFilterSemester] = useState('all');
 
-  // Role Guard Check & Polling
-  useEffect(() => {
-    if (!isLoggedIn || !token) {
-      navigate('/login', { replace: true });
-      return;
-    }
-
-    if (userRole !== 'admin') {
-      alert('⚠️ Unauthorized! Admin Panel Access Restricted.');
-      navigate('/dashboard', { replace: true });
-      return;
-    }
-
-    fetchLiveLogs();
-    fetchUploadedMaterials();
-    const interval = setInterval(fetchLiveLogs, 4000);
-    return () => clearInterval(interval);
-  }, [isLoggedIn, userRole, token, navigate]);
-
   // Fetch Live Logs
   const fetchLiveLogs = async () => {
     if (!token) return;
@@ -107,6 +88,25 @@ function AdminDashboard() {
     }
   };
 
+  // Role Guard Check & Polling
+  useEffect(() => {
+    if (!isLoggedIn || !token) {
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    if (userRole !== 'admin') {
+      alert('⚠️ Unauthorized! Admin Panel Access Restricted.');
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+
+    fetchLiveLogs();
+    fetchUploadedMaterials();
+    const interval = setInterval(fetchLiveLogs, 4000);
+    return () => clearInterval(interval);
+  }, [isLoggedIn, userRole, token, navigate]);
+
   // Delete Material Handler
   const handleDeleteMaterial = async (id, fileTitle) => {
     const confirmDelete = window.confirm(`🗑️ क्या आप सच में "${fileTitle}" को हमेशा के लिए डिलीट करना चाहते हैं?`);
@@ -122,10 +122,10 @@ function AdminDashboard() {
       });
       const data = await response.json();
       if (response.ok) {
-        alert(data.message);
+        alert(data.message || 'फ़ाइल डिलीट हो गई!');
         fetchUploadedMaterials();
       } else { 
-        alert(data.message); 
+        alert(data.message || 'डिलीट नहीं हो पाया!'); 
       }
     } catch (error) { 
       alert('फ़ाइल डिलीट एरर!'); 
@@ -146,12 +146,27 @@ function AdminDashboard() {
       });
       const data = await response.json();
       if (response.ok) { 
-        alert(data.message); 
+        alert(data.message || 'सबका लॉगआउट पूरा हुआ!'); 
         fetchLiveLogs(); 
       }
     } catch (error) { 
-      alert('connection fail!'); 
+      alert('Connection failed!'); 
     }
+  };
+
+  // Form Reset Helper
+  const resetFormFields = () => {
+    setTitle(''); 
+    setDriveUrl('');
+    setFile(null); 
+    setQuizQuestion('');
+    setOptionA(''); 
+    setOptionB(''); 
+    setOptionC(''); 
+    setOptionD('');
+    setCorrectOption('A');
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput) fileInput.value = ''; 
   };
 
   // Upload Handler
@@ -206,14 +221,7 @@ function AdminDashboard() {
       const data = await response.json();
       if (response.ok) { 
         alert(data.message || 'सफलतापूर्वक अपलोड हो गया!'); 
-        setTitle(''); 
-        setDriveUrl('');
-        setFile(null); 
-        setQuizQuestion('');
-        setOptionA(''); setOptionB(''); setOptionC(''); setOptionD('');
-        setCorrectOption('A');
-        const fileInput = document.getElementById('fileInput');
-        if (fileInput) fileInput.value = ''; 
+        resetFormFields();
         fetchUploadedMaterials(); 
       } else { 
         alert(data.message || 'अपलोड फ़ेल हो गया!'); 
@@ -236,22 +244,13 @@ function AdminDashboard() {
   return (
     <>
       <style>{`
-        /* Overriding all global blur and unwanted CSS styles */
-        button, select, input {
-          backdrop-filter: none !important;
-          -webkit-backdrop-filter: none !important;
-          box-shadow: none !important;
-          text-shadow: none !important;
-          filter: none !important;
-          opacity: 1 !important;
-        }
-
         body {
           margin: 0;
           padding: 0;
           background-color: #0b1329;
           min-height: 100vh;
           color: #ffffff;
+          font-family: Arial, Helvetica, sans-serif;
         }
 
         .adm-container {
@@ -259,18 +258,16 @@ function AdminDashboard() {
           max-width: 1050px;
           width: 100%;
           margin: 0 auto;
-          font-family: Arial, Helvetica, sans-serif;
           min-height: 100vh;
           box-sizing: border-box;
         }
 
-        /* Clean Header Panel */
         .adm-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background-color: #131e3a !important;
-          border: 1px solid #1e2d5a !important;
+          background-color: #131e3a;
+          border: 1px solid #1e2d5a;
           padding: clamp(16px, 3vw, 24px);
           border-radius: 8px;
           flex-wrap: wrap;
@@ -288,8 +285,9 @@ function AdminDashboard() {
         .adm-avatar {
           width: 48px;
           height: 48px;
-          background-color: #0284c7;
-          border-radius: 50%;
+          background-color: #8b2d29;
+          border: 1px solid #712421;
+          border-radius: 6px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -301,59 +299,51 @@ function AdminDashboard() {
           display: flex;
           gap: 12px;
           flex-wrap: wrap;
-          width: auto;
         }
 
-        /* Completely Normal & Crisp Sky Blue Button */
         .adm-candidate-btn {
-          padding: 10px 18px !important;
-          background-color: #0284c7 !important;
-          color: #ffffff !important;
-          border: 1px solid #0284c7 !important;
-          border-radius: 6px !important;
-          cursor: pointer !important;
-          font-weight: bold !important;
-          font-size: 13px !important;
-          outline: none !important;
+          padding: 10px 18px;
+          background-color: #8b2d29;
+          color: #ffffff;
+          border: 1px solid #712421;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 13px;
         }
 
         .adm-candidate-btn:hover {
-          background-color: #0369a1 !important;
-          border-color: #0369a1 !important;
+          background-color: #712421;
         }
 
-        /* Completely Normal & Crisp Red Force Logout Button */
         .adm-logout-btn {
-          padding: 10px 18px !important;
-          background-color: #dc2626 !important;
-          color: #ffffff !important;
-          border: 1px solid #dc2626 !important;
-          border-radius: 6px !important;
-          cursor: pointer !important;
-          font-weight: bold !important;
-          font-size: 13px !important;
-          outline: none !important;
+          padding: 10px 18px;
+          background-color: #dc2626;
+          color: #ffffff;
+          border: 1px solid #b91c1c;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 13px;
         }
 
         .adm-logout-btn:hover {
-          background-color: #b91c1c !important;
-          border-color: #b91c1c !important;
+          background-color: #b91c1c;
         }
 
-        /* Clean Normal Card Box */
         .adm-card {
           margin-top: 25px;
-          background-color: #131e3a !important;
+          background-color: #131e3a;
           padding: clamp(20px, 4vw, 30px);
           border-radius: 8px;
-          border: 1px solid #1e2d5a !important;
+          border: 1px solid #1e2d5a;
           box-sizing: border-box;
           width: 100%;
         }
 
         .adm-card-title {
           margin: 0 0 20px 0;
-          color: #eab308;
+          color: #fef08a;
           font-size: clamp(18px, 4vw, 21px);
           font-weight: bold;
           display: flex;
@@ -374,26 +364,20 @@ function AdminDashboard() {
           margin-bottom: 8px;
         }
 
-        /* Normal Sharp Input Field */
         .adm-input {
           width: 100%;
           padding: 12px 15px;
           box-sizing: border-box;
-          border: 1px solid #1e2d5a !important;
-          border-radius: 6px !important;
+          border: 1px solid #1e2d5a;
+          border-radius: 6px;
           font-size: 14px;
-          color: #ffffff !important;
-          outline: none !important;
-          background-color: #0b1329 !important;
+          color: #ffffff;
+          outline: none;
+          background-color: #0b1329;
         }
 
         .adm-input:focus {
-          border-color: #0284c7 !important;
-        }
-
-        .adm-input option {
-          background-color: #0b1329;
-          color: #ffffff;
+          border-color: #fde047;
         }
 
         .adm-row-group {
@@ -411,41 +395,40 @@ function AdminDashboard() {
         .adm-file-input {
           width: 100%;
           padding: 12px;
-          border: 1px dashed #1e2d5a !important;
-          border-radius: 6px !important;
+          border: 1px dashed #1e2d5a;
+          border-radius: 6px;
           box-sizing: border-box;
           font-size: 13px;
-          background-color: #0b1329 !important;
+          background-color: #0b1329;
           color: #cbd5e1;
         }
 
-        /* Normal Upload Button */
         .adm-upload-btn {
           width: 100%;
-          padding: 14px 20px !important;
-          border: 1px solid #0284c7 !important;
-          border-radius: 6px !important;
-          cursor: pointer !important;
-          font-weight: bold !important;
-          background-color: #0284c7 !important;
-          color: #ffffff !important;
-          font-size: 15px !important;
+          padding: 14px 20px;
+          border: 1px solid #712421;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: bold;
+          background-color: #8b2d29;
+          color: #ffffff;
+          font-size: 15px;
         }
 
         .adm-upload-btn:hover {
-          background-color: #0369a1 !important;
+          background-color: #712421;
         }
 
         .adm-filter-bar {
           display: flex;
           gap: 12px;
-          background-color: #0b1329 !important;
+          background-color: #0b1329;
           padding: 14px;
           border-radius: 6px;
           margin-bottom: 20px;
           flex-wrap: wrap;
           align-items: center;
-          border: 1px solid #1e2d5a !important;
+          border: 1px solid #1e2d5a;
         }
 
         .adm-mat-item {
@@ -453,34 +436,33 @@ function AdminDashboard() {
           justify-content: space-between;
           align-items: center;
           padding: 14px 18px;
-          background-color: #0b1329 !important;
+          background-color: #0b1329;
           border-radius: 6px;
-          border: 1px solid #1e2d5a !important;
+          border: 1px solid #1e2d5a;
           gap: 10px;
           flex-wrap: wrap;
         }
 
         .adm-delete-btn {
-          padding: 8px 16px !important;
-          background-color: #dc2626 !important;
-          color: #ffffff !important;
-          border: 1px solid #dc2626 !important;
-          border-radius: 6px !important;
-          cursor: pointer !important;
-          font-weight: bold !important;
-          font-size: 12px !important;
+          padding: 8px 16px;
+          background-color: #dc2626;
+          color: #ffffff;
+          border: 1px solid #b91c1c;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 12px;
         }
 
         .adm-delete-btn:hover {
-          background-color: #b91c1c !important;
+          background-color: #b91c1c;
         }
 
         .adm-table-wrapper {
           overflow-x: auto;
           width: 100%;
           border-radius: 6px;
-          -webkit-overflow-scrolling: touch;
-          border: 1px solid #1e2d5a !important;
+          border: 1px solid #1e2d5a;
         }
 
         .adm-table {
@@ -495,6 +477,8 @@ function AdminDashboard() {
           font-size: 13px;
           font-weight: bold;
           text-transform: uppercase;
+          background-color: #1e2d5a;
+          color: #ffffff;
         }
 
         .adm-td {
@@ -541,7 +525,7 @@ function AdminDashboard() {
             <div className="adm-avatar">👑</div>
             <div>
               <h2 style={{ color: '#ffffff', margin: 0, fontSize: 'clamp(18px, 4vw, 22px)', fontWeight: 'bold' }}>Main Admin Control Panel</h2>
-              <p style={{ margin: '4px 0 0 0', color: '#eab308', fontSize: '13px', fontWeight: '500' }}>BCA Portal Management System</p>
+              <p style={{ margin: '4px 0 0 0', color: '#fde047', fontSize: '13px', fontWeight: '500' }}>BCA Portal Management System</p>
             </div>
           </div>
           <div className="adm-btn-group">
@@ -561,7 +545,7 @@ function AdminDashboard() {
             
             <div className="adm-input-group">
               <label className="adm-label">Select Content Type *</label>
-              <select value={category} onChange={(e) => setCategory(e.target.value)} className="adm-input" style={{ fontWeight: 'bold', color: '#38bdf8' }}>
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className="adm-input" style={{ fontWeight: 'bold', color: '#fde047' }}>
                 <option value="notes">📘 Study Notes / Material</option>
                 <option value="pyq">📝 Previous Year Question Paper (PYQ)</option>
                 <option value="quiz">❓ Interactive Student Quiz</option>
@@ -606,7 +590,7 @@ function AdminDashboard() {
 
             {category === 'quiz' ? (
               <div style={{ backgroundColor: '#0b1329', padding: '18px', borderRadius: '6px', marginBottom: '18px', border: '1px solid #1e2d5a' }}>
-                <h4 style={{ margin: '0 0 14px 0', color: '#eab308', fontSize: '15px' }}>❓ Add Quiz Question & Options</h4>
+                <h4 style={{ margin: '0 0 14px 0', color: '#fde047', fontSize: '15px' }}>❓ Add Quiz Question & Options</h4>
                 
                 <div className="adm-input-group">
                   <label className="adm-label">Question Text *</label>
@@ -633,7 +617,7 @@ function AdminDashboard() {
 
                 <div className="adm-input-group" style={{ marginBottom: 0 }}>
                   <label className="adm-label">Correct Option Key *</label>
-                  <select value={correctOption} onChange={(e) => setCorrectOption(e.target.value)} className="adm-input" style={{ color: '#38bdf8', fontWeight: 'bold' }}>
+                  <select value={correctOption} onChange={(e) => setCorrectOption(e.target.value)} className="adm-input" style={{ color: '#fde047', fontWeight: 'bold' }}>
                     <option value="A">Option A</option>
                     <option value="B">Option B</option>
                     <option value="C">Option C</option>
@@ -652,7 +636,7 @@ function AdminDashboard() {
                     onChange={(e) => setDriveUrl(e.target.value)} 
                     className="adm-input" 
                   />
-                  <small style={{ color: '#eab308', fontSize: '11px', display: 'block', marginTop: '6px' }}>
+                  <small style={{ color: '#fde047', fontSize: '11px', display: 'block', marginTop: '6px' }}>
                     * लिंक खुद ब खुद <b>/preview</b> फॉर्मेट में बदल जाएगी।
                   </small>
                 </div>
@@ -681,7 +665,7 @@ function AdminDashboard() {
           <h3 className="adm-card-title">📂 Uploaded Documents & Content Management</h3>
           
           <div className="adm-filter-bar">
-            <span style={{ fontWeight: 'bold', color: '#eab308', fontSize: '13px', minWidth: '130px' }}>🔍 Live Filter List:</span>
+            <span style={{ fontWeight: 'bold', color: '#fde047', fontSize: '13px', minWidth: '130px' }}>🔍 Live Filter List:</span>
             
             <div style={{ flex: 1, minWidth: '140px' }}>
               <select value={filterCourse} onChange={(e) => setFilterCourse(e.target.value)} className="adm-input" style={{ padding: '8px 12px', fontSize: '13px' }}>
@@ -715,10 +699,10 @@ function AdminDashboard() {
                       {mat.category === 'quiz' ? '❓' : mat.category === 'pyq' ? '📝' : '📄'} {mat.title}
                     </span>
                     <div style={{ display: 'flex', gap: '12px', marginTop: '6px', fontSize: '12px', color: '#cbd5e1', flexWrap: 'wrap' }}>
-                      <span><strong style={{ color: '#fde047' }}>Category:</strong> <span style={{ color: '#38bdf8' }}>{mat.category ? mat.category.toUpperCase() : 'NOTES'}</span></span>
+                      <span><strong style={{ color: '#fde047' }}>Category:</strong> <span style={{ color: '#fde047' }}>{mat.category ? mat.category.toUpperCase() : 'NOTES'}</span></span>
                       <span><strong style={{ color: '#fde047' }}>Course:</strong> {mat.course?.toUpperCase()}</span>
                       <span><strong style={{ color: '#fde047' }}>Semester:</strong> Sem-{mat.semester}</span>
-                      {mat.driveUrl && <span style={{ color: '#38bdf8', fontWeight: 'bold' }}>[Drive Linked]</span>}
+                      {mat.driveUrl && <span style={{ color: '#fde047', fontWeight: 'bold' }}>[Drive Linked]</span>}
                     </div>
                   </div>
                   <button onClick={() => handleDeleteMaterial(mat._id, mat.title)} className="adm-delete-btn">🗑️ Delete</button>
@@ -736,7 +720,7 @@ function AdminDashboard() {
           <div className="adm-table-wrapper">
             <table className="adm-table">
               <thead>
-                <tr style={{ backgroundColor: '#0284c7', color: '#ffffff' }}>
+                <tr>
                   <th className="adm-th">Name</th>
                   <th className="adm-th">Mobile</th>
                   <th className="adm-th">Login Time</th>
@@ -749,7 +733,7 @@ function AdminDashboard() {
                     <td className="adm-td" style={{ fontWeight: '600' }}>{log.userName}</td>
                     <td className="adm-td" style={{ color: '#cbd5e1' }}>{log.mobile}</td>
                     <td className="adm-td" style={{ color: '#cbd5e1' }}>{new Date(log.loginTime).toLocaleString()}</td>
-                    <td style={{ ...tdStyle, color: !log.logoutTime ? '#4ade80' : '#f87171', fontWeight: 'bold' }}>
+                    <td style={{ ...tdStyle, fontWeight: 'bold' }}>
                       {!log.logoutTime ? (
                         <span style={{ backgroundColor: '#15803d', color: '#ffffff', padding: '4px 10px', borderRadius: '4px' }}>
                           ● Online

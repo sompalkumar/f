@@ -7,7 +7,7 @@ import { API_BASE_URL } from '../config';
 function Login() {
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false); // ⏳ Loading state
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // 🛡️ Guard Check: Agar user pehle se logged-in hai to uske role ke aadhar par sahi Dashboard par bhejo
@@ -42,10 +42,24 @@ function Login() {
     };
   }, [navigate]);
 
+  // 📱 Mobile Input Sanitization (only 10 digits allowed)
+  const handleMobileChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 10) {
+      setMobile(value);
+    }
+  };
+
   // 🔑 Login Handler
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true); // ⏳ Loading chalu karein
+    
+    if (mobile.length !== 10) {
+      alert('कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें!');
+      return;
+    }
+
+    setLoading(true);
     
     try {
       const response = await fetch(`${API_BASE_URL}/api/login`, {
@@ -57,25 +71,23 @@ function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        const userRole = data.role || data.userRole;
+        const userRole = data.role || data.userRole || 'student';
 
-        // 🔴 1. अगर यूज़र एडमिन नहीं है तो लॉगिन तुरंत ब्लॉक करें
-        if (userRole !== 'admin') {
-          alert('❌ You are not an admin! You cannot log in from here.');
-          
-          sessionStorage.clear();
-          localStorage.clear();
-          setLoading(false);
-          return;
-        }
-
-        // 🟢 2. केवल Admin होने पर ही Session सेव करें और Admin Dashboard पर भेजें
+        // 🟢 Session Saving Logic
         sessionStorage.setItem('isLoggedIn', 'true');
         sessionStorage.setItem('token', data.token);
         sessionStorage.setItem('userRole', userRole);
+        if (data.name || data.userName) {
+          sessionStorage.setItem('userName', data.name || data.userName);
+        }
         if (data.logId) sessionStorage.setItem('logId', data.logId);
 
-        navigate('/admin-dashboard', { replace: true });
+        // 🔀 Role-Based Dynamic Redirection
+        if (userRole === 'admin') {
+          navigate('/admin-dashboard', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
       } else {
         alert(data.message || 'लॉगिन विफल रहा!');
       }
@@ -83,7 +95,7 @@ function Login() {
       console.error('Login Error:', error);
       alert('सर्वर से कनेक्शन नहीं हो पाया!');
     } finally {
-      setLoading(false); // ⏳ Loading बंद करें
+      setLoading(false);
     }
   };
 
@@ -138,7 +150,7 @@ function Login() {
               type="tel" 
               placeholder="Mobile Number" 
               value={mobile} 
-              onChange={(e) => setMobile(e.target.value)} 
+              onChange={handleMobileChange} 
               autoComplete="username"
               style={{ 
                 width: '100%', 

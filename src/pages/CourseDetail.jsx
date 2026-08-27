@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 
@@ -25,7 +25,7 @@ function CourseDetail() {
     sessionStorage.getItem('isLoggedIn') === 'true' || 
     localStorage.getItem('isLoggedIn') === 'true';
 
-  // 🟢 Login Check
+  // 🟢 Auth Guard
   useEffect(() => {
     if (!isLoggedIn) {
       navigate('/', { replace: true });
@@ -33,40 +33,59 @@ function CourseDetail() {
   }, [isLoggedIn, navigate]);
 
   // 🟢 Fetch Materials from Backend
-  useEffect(() => {
-    if (selectedSem && courseId) {
-      setLoading(true);
-      setDbMaterials([]); // Reset old materials while fetching
+  const fetchMaterials = useCallback(async () => {
+    if (!selectedSem || !courseId) return;
 
-      const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+    setLoading(true);
+    setDbMaterials([]);
 
-      fetch(`${API_BASE_URL}/api/materials/${courseId}/${selectedSem}`, {
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/materials/${courseId}/${selectedSem}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           ...(token && { Authorization: `Bearer ${token}` })
         }
-      })
-        .then(res => {
-          if (res.status === 401 || res.status === 403) {
-            sessionStorage.clear(); 
-            localStorage.clear();
-            alert('⏰ आपका सुरक्षा सेशन समाप्त हो चुका है! कृपया दोबारा लॉगिन करें।');
-            navigate('/', { replace: true });
-            return null;
-          }
-          if (!res.ok) {
-            throw new Error(`Server returned status ${res.status}`);
-          }
-          return res.json();
-        })
-        .then(data => { 
-          if (data) setDbMaterials(data); 
-        })
-        .catch(err => console.error("API Error:", err))
-        .finally(() => setLoading(false));
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        sessionStorage.clear(); 
+        localStorage.clear();
+        alert('⏰ आपका सुरक्षा सेशन समाप्त हो चुका है! कृपया दोबारा लॉगिन करें।');
+        navigate('/', { replace: true });
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(`Server returned status ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (data) setDbMaterials(data);
+    } catch (err) {
+      console.error("API Error:", err);
+    } finally {
+      setLoading(false);
     }
   }, [selectedSem, courseId, navigate]);
+
+  useEffect(() => {
+    fetchMaterials();
+  }, [fetchMaterials]);
+
+  // Close preview on ESC key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setPreviewImage(null);
+        setIsPdfOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const semesters = [1, 2, 3, 4, 5, 6];
 
@@ -376,10 +395,10 @@ function CourseDetail() {
             ))}
           </div>
 
-          {/* 🖼️ Live Image Preview Lightbox */}
+          {/* 🖼️ Live Image Preview Lightbox (Click outside to close added) */}
           {previewImage && (
-            <div className="cd-img-overlay">
-              <div className="cd-img-card">
+            <div className="cd-img-overlay" onClick={() => setPreviewImage(null)}>
+              <div className="cd-img-card" onClick={(e) => e.stopPropagation()}>
                 <button 
                   onClick={() => setPreviewImage(null)} 
                   className="cd-close-btn"

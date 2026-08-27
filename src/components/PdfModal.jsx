@@ -1,16 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   const [downloading, setDownloading] = useState(false);
 
-  if (!isOpen) return null;
-
   // 🔍 Extract Google Drive File ID safely using Regex
-  const extractDriveFileId = (url) => {
+  const extractDriveFileId = useCallback((url) => {
     if (!url) return null;
     const match = url.match(/(?:d\/|id=|file\/d\/|src=)([\w-]{25,})/);
     return match ? match[1] : null;
-  };
+  }, []);
 
   const fileId = extractDriveFileId(pdfUrl);
   const isGoogleDrive = Boolean(pdfUrl && (pdfUrl.includes('drive.google.com') || fileId));
@@ -20,8 +18,27 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     ? `https://drive.google.com/file/d/${fileId}/preview` 
     : pdfUrl;
 
-  // ⬇️ Direct In-App Download Function (No External Redirects)
-  const handleDirectDownload = () => {
+  // ⌨️ Close Modal on 'Escape' key press & Manage Body Scroll Lock
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = 'hidden'; // Stop background scrolling
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset'; // Restore background scrolling
+    };
+  }, [isOpen, onClose]);
+
+  // ⬇️ Direct In-App Download Function
+  const handleDirectDownload = useCallback(() => {
     if (!pdfUrl) return;
     setDownloading(true);
 
@@ -34,7 +51,9 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
       document.body.appendChild(hiddenIframe);
 
       setTimeout(() => {
-        document.body.removeChild(hiddenIframe);
+        if (document.body.contains(hiddenIframe)) {
+          document.body.removeChild(hiddenIframe);
+        }
         setDownloading(false);
       }, 3000);
     } else {
@@ -46,12 +65,14 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
       document.body.removeChild(a);
       setDownloading(false);
     }
-  };
+  }, [pdfUrl, fileId, title]);
+
+  if (!isOpen) return null;
 
   return (
     <>
       <style>{`
-        /* Modal Backdrop - Top Margin added to prevent Navbar overlap */
+        /* Modal Backdrop - Navbar overlapping prevented */
         .pdf-modal-backdrop {
           position: fixed;
           top: 0;
@@ -64,13 +85,13 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           display: flex;
           justify-content: center;
           align-items: flex-start;
-          padding-top: 80px; /* 🟢 Navbar ke niche modal shift karne ke liye */
+          padding-top: 80px;
           padding-bottom: 20px;
           padding-left: clamp(10px, 2vw, 20px);
           padding-right: clamp(10px, 2vw, 20px);
           box-sizing: border-box;
           z-index: 99999;
-          animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          animation: modalFadeIn 0.25s ease-out;
         }
 
         @keyframes modalFadeIn {
@@ -86,18 +107,18 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           border: 1px solid rgba(255, 255, 255, 0.12);
           width: 100%;
           max-width: 1200px;
-          height: calc(100vh - 100px); /* 🟢 Clear Viewport boundary */
+          height: calc(100vh - 100px);
           border-radius: 20px;
           display: flex;
           flex-direction: column;
           overflow: hidden;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
           position: relative;
-          animation: modalZoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          animation: modalZoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes modalZoomIn {
-          from { transform: scale(0.95); opacity: 0; }
+          from { transform: scale(0.96); opacity: 0; }
           to { transform: scale(1); opacity: 1; }
         }
 
@@ -226,7 +247,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           {/* Modal Body */}
           <div style={{ flex: 1, width: '100%', height: '100%', backgroundColor: '#0f172a', position: 'relative', overflow: 'hidden' }}>
             
-            {/* Top-Right Arrow Click Guard (Protects Admin Identity) */}
+            {/* Top-Right Arrow Click Guard (Protects External Popout Navigation) */}
             {isGoogleDrive && (
               <div 
                 style={{

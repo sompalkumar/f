@@ -13,11 +13,28 @@ function ForgotPassword() {
   
   const navigate = useNavigate();
 
+  // 📱 Mobile Input Filter (only 10 digits allowed)
+  const handleMobileChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 10) {
+      setMobile(value);
+    }
+  };
+
+  // 🔢 OTP Input Filter (only digits allowed)
+  const handleOtpChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 6) {
+      setOtp(value);
+    }
+  };
+
   // Step 1: Request OTP from Backend
   const handleSendOtp = async (e) => {
-    e.preventDefault();
-    if (!mobile || mobile.length < 10) {
-      alert('कृपया एक वैध 10-अंकों का मोबाइल नंबर दर्ज करें!');
+    if (e) e.preventDefault();
+    
+    if (!mobile || mobile.length !== 10) {
+      alert('कृपया 10-अंकों का वैध मोबाइल नंबर दर्ज करें!');
       return;
     }
 
@@ -47,8 +64,14 @@ function ForgotPassword() {
   // Step 2: Verify OTP and Reset Password
   const handleVerifyAndReset = async (e) => {
     e.preventDefault();
-    if (!otp || !newPassword) {
-      alert('कृपया OTP और नया पासवर्ड दोनों दर्ज करें!');
+    
+    if (!otp || otp.length < 4) {
+      alert('कृपया सही OTP दर्ज करें!');
+      return;
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+      alert('नया पासवर्ड कम से कम 6 अक्षरों का होना चाहिए!');
       return;
     }
 
@@ -104,9 +127,6 @@ function ForgotPassword() {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
-       
-        /* Glassmorphic Container */
-       
         .fp-card {
           max-width: 420px;
           width: 100%;
@@ -122,6 +142,7 @@ function ForgotPassword() {
           box-sizing: border-box;
           transition: transform 0.3s ease;
         }
+
         .fp-icon {
           width: 60px;
           height: 60px;
@@ -187,17 +208,21 @@ function ForgotPassword() {
           font-size: 18px;
         }
 
+        .fp-actions-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 18px;
+          font-size: 12.5px;
+        }
+
         .fp-change-btn {
           background: none;
           border: none;
           color: #38bdf8;
           cursor: pointer;
-          font-size: 12.5px;
-          text-decoration: none;
-          margin-bottom: 18px;
-          display: inline-block;
           font-weight: 600;
           transition: color 0.2s ease;
+          padding: 0;
         }
 
         .fp-change-btn:hover {
@@ -205,7 +230,6 @@ function ForgotPassword() {
           text-decoration: underline;
         }
 
-        /* 3D Action Button */
         .fp-submit-btn {
           width: 100%;
           padding: 14px;
@@ -269,9 +293,9 @@ function ForgotPassword() {
               <div className="fp-input-group">
                 <input 
                   type="tel" 
-                  placeholder="Mobile Number" 
+                  placeholder="Mobile Number (10 digits)" 
                   value={mobile} 
-                  onChange={(e) => setMobile(e.target.value)} 
+                  onChange={handleMobileChange} 
                   className="fp-input"
                   required 
                 />
@@ -292,13 +316,22 @@ function ForgotPassword() {
                 आपके मोबाइल ({mobile}) पर भेजा गया OTP दर्ज करें
               </p>
               
-              <div>
+              <div className="fp-actions-row">
                 <button 
                   type="button" 
                   onClick={() => setIsOtpSent(false)} 
                   className="fp-change-btn"
                 >
-                  ✏️ Change Mobile Number
+                  ✏️ Change Mobile
+                </button>
+
+                <button 
+                  type="button" 
+                  onClick={() => handleSendOtp(null)} 
+                  disabled={loading}
+                  className="fp-change-btn"
+                >
+                  🔄 Resend OTP
                 </button>
               </div>
 
@@ -307,7 +340,7 @@ function ForgotPassword() {
                   type="text" 
                   placeholder="Enter OTP" 
                   value={otp} 
-                  onChange={(e) => setOtp(e.target.value)} 
+                  onChange={handleOtpChange} 
                   className="fp-input fp-input-otp"
                   maxLength={6}
                   required 
@@ -317,7 +350,7 @@ function ForgotPassword() {
               <div className="fp-input-group">
                 <input 
                   type="password" 
-                  placeholder="Enter New Password" 
+                  placeholder="Enter New Password (min 6 chars)" 
                   value={newPassword} 
                   onChange={(e) => setNewPassword(e.target.value)} 
                   className="fp-input"

@@ -34,6 +34,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
   const resetFormState = () => {
     setMobile('');
     setPassword('');
+    setName('');
     setOtp('');
     setCaptchaInput('');
     setIsOtpSent(false);
@@ -59,7 +60,10 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
   // 🔑 लॉगिन हैंडलर
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!validateMobile(mobile)) { alert('⚠️ कृपया एक वैध 10 अंकों का मोबाइल नंबर दर्ज करें!'); return; }
+    if (!validateMobile(mobile)) { 
+      alert('⚠️ कृपया एक वैध 10 अंकों का मोबाइल नंबर दर्ज करें!'); 
+      return; 
+    }
     if (captchaInput.trim().toLowerCase() !== currentCaptcha.toLowerCase()) { 
       alert('⚠️ गलत कैप्चा कोड!'); 
       refreshCaptcha();
@@ -69,11 +73,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     
     setIsLoading(true);
     try {
-      const endpoint = userRole === 'admin' 
-        ? `${API_BASE_URL}/api/admin-login` 
-        : `${API_BASE_URL}/api/login`;
-
-      const response = await fetch(endpoint, {
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mobile, password })
@@ -83,51 +83,42 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
 
       if (!response.ok) {
         alert(data.message || '🛑 लॉगिन विफल! कृपया अपनी जानकारी पुनः जांचें।');
-        localStorage.clear();
-        sessionStorage.clear();
         refreshCaptcha();
         setCaptchaInput('');
         setIsLoading(false);
         return;
       }
 
-      if (userRole === 'admin' && data.role !== 'admin') {
+      const backendRole = data.role || data.userRole || 'candidate';
+
+      // 🛡️ रोल मैचिंग चेक
+      if (userRole === 'admin' && backendRole !== 'admin') {
         alert('❌ You are not an admin! (आप एडमिन नहीं हैं)');
-        localStorage.clear();
-        sessionStorage.clear();
         refreshCaptcha();
+        setCaptchaInput('');
         setIsLoading(false);
         return;
       }
 
-      localStorage.clear();
+      // 🟢 केवल आवश्यक Storage क्लीनअप एवं सेटर
       sessionStorage.clear();
+      localStorage.clear();
 
       const tokenValue = data.token || '';
-      const roleValue = data.role || userRole;
-      const nameValue = data.name || '';
+      const nameValue = data.name || data.userName || '';
       const logIdValue = data.logId || '';
       const courseValue = data.course || 'bca';
 
-      localStorage.setItem('token', tokenValue);
-      localStorage.setItem('userToken', tokenValue);
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userName', nameValue);
-      localStorage.setItem('logId', logIdValue);
-      localStorage.setItem('userRole', roleValue);
-      localStorage.setItem('userCourse', courseValue);
-
       sessionStorage.setItem('token', tokenValue);
-      sessionStorage.setItem('userToken', tokenValue);
       sessionStorage.setItem('isLoggedIn', 'true');
       sessionStorage.setItem('userName', nameValue);
       sessionStorage.setItem('logId', logIdValue);
-      sessionStorage.setItem('userRole', roleValue);
+      sessionStorage.setItem('userRole', backendRole);
       sessionStorage.setItem('userCourse', courseValue);
 
       setShowPortalModal(false);
 
-      if (roleValue === 'admin') { 
+      if (backendRole === 'admin') { 
         window.location.replace('/admin-dashboard'); 
       } else { 
         window.location.replace('/dashboard'); 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // 🌐 Centralized API Base URL Import
@@ -7,7 +7,7 @@ import { API_BASE_URL } from '../config';
 function Navbar({ onTabChange, activeTab, onLoginClick }) {
   const navigate = useNavigate();
 
-  // 🟢 Session aur Local Storage dono checks Sync
+  // 🟢 Session aur Local Storage Sync Check
   const isLoggedIn = 
     sessionStorage.getItem('isLoggedIn') === 'true' || 
     localStorage.getItem('isLoggedIn') === 'true';
@@ -17,7 +17,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
     localStorage.getItem('userRole');
 
   // 🚪 Backend API ke saath Secure Logout Function
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     const logId = 
       sessionStorage.getItem('logId') || 
       localStorage.getItem('logId');
@@ -31,13 +31,18 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
         });
       } catch (error) {
         console.error('Logout API Error:', error);
+      } finally {
+        // Clear Storage & Redirect even if API fails
+        localStorage.clear();
+        sessionStorage.clear();
+        navigate('/', { replace: true });
       }
+    } else {
+      localStorage.clear();
+      sessionStorage.clear();
+      navigate('/', { replace: true });
     }
-
-    localStorage.clear();
-    sessionStorage.clear();
-    window.location.replace('/');
-  };
+  }, [navigate]);
 
   return (
     <>
@@ -207,29 +212,29 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
           📚 BCA Portal
         </h2>
 
-        {/* 🛡️ Middle Navigation Links: Tabhi dikhenge jab user logged out ho */}
+        {/* 🛡️ Middle Navigation Links: Only visible when user is logged out */}
         {!isLoggedIn && (
           <div className="nav-links-container">
             <button 
-              onClick={() => onTabChange && onTabChange('home')} 
+              onClick={() => onTabChange?.('home')} 
               className={`nav-btn ${activeTab === 'home' ? 'active' : ''}`}
             >
               Home
             </button>
             <button 
-              onClick={() => onTabChange && onTabChange('chairman')} 
+              onClick={() => onTabChange?.('chairman')} 
               className={`nav-btn ${activeTab === 'chairman' ? 'active' : ''}`}
             >
               Chairman's Message
             </button>
             <button 
-              onClick={() => onTabChange && onTabChange('students')} 
+              onClick={() => onTabChange?.('students')} 
               className={`nav-btn ${activeTab === 'students' ? 'active' : ''}`}
             >
               For Students
             </button>
             <button 
-              onClick={() => onTabChange && onTabChange('about')} 
+              onClick={() => onTabChange?.('about')} 
               className={`nav-btn ${activeTab === 'about' ? 'active' : ''}`}
             >
               About Us
@@ -237,7 +242,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
           </div>
         )}
 
-        {/* Right Side Buttons */}
+        {/* Right Side Action Buttons */}
         <div>
           {!isLoggedIn ? (
             <button 

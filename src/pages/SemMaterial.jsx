@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
 // 🌐 Centralized Backend Base URL
@@ -18,8 +18,8 @@ function SemMaterial() {
   const [selectedPdfUrl, setSelectedPdfUrl] = useState('');
   const [selectedPdfTitle, setSelectedPdfTitle] = useState('');
 
-  // 📚 Static Fallback Data
-  const localFallbackData = {
+  // 📚 Static Fallback Data (Memoized to prevent unnecessary re-creations)
+  const localFallbackData = useMemo(() => ({
     bca: {
       1: [
         { id: 1, title: 'C Programming Complete Notes', fileName: 'c_notes.pdf', size: '2.5 MB' },
@@ -31,20 +31,23 @@ function SemMaterial() {
         { id: 2, title: 'C++ Object Oriented Programming', fileName: 'cpp_oops.pdf', size: '2.9 MB' }
       ]
     }
-  };
+  }), []);
 
   useEffect(() => {
-    const fetchMaterials = async () => {
-      setLoading(true);
+    let isMounted = true;
+    setLoading(true);
 
+    const fetchMaterials = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/materials/${courseId}/${semId}`);
         
         if (response.ok) {
           const data = await response.json();
           if (Array.isArray(data) && data.length > 0) {
-            setMaterials(data);
-            setLoading(false);
+            if (isMounted) {
+              setMaterials(data);
+              setLoading(false);
+            }
             return;
           }
         }
@@ -52,6 +55,7 @@ function SemMaterial() {
         console.warn('Backend materials fetch failed, using fallback data:', err);
       }
 
+      // 🔄 Fallback Data Handling
       const safeCourse = courseId.toLowerCase();
       const fallback = localFallbackData[safeCourse]?.[semId] || [
         { id: 1, title: `Syllabus Sem ${semId}`, fileName: `Syllabus_Sem_${semId}.pdf`, size: '1.5 MB' },
@@ -59,28 +63,34 @@ function SemMaterial() {
         { id: 3, title: 'Important Questions & Notes', fileName: 'Notes_Subject_1.pdf', size: '2.0 MB' }
       ];
 
-      setMaterials(fallback);
-      setLoading(false);
+      if (isMounted) {
+        setMaterials(fallback);
+        setLoading(false);
+      }
     };
 
     fetchMaterials();
-  }, [courseId, semId]);
+
+    return () => {
+      isMounted = false; // Cleanup flag
+    };
+  }, [courseId, semId, localFallbackData]);
 
   // Target PDF URL Resolve karne ke liye Helper Function
-  const getPdfUrl = (file) => {
+  const getPdfUrl = useCallback((file) => {
     if (file.driveUrl) return file.driveUrl;
     if (file.fileUrl) return file.fileUrl;
     if (file.fileName && file.fileName.startsWith('http')) return file.fileName;
     return `${API_BASE_URL}/uploads/${file.fileName}`;
-  };
+  }, []);
 
   // PDF Popup Open karne ke liye Handler
-  const handleViewPdf = (file) => {
+  const handleViewPdf = useCallback((file) => {
     const targetUrl = getPdfUrl(file);
     setSelectedPdfUrl(targetUrl);
     setSelectedPdfTitle(file.title);
     setIsPdfOpen(true);
-  };
+  }, [getPdfUrl]);
 
   return (
     <>
