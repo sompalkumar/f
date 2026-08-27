@@ -239,7 +239,7 @@ function AdminDashboard() {
         body {
           margin: 0;
           padding: 0;
-          background: linear-gradient(-45deg, #0b0f19, #111827, #1e1b4b, #06202a);
+          background: linear-gradient(-45deg, #18150c, #0f172a, #262110, #0c1928);
           background-size: 400% 400%;
           animation: liquidBg 15s ease infinite;
           min-height: 100vh;
@@ -266,13 +266,13 @@ function AdminDashboard() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: rgba(15, 23, 42, 0.65);
+          background: rgba(30, 27, 20, 0.75);
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(56, 189, 248, 0.25);
+          border: 1px solid rgba(245, 158, 11, 0.35);
           padding: clamp(16px, 3vw, 24px);
           border-radius: 20px;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.1);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(234, 179, 8, 0.12);
           flex-wrap: wrap;
           gap: 15px;
           width: 100%;
@@ -288,14 +288,14 @@ function AdminDashboard() {
         .adm-avatar {
           width: 54px;
           height: 54px;
-          background: linear-gradient(135deg, #06b6d4, #3b82f6);
+          background: linear-gradient(135deg, #0284c7, #38bdf8);
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 24px;
-          box-shadow: 0 0 25px rgba(6, 182, 212, 0.6);
-          border: 2px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
+          border: 2px solid rgba(255, 255, 255, 0.3);
           flex-shrink: 0;
         }
 
@@ -308,21 +308,21 @@ function AdminDashboard() {
 
         .adm-candidate-btn {
           padding: 12px 18px;
-          background: linear-gradient(135deg, #2563eb, #1d4ed8);
+          background: linear-gradient(135deg, #0284c7, #0ea5e9);
           color: #ffffff;
-          border: 1px solid rgba(147, 197, 253, 0.3);
+          border: 1px solid rgba(186, 230, 253, 0.4);
           border-radius: 12px;
           cursor: pointer;
           font-weight: 600;
           font-size: 13px;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+          box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
         }
 
         .adm-candidate-btn:hover {
           transform: translateY(-2px);
-          background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-          box-shadow: 0 12px 25px rgba(59, 130, 246, 0.5);
+          background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+          box-shadow: 0 12px 25px rgba(56, 189, 248, 0.55);
         }
 
         .adm-logout-btn {
@@ -346,24 +346,24 @@ function AdminDashboard() {
 
         .adm-card {
           margin-top: 25px;
-          background: rgba(15, 23, 42, 0.55);
+          background: rgba(26, 23, 16, 0.65);
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
           padding: clamp(20px, 4vw, 30px);
           border-radius: 20px;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 15px rgba(234, 179, 8, 0.05);
+          border: 1px solid rgba(245, 158, 11, 0.25);
           box-sizing: border-box;
           width: 100%;
         }
 
         .adm-card-title {
           margin: 0 0 20px 0;
-          color: #38bdf8;
+          color: #fde047;
           font-size: clamp(18px, 4vw, 21px);
           font-weight: 700;
           letter-spacing: 0.5px;
-          text-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+          text-shadow: 0 0 12px rgba(253, 224, 71, 0.25);
           display: flex;
           align-items: center;
           gap: 8px;
@@ -378,7 +378,7 @@ function AdminDashboard() {
           display: block;
           font-size: 13px;
           font-weight: 600;
-          color: #94a3b8;
+          color: #fef08a;
           margin-bottom: 8px;
         }
 
@@ -386,19 +386,19 @@ function AdminDashboard() {
           width: 100%;
           padding: 12px 15px;
           box-sizing: border-box;
-          border: 1px solid rgba(255, 255, 255, 0.12);
+          border: 1px solid rgba(234, 179, 8, 0.25);
           border-radius: 10px;
           font-size: 14px;
           color: #ffffff;
           outline: none;
-          background: rgba(2, 6, 23, 0.6);
+          background: rgba(15, 23, 42, 0.7);
           transition: all 0.3s ease;
         }
 
         .adm-input:focus {
           border-color: #38bdf8;
-          box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
-          background: rgba(2, 6, 23, 0.8);
+          box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+          background: rgba(15, 23, 42, 0.9);
         }
 
         .adm-input option {
@@ -421,50 +421,50 @@ function AdminDashboard() {
         .adm-file-input {
           width: 100%;
           padding: 12px;
-          border: 1px dashed rgba(56, 189, 248, 0.4);
+          border: 1px dashed rgba(56, 189, 248, 0.5);
           border-radius: 10px;
           box-sizing: border-box;
           font-size: 13px;
-          background: rgba(2, 6, 23, 0.4);
+          background: rgba(15, 23, 42, 0.5);
           color: #cbd5e1;
           transition: all 0.3s ease;
         }
         
         .adm-file-input:hover {
           border-color: #38bdf8;
-          background: rgba(56, 189, 248, 0.05);
+          background: rgba(56, 189, 248, 0.1);
         }
 
         .adm-upload-btn {
           width: 100%;
           padding: 14px 20px;
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          border: 1px solid rgba(186, 230, 253, 0.4);
           border-radius: 12px;
           cursor: pointer;
           font-weight: 700;
-          background: linear-gradient(135deg, #059669, #0d9488);
+          background: linear-gradient(135deg, #0284c7, #0ea5e9);
           color: #ffffff;
           font-size: 15px;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 10px 25px rgba(13, 148, 136, 0.4);
+          box-shadow: 0 10px 25px rgba(14, 165, 233, 0.45);
         }
 
         .adm-upload-btn:hover {
           transform: translateY(-2px);
-          background: linear-gradient(135deg, #10b981, #14b8a6);
-          box-shadow: 0 15px 30px rgba(16, 185, 129, 0.5);
+          background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+          box-shadow: 0 15px 30px rgba(56, 189, 248, 0.6);
         }
 
         .adm-filter-bar {
           display: flex;
           gap: 12px;
-          background: rgba(2, 6, 23, 0.6);
+          background: rgba(15, 23, 42, 0.65);
           padding: 14px;
           border-radius: 12px;
           margin-bottom: 20px;
           flex-wrap: wrap;
           align-items: center;
-          border: 1px solid rgba(56, 189, 248, 0.15);
+          border: 1px solid rgba(234, 179, 8, 0.2);
         }
 
         .adm-mat-item {
@@ -472,17 +472,17 @@ function AdminDashboard() {
           justify-content: space-between;
           align-items: center;
           padding: 14px 18px;
-          background: rgba(255, 255, 255, 0.03);
+          background: rgba(254, 240, 138, 0.04);
           border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(234, 179, 8, 0.15);
           gap: 10px;
           flex-wrap: wrap;
           transition: all 0.3s ease;
         }
 
         .adm-mat-item:hover {
-          background: rgba(255, 255, 255, 0.07);
-          border-color: rgba(56, 189, 248, 0.3);
+          background: rgba(254, 240, 138, 0.08);
+          border-color: rgba(56, 189, 248, 0.4);
           transform: translateX(4px);
         }
 
@@ -510,7 +510,7 @@ function AdminDashboard() {
           width: 100%;
           border-radius: 12px;
           -webkit-overflow-scrolling: touch;
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(234, 179, 8, 0.2);
         }
 
         .adm-table {
@@ -572,7 +572,7 @@ function AdminDashboard() {
             <div className="adm-avatar">👑</div>
             <div>
               <h2 style={{ color: '#ffffff', margin: 0, fontSize: 'clamp(18px, 4vw, 22px)', fontWeight: '700' }}>Main Admin Control Panel</h2>
-              <p style={{ margin: '4px 0 0 0', color: '#38bdf8', fontSize: '13px', fontWeight: '500' }}>BCA Portal Management System</p>
+              <p style={{ margin: '4px 0 0 0', color: '#fde047', fontSize: '13px', fontWeight: '500' }}>BCA Portal Management System</p>
             </div>
           </div>
           <div className="adm-btn-group">
@@ -636,8 +636,8 @@ function AdminDashboard() {
             </div>
 
             {category === 'quiz' ? (
-              <div style={{ backgroundColor: 'rgba(6, 182, 212, 0.08)', padding: '18px', borderRadius: '14px', marginBottom: '18px', border: '1px solid rgba(6, 182, 212, 0.3)', boxShadow: 'inset 0 0 15px rgba(6, 182, 212, 0.05)' }}>
-                <h4 style={{ margin: '0 0 14px 0', color: '#38bdf8', fontSize: '15px' }}>❓ Add Quiz Question & Options</h4>
+              <div style={{ backgroundColor: 'rgba(234, 179, 8, 0.08)', padding: '18px', borderRadius: '14px', marginBottom: '18px', border: '1px solid rgba(234, 179, 8, 0.3)', boxShadow: 'inset 0 0 15px rgba(234, 179, 8, 0.05)' }}>
+                <h4 style={{ margin: '0 0 14px 0', color: '#fde047', fontSize: '15px' }}>❓ Add Quiz Question & Options</h4>
                 
                 <div className="adm-input-group">
                   <label className="adm-label">Question Text *</label>
@@ -664,7 +664,7 @@ function AdminDashboard() {
 
                 <div className="adm-input-group" style={{ marginBottom: 0 }}>
                   <label className="adm-label">Correct Option Key *</label>
-                  <select value={correctOption} onChange={(e) => setCorrectOption(e.target.value)} className="adm-input" style={{ color: '#4ade80', fontWeight: 'bold' }}>
+                  <select value={correctOption} onChange={(e) => setCorrectOption(e.target.value)} className="adm-input" style={{ color: '#38bdf8', fontWeight: 'bold' }}>
                     <option value="A">Option A</option>
                     <option value="B">Option B</option>
                     <option value="C">Option C</option>
@@ -683,12 +683,12 @@ function AdminDashboard() {
                     onChange={(e) => setDriveUrl(e.target.value)} 
                     className="adm-input" 
                   />
-                  <small style={{ color: '#38bdf8', fontSize: '11px', display: 'block', marginTop: '6px' }}>
+                  <small style={{ color: '#fde047', fontSize: '11px', display: 'block', marginTop: '6px' }}>
                     * लिंक खुद ब खुद <b>/preview</b> फॉर्मेट में बदल जाएगी।
                   </small>
                 </div>
 
-                <p style={{ textAlign: 'center', margin: '12px 0', fontWeight: 'bold', color: '#64748b', fontSize: '12px', letterSpacing: '1px' }}>— OR —</p>
+                <p style={{ textAlign: 'center', margin: '12px 0', fontWeight: 'bold', color: '#94a3b8', fontSize: '12px', letterSpacing: '1px' }}>— OR —</p>
 
                 <div className="adm-input-group">
                   <label className="adm-label">Select Local File (.pdf, .jpg, .png)</label>
@@ -712,7 +712,7 @@ function AdminDashboard() {
           <h3 className="adm-card-title">📂 Uploaded Documents & Content Management</h3>
           
           <div className="adm-filter-bar">
-            <span style={{ fontWeight: 'bold', color: '#38bdf8', fontSize: '13px', minWidth: '130px' }}>🔍 Live Filter List:</span>
+            <span style={{ fontWeight: 'bold', color: '#fde047', fontSize: '13px', minWidth: '130px' }}>🔍 Live Filter List:</span>
             
             <div style={{ flex: 1, minWidth: '140px' }}>
               <select value={filterCourse} onChange={(e) => setFilterCourse(e.target.value)} className="adm-input" style={{ padding: '8px 12px', fontSize: '13px' }}>
@@ -745,18 +745,18 @@ function AdminDashboard() {
                     <span style={{ fontWeight: 'bold', color: '#ffffff', fontSize: '14px' }}>
                       {mat.category === 'quiz' ? '❓' : mat.category === 'pyq' ? '📝' : '📄'} {mat.title}
                     </span>
-                    <div style={{ display: 'flex', gap: '12px', marginTop: '6px', fontSize: '12px', color: '#94a3b8', flexWrap: 'wrap' }}>
-                      <span><strong style={{ color: '#cbd5e1' }}>Category:</strong> <span style={{ color: '#38bdf8' }}>{mat.category ? mat.category.toUpperCase() : 'NOTES'}</span></span>
-                      <span><strong style={{ color: '#cbd5e1' }}>Course:</strong> {mat.course?.toUpperCase()}</span>
-                      <span><strong style={{ color: '#cbd5e1' }}>Semester:</strong> Sem-{mat.semester}</span>
-                      {mat.driveUrl && <span style={{ color: '#34d399', fontWeight: 'bold' }}>[Drive Linked]</span>}
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '6px', fontSize: '12px', color: '#cbd5e1', flexWrap: 'wrap' }}>
+                      <span><strong style={{ color: '#fef08a' }}>Category:</strong> <span style={{ color: '#38bdf8' }}>{mat.category ? mat.category.toUpperCase() : 'NOTES'}</span></span>
+                      <span><strong style={{ color: '#fef08a' }}>Course:</strong> {mat.course?.toUpperCase()}</span>
+                      <span><strong style={{ color: '#fef08a' }}>Semester:</strong> Sem-{mat.semester}</span>
+                      {mat.driveUrl && <span style={{ color: '#38bdf8', fontWeight: 'bold' }}>[Drive Linked]</span>}
                     </div>
                   </div>
                   <button onClick={() => handleDeleteMaterial(mat._id, mat.title)} className="adm-delete-btn">🗑️ Delete</button>
                 </div>
               ))
             ) : ( 
-              <p style={{ color: '#64748b', textAlign: 'center', margin: '20px 0', fontSize: '14px' }}>🔍 No documents found for this filter match.</p> 
+              <p style={{ color: '#cbd5e1', textAlign: 'center', margin: '20px 0', fontSize: '14px' }}>🔍 No documents found for this filter match.</p> 
             )}
           </div>
         </div>
@@ -767,7 +767,7 @@ function AdminDashboard() {
           <div className="adm-table-wrapper">
             <table className="adm-table">
               <thead>
-                <tr style={{ background: 'linear-gradient(135deg, #0284c7, #2563eb)', color: '#ffffff' }}>
+                <tr style={{ background: 'linear-gradient(135deg, #0284c7, #0ea5e9)', color: '#ffffff' }}>
                   <th className="adm-th">Name</th>
                   <th className="adm-th">Mobile</th>
                   <th className="adm-th">Login Time</th>
@@ -776,17 +776,17 @@ function AdminDashboard() {
               </thead>
               <tbody>
                 {logs.map((log, i) => (
-                  <tr key={log._id || i} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.06)', background: i % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.015)' }}>
+                  <tr key={log._id || i} style={{ borderBottom: '1px solid rgba(234, 179, 8, 0.15)', background: i % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.02)' }}>
                     <td className="adm-td" style={{ fontWeight: '600' }}>{log.userName}</td>
-                    <td className="adm-td" style={{ color: '#94a3b8' }}>{log.mobile}</td>
-                    <td className="adm-td" style={{ color: '#94a3b8' }}>{new Date(log.loginTime).toLocaleString()}</td>
+                    <td className="adm-td" style={{ color: '#cbd5e1' }}>{log.mobile}</td>
+                    <td className="adm-td" style={{ color: '#cbd5e1' }}>{new Date(log.loginTime).toLocaleString()}</td>
                     <td style={{ ...tdStyle, color: !log.logoutTime ? '#4ade80' : '#f87171', fontWeight: 'bold' }}>
                       {!log.logoutTime ? (
-                        <span style={{ background: 'rgba(74, 222, 128, 0.1)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(74, 222, 128, 0.3)' }}>
+                        <span style={{ background: 'rgba(74, 222, 128, 0.12)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(74, 222, 128, 0.35)' }}>
                           ● Online
                         </span>
                       ) : (
-                        <span style={{ background: 'rgba(248, 113, 113, 0.1)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(248, 113, 113, 0.3)' }}>
+                        <span style={{ background: 'rgba(248, 113, 113, 0.12)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(248, 113, 113, 0.35)' }}>
                           ○ Offline
                         </span>
                       )}
