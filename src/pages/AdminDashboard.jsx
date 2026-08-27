@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 
+const tdStyle = { padding: '14px', fontSize: '13px' };
+
 function AdminDashboard() {
   const navigate = useNavigate();
 
-  // 🟢 Storage se Credentials fetch karein
+  // Storage credentials fetch
   const isLoggedIn = 
     sessionStorage.getItem('isLoggedIn') === 'true' || 
     localStorage.getItem('isLoggedIn') === 'true';
@@ -21,12 +23,12 @@ function AdminDashboard() {
   const [logs, setLogs] = useState([]);
   const [uploadedMaterials, setUploadedMaterials] = useState([]);
 
-  // अपलोड फॉर्म के लिए स्टेट्स
+  // Upload Form States
   const [title, setTitle] = useState('');
   const [course, setCourse] = useState('bca');
   const [semester, setSemester] = useState('1');
   const [category, setCategory] = useState('notes'); // 'notes', 'pyq', 'quiz'
-  const [driveUrl, setDriveUrl] = useState(''); // Google Drive URL State
+  const [driveUrl, setDriveUrl] = useState('');
   const [file, setFile] = useState(null);
 
   // Quiz specific states
@@ -37,11 +39,11 @@ function AdminDashboard() {
   const [optionD, setOptionD] = useState('');
   const [correctOption, setCorrectOption] = useState('A');
 
-  // लाइव फ़िल्टर बार के लिए स्टेट्स
+  // Live Filter Bar States
   const [filterCourse, setFilterCourse] = useState('all');
   const [filterSemester, setFilterSemester] = useState('all');
 
-  // 🛡️ 1. Complete Role Guard Check
+  // Role Guard Check & Polling
   useEffect(() => {
     if (!isLoggedIn || !token) {
       navigate('/login', { replace: true });
@@ -60,7 +62,7 @@ function AdminDashboard() {
     return () => clearInterval(interval);
   }, [isLoggedIn, userRole, token, navigate]);
 
-  // Authorization Header के साथ Logs प्राप्त करें
+  // Fetch Live Logs
   const fetchLiveLogs = async () => {
     if (!token) return;
     try {
@@ -85,7 +87,7 @@ function AdminDashboard() {
     }
   };
 
-  // Authorization Header के साथ Materials प्राप्त करें
+  // Fetch Uploaded Materials
   const fetchUploadedMaterials = async () => {
     if (!token) return;
     try {
@@ -105,7 +107,7 @@ function AdminDashboard() {
     }
   };
 
-  // Delete API
+  // Delete Material Handler
   const handleDeleteMaterial = async (id, fileTitle) => {
     const confirmDelete = window.confirm(`🗑️ क्या आप सच में "${fileTitle}" को हमेशा के लिए डिलीट करना चाहते हैं?`);
     if (!confirmDelete) return;
@@ -152,7 +154,7 @@ function AdminDashboard() {
     }
   };
 
-  // File / Drive / Quiz Upload Handler
+  // Upload Handler
   const handleFileUpload = async (e) => {
     e.preventDefault();
 
@@ -209,6 +211,7 @@ function AdminDashboard() {
         setFile(null); 
         setQuizQuestion('');
         setOptionA(''); setOptionB(''); setOptionC(''); setOptionD('');
+        setCorrectOption('A');
         const fileInput = document.getElementById('fileInput');
         if (fileInput) fileInput.value = ''; 
         fetchUploadedMaterials(); 
@@ -233,7 +236,6 @@ function AdminDashboard() {
   return (
     <>
       <style>{`
-        /* Dynamic 3D Animated Background */
         body {
           margin: 0;
           padding: 0;
@@ -260,7 +262,6 @@ function AdminDashboard() {
           color: #f8fafc;
         }
 
-        /* Glassmorphic Header Card */
         .adm-header {
           display: flex;
           justify-content: space-between;
@@ -305,7 +306,6 @@ function AdminDashboard() {
           width: auto;
         }
 
-        /* 3D Modern Buttons */
         .adm-candidate-btn {
           padding: 12px 18px;
           background: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -344,7 +344,6 @@ function AdminDashboard() {
           box-shadow: 0 12px 25px rgba(239, 68, 68, 0.55);
         }
 
-        /* Glassmorphic Cards */
         .adm-card {
           margin-top: 25px;
           background: rgba(15, 23, 42, 0.55);
@@ -456,7 +455,6 @@ function AdminDashboard() {
           box-shadow: 0 15px 30px rgba(16, 185, 129, 0.5);
         }
 
-        /* Filter Section */
         .adm-filter-bar {
           display: flex;
           gap: 12px;
@@ -507,7 +505,6 @@ function AdminDashboard() {
           box-shadow: 0 8px 18px rgba(244, 63, 94, 0.5);
         }
 
-        /* Table Styling */
         .adm-table-wrapper {
           overflow-x: auto;
           width: 100%;
@@ -569,7 +566,7 @@ function AdminDashboard() {
       `}</style>
 
       <div className="adm-container">
-        {/* हेडर */}
+        {/* Header */}
         <div className="adm-header">
           <div className="adm-avatar-box">
             <div className="adm-avatar">👑</div>
@@ -588,12 +585,11 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* अपलोड फॉर्म बॉक्स */}
+        {/* Upload Form Box */}
         <div className="adm-card">
           <h3 className="adm-card-title">➕ Upload Study Material, PYQ & Quiz</h3>
           <form onSubmit={handleFileUpload}>
             
-            {/* Category Selection (Notes, PYQ, Quiz) */}
             <div className="adm-input-group">
               <label className="adm-label">Select Content Type *</label>
               <select value={category} onChange={(e) => setCategory(e.target.value)} className="adm-input" style={{ fontWeight: 'bold', color: '#38bdf8' }}>
@@ -639,7 +635,6 @@ function AdminDashboard() {
               </div>
             </div>
 
-            {/* IF CATEGORY IS QUIZ */}
             {category === 'quiz' ? (
               <div style={{ backgroundColor: 'rgba(6, 182, 212, 0.08)', padding: '18px', borderRadius: '14px', marginBottom: '18px', border: '1px solid rgba(6, 182, 212, 0.3)', boxShadow: 'inset 0 0 15px rgba(6, 182, 212, 0.05)' }}>
                 <h4 style={{ margin: '0 0 14px 0', color: '#38bdf8', fontSize: '15px' }}>❓ Add Quiz Question & Options</h4>
@@ -678,9 +673,7 @@ function AdminDashboard() {
                 </div>
               </div>
             ) : (
-              /* IF CATEGORY IS NOTES OR PYQ */
               <>
-                {/* Google Drive URL Option */}
                 <div className="adm-input-group">
                   <label className="adm-label">🔗 Google Drive Share Link (Iframe Embed Viewer)</label>
                   <input 
@@ -697,7 +690,6 @@ function AdminDashboard() {
 
                 <p style={{ textAlign: 'center', margin: '12px 0', fontWeight: 'bold', color: '#64748b', fontSize: '12px', letterSpacing: '1px' }}>— OR —</p>
 
-                {/* Local File Upload */}
                 <div className="adm-input-group">
                   <label className="adm-label">Select Local File (.pdf, .jpg, .png)</label>
                   <input 
@@ -715,7 +707,7 @@ function AdminDashboard() {
           </form>
         </div>
 
-        {/* अपलोडेड दस्तावेज प्रबंधन */}
+        {/* Uploaded Documents Management */}
         <div className="adm-card">
           <h3 className="adm-card-title">📂 Uploaded Documents & Content Management</h3>
           
@@ -769,7 +761,7 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* लाइव छात्र ट्रैकिंग लिस्ट */}
+        {/* Live Student Tracking List */}
         <div className="adm-card">
           <h3 className="adm-card-title">📊 Student Login Live Tracking List</h3>
           <div className="adm-table-wrapper">
@@ -809,7 +801,5 @@ function AdminDashboard() {
     </>
   );
 }
-
-const tdStyle = { padding: '14px', fontSize: '13px' };
 
 export default AdminDashboard;
