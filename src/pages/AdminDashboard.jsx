@@ -240,8 +240,8 @@ function AdminDashboard() {
           margin: 0;
           padding: 0;
           background-color: #0f172a;
-          background-image: radial-gradient(circle at 50% 0%, rgba(234, 179, 8, 0.08) 0%, transparent 60%);
           min-height: 100vh;
+          color: #ffffff;
         }
 
         .adm-container {
@@ -252,23 +252,21 @@ function AdminDashboard() {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           min-height: 100vh;
           box-sizing: border-box;
-          color: #f8fafc;
         }
 
-        /* Clean Box without permanent glowing shadows */
+        /* Clean Header without Blur */
         .adm-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: #1e293b;
-          border: 1px solid rgba(234, 179, 8, 0.25);
+          background-color: #1e293b;
+          border: 1px solid #334155;
           padding: clamp(16px, 3vw, 24px);
-          border-radius: 16px;
+          border-radius: 12px;
           flex-wrap: wrap;
           gap: 15px;
           width: 100%;
           box-sizing: border-box;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .adm-avatar-box {
@@ -280,13 +278,12 @@ function AdminDashboard() {
         .adm-avatar {
           width: 50px;
           height: 50px;
-          background: #0284c7;
+          background-color: #0284c7;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 22px;
-          border: 1px solid rgba(255, 255, 255, 0.2);
           flex-shrink: 0;
         }
 
@@ -297,64 +294,58 @@ function AdminDashboard() {
           width: auto;
         }
 
-        /* Pure Sky Blue Button (No Glow by default) */
+        /* Clear Solid Buttons - No initial glow, crisp text */
         .adm-candidate-btn {
           padding: 12px 18px;
-          background-color: #35fa09;
-          
-          border: 1px solid #0369a1;
-          border-radius: 10px;
+          background-color: #38bdf8;
+          color: #0f172a;
+          border: none;
+          border-radius: 8px;
           cursor: pointer;
-          font-weight: 600;
+          font-weight: 700;
           font-size: 13px;
-          transition: all 0.2s ease-in-out;
-          box-shadow: none;
+          transition: background-color 0.2s, box-shadow 0.2s;
         }
 
-        /* Glow ONLY when hovered */
         .adm-candidate-btn:hover {
           background-color: #0ea5e9;
-          border-color: #38bdf8;
-          box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+          color: #ffffff;
+          box-shadow: 0 0 12px #38bdf8;
         }
 
         .adm-logout-btn {
           padding: 12px 18px;
-          background-color: red;
-          
-          border: 1px solid #b91c1c;
-          border-radius: 10px;
-          cursor: pointer;
-          font-weight: 600;
-          font-size: 13px;
-          transition: all 0.2s ease-in-out;
-          box-shadow: none;
-        }
-
-        /* Red Glow ONLY when hovered */
-        .adm-logout-btn:hover {
           background-color: #ef4444;
-          box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+          color: #ffffff;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 700;
+          font-size: 13px;
+          transition: background-color 0.2s, box-shadow 0.2s;
         }
 
-        /* Clean Card Boxes */
+        .adm-logout-btn:hover {
+          background-color: #dc2626;
+          box-shadow: 0 0 12px #ef4444;
+        }
+
+        /* Clean Card Boxes - Crisp Solid Border */
         .adm-card {
           margin-top: 25px;
-          background: #1e293b;
+          background-color: #1e293b;
           padding: clamp(20px, 4vw, 30px);
-          border-radius: 16px;
-          border: 1px solid rgba(234, 179, 8, 0.2);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          border-radius: 12px;
+          border: 1px solid #334155;
           box-sizing: border-box;
           width: 100%;
         }
 
         .adm-card-title {
           margin: 0 0 20px 0;
-          color: #fde047;
+          color: #eab308;
           font-size: clamp(18px, 4vw, 21px);
           font-weight: 700;
-          letter-spacing: 0.5px;
           display: flex;
           align-items: center;
           gap: 8px;
@@ -373,25 +364,23 @@ function AdminDashboard() {
           margin-bottom: 8px;
         }
 
-        /* Flat & Clean Input Box (No initial glow) */
+        /* Crisp Solid Inputs */
         .adm-input {
           width: 100%;
           padding: 12px 15px;
           box-sizing: border-box;
-          border: 1px solid #334155;
+          border: 1px solid #475569;
           border-radius: 8px;
           font-size: 14px;
           color: #ffffff;
           outline: none;
-          background: #0f172a;
-          transition: all 0.2s ease-in-out;
-          box-shadow: none;
+          background-color: #0f172a;
+          transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        /* Glow ONLY on hover or focus */
-        .adm-input:hover, .adm-input:focus {
+        .adm-input:focus, .adm-input:hover {
           border-color: #38bdf8;
-          box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+          box-shadow: 0 0 8px #38bdf8;
         }
 
         .adm-input option {
@@ -414,52 +403,49 @@ function AdminDashboard() {
         .adm-file-input {
           width: 100%;
           padding: 12px;
-          border: 1px dashed #475569;
+          border: 1px dashed #64748b;
           border-radius: 8px;
           box-sizing: border-box;
           font-size: 13px;
-          background: #0f172a;
+          background-color: #0f172a;
           color: #cbd5e1;
-          transition: all 0.2s ease-in-out;
+          transition: border-color 0.2s, box-shadow 0.2s;
         }
         
         .adm-file-input:hover {
           border-color: #38bdf8;
-          box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+          box-shadow: 0 0 8px #38bdf8;
         }
 
-        /* Flat Sky-Blue Upload Button */
+        /* Clear Upload Button */
         .adm-upload-btn {
           width: 100%;
           padding: 14px 20px;
-          border: 1px solid #0369a1;
-          border-radius: 10px;
+          border: none;
+          border-radius: 8px;
           cursor: pointer;
           font-weight: 700;
-          background-color: #0ef11d;
-         
+          background-color: #0284c7;
+          color: #ffffff;
           font-size: 15px;
-          transition: all 0.2s ease-in-out;
-          box-shadow: none;
+          transition: background-color 0.2s, box-shadow 0.2s;
         }
 
-        /* Upload Button Glow ONLY when hovered */
         .adm-upload-btn:hover {
           background-color: #0ea5e9;
-          border-color: #38bdf8;
-          box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+          box-shadow: 0 0 12px #38bdf8;
         }
 
         .adm-filter-bar {
           display: flex;
           gap: 12px;
-          background: #0f172a;
+          background-color: #0f172a;
           padding: 14px;
-          border-radius: 10px;
+          border-radius: 8px;
           margin-bottom: 20px;
           flex-wrap: wrap;
           align-items: center;
-          border: 1px solid rgba(234, 179, 8, 0.15);
+          border: 1px solid #334155;
         }
 
         .adm-mat-item {
@@ -467,41 +453,40 @@ function AdminDashboard() {
           justify-content: space-between;
           align-items: center;
           padding: 14px 18px;
-          background: #0f172a;
-          border-radius: 10px;
+          background-color: #0f172a;
+          border-radius: 8px;
           border: 1px solid #334155;
           gap: 10px;
           flex-wrap: wrap;
-          transition: all 0.2s ease-in-out;
+          transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .adm-mat-item:hover {
           border-color: #38bdf8;
-          box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+          box-shadow: 0 0 8px #38bdf8;
         }
 
         .adm-delete-btn {
           padding: 8px 16px;
           background-color: #e11d48;
-         
-          border: 1px solid #be123c;
+          color: #ffffff;
+          border: none;
           border-radius: 6px;
           cursor: pointer;
-          font-weight: 600;
+          font-weight: 700;
           font-size: 12px;
-          transition: all 0.2s ease-in-out;
-          box-shadow: none;
+          transition: background-color 0.2s, box-shadow 0.2s;
         }
 
         .adm-delete-btn:hover {
           background-color: #f43f5e;
-          box-shadow: 0 0 12px rgba(244, 63, 94, 0.5);
+          box-shadow: 0 0 10px #f43f5e;
         }
 
         .adm-table-wrapper {
           overflow-x: auto;
           width: 100%;
-          border-radius: 10px;
+          border-radius: 8px;
           -webkit-overflow-scrolling: touch;
           border: 1px solid #334155;
         }
@@ -565,7 +550,7 @@ function AdminDashboard() {
             <div className="adm-avatar">👑</div>
             <div>
               <h2 style={{ color: '#ffffff', margin: 0, fontSize: 'clamp(18px, 4vw, 22px)', fontWeight: '700' }}>Main Admin Control Panel</h2>
-              <p style={{ margin: '4px 0 0 0', color: '#fde047', fontSize: '13px', fontWeight: '500' }}>BCA Portal Management System</p>
+              <p style={{ margin: '4px 0 0 0', color: '#eab308', fontSize: '13px', fontWeight: '500' }}>BCA Portal Management System</p>
             </div>
           </div>
           <div className="adm-btn-group">
@@ -629,8 +614,8 @@ function AdminDashboard() {
             </div>
 
             {category === 'quiz' ? (
-              <div style={{ backgroundColor: '#0f172a', padding: '18px', borderRadius: '12px', marginBottom: '18px', border: '1px solid rgba(234, 179, 8, 0.2)' }}>
-                <h4 style={{ margin: '0 0 14px 0', color: '#fde047', fontSize: '15px' }}>❓ Add Quiz Question & Options</h4>
+              <div style={{ backgroundColor: '#0f172a', padding: '18px', borderRadius: '8px', marginBottom: '18px', border: '1px solid #334155' }}>
+                <h4 style={{ margin: '0 0 14px 0', color: '#eab308', fontSize: '15px' }}>❓ Add Quiz Question & Options</h4>
                 
                 <div className="adm-input-group">
                   <label className="adm-label">Question Text *</label>
@@ -676,7 +661,7 @@ function AdminDashboard() {
                     onChange={(e) => setDriveUrl(e.target.value)} 
                     className="adm-input" 
                   />
-                  <small style={{ color: '#fde047', fontSize: '11px', display: 'block', marginTop: '6px' }}>
+                  <small style={{ color: '#eab308', fontSize: '11px', display: 'block', marginTop: '6px' }}>
                     * लिंक खुद ब खुद <b>/preview</b> फॉर्मेट में बदल जाएगी।
                   </small>
                 </div>
@@ -705,7 +690,7 @@ function AdminDashboard() {
           <h3 className="adm-card-title">📂 Uploaded Documents & Content Management</h3>
           
           <div className="adm-filter-bar">
-            <span style={{ fontWeight: 'bold', color: '#fde047', fontSize: '13px', minWidth: '130px' }}>🔍 Live Filter List:</span>
+            <span style={{ fontWeight: 'bold', color: '#eab308', fontSize: '13px', minWidth: '130px' }}>🔍 Live Filter List:</span>
             
             <div style={{ flex: 1, minWidth: '140px' }}>
               <select value={filterCourse} onChange={(e) => setFilterCourse(e.target.value)} className="adm-input" style={{ padding: '8px 12px', fontSize: '13px' }}>
@@ -775,11 +760,11 @@ function AdminDashboard() {
                     <td className="adm-td" style={{ color: '#cbd5e1' }}>{new Date(log.loginTime).toLocaleString()}</td>
                     <td style={{ ...tdStyle, color: !log.logoutTime ? '#4ade80' : '#f87171', fontWeight: 'bold' }}>
                       {!log.logoutTime ? (
-                        <span style={{ background: 'rgba(74, 222, 128, 0.12)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(74, 222, 128, 0.35)' }}>
+                        <span style={{ backgroundColor: '#166534', color: '#ffffff', padding: '4px 10px', borderRadius: '4px' }}>
                           ● Online
                         </span>
                       ) : (
-                        <span style={{ background: 'rgba(248, 113, 113, 0.12)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(248, 113, 113, 0.35)' }}>
+                        <span style={{ backgroundColor: '#991b1b', color: '#ffffff', padding: '4px 10px', borderRadius: '4px' }}>
                           ○ Offline
                         </span>
                       )}
