@@ -95,7 +95,6 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
         return;
       }
 
-      // Targeted cleanup instead of clearing all app storage
       const authKeys = ['token', 'isLoggedIn', 'userName', 'logId', 'userRole', 'userCourse'];
       authKeys.forEach(key => sessionStorage.removeItem(key));
 
@@ -209,7 +208,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     about: { title: "ℹ️ About Us", desc: "Since its inception, Bca Portal has been setting new records in the field of higher education." }
   };
 
-  // Styles
+  // Dynamic Styles (Updated for layout fix)
   const overlayStyle = { 
     position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', 
     backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
@@ -218,16 +217,16 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
 
   const modalStyle = { 
     background: 'rgba(255, 255, 255, 0.35)', backdropFilter: 'blur(25px) saturate(190%)', WebkitBackdropFilter: 'blur(25px) saturate(190%)',
-    padding: 'clamp(22px, 4vw, 32px)', borderRadius: '28px', width: '100%', maxWidth: '440px', maxHeight: '90vh',
+    padding: '45px clamp(22px, 4vw, 32px) clamp(22px, 4vw, 32px)', borderRadius: '28px', width: '100%', maxWidth: '440px', maxHeight: '90vh',
     overflowY: 'auto', border: '1.5px solid rgba(255, 255, 255, 0.75)',
     boxShadow: '0 20px 40px rgba(0, 0, 0, 0.12), inset 0 2px 4px rgba(255, 255, 255, 0.9), inset 0 -2px 4px rgba(0, 0, 0, 0.05)', 
     position: 'relative', boxSizing: 'border-box', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' 
   };
 
   const closeBtnStyle = { 
-    position: 'absolute', top: '18px', right: '18px', background: 'rgba(255, 255, 255, 0.4)', border: '1px solid rgba(255, 255, 255, 0.6)', 
-    width: '32px', height: '32px', borderRadius: '50%', fontSize: '16px', cursor: 'pointer', color: '#1d1d1f', outline: 'none',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.08)', transition: 'all 0.2s ease'
+    position: 'absolute', top: '14px', right: '14px', background: 'rgba(255, 255, 255, 0.5)', border: '1px solid rgba(255, 255, 255, 0.7)', 
+    width: '26px', height: '26px', borderRadius: '50%', fontSize: '13px', cursor: 'pointer', color: '#1d1d1f', outline: 'none',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.08)', transition: 'all 0.2s ease', zIndex: 10
   };
 
   const inputGroupStyle = { marginBottom: '16px', textAlign: 'left' };
