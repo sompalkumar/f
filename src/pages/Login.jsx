@@ -74,10 +74,19 @@ function Login() {
       if (response.ok) {
         const backendRole = data.role || data.userRole || 'candidate';
 
-        if (userRole === 'admin' && backendRole !== 'admin') {
-          alert('❌ You are not an admin!');
-          setLoading(false);
-          return;
+        // 🛑 Role Security Validation Logic Fix
+        if (userRole === 'admin') {
+          if (backendRole !== 'admin') {
+            alert('❌ Access Denied! Only authorized Admins can login from Admin Tab.');
+            setLoading(false);
+            return;
+          }
+        } else {
+          if (backendRole === 'admin') {
+            alert('⚠️ आप एक एडमिन हैं। कृपया Admin Tab चुनकर लॉगिन करें!');
+            setLoading(false);
+            return;
+          }
         }
 
         // 🟢 Session Saving Logic
