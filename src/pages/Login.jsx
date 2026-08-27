@@ -93,27 +93,23 @@ function Login() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '20px'
+      padding: '20px',
+      backgroundColor: '#0a192f'
     }}>
-      {/* 🧪 Main Glass Card Container */}
+      {/* 🟦 Clean Navy Blue Card Container */}
       <div style={{ 
         width: '100%',
         maxWidth: '420px', 
         padding: '40px 30px', 
-        background: 'rgba(255, 255, 255, 0.25)',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-        borderRadius: '28px',
-        border: '1.5px solid rgba(255, 255, 255, 0.7)',
-        boxShadow: `
-          0 20px 40px rgba(0, 0, 0, 0.08),
-          inset 0 3px 5px rgba(255, 255, 255, 0.9),
-          inset 0 -3px 5px rgba(0, 0, 0, 0.08)`,
+        background: '#0f2744',
+        borderRadius: '16px',
+        border: '1px solid #1e4976',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.4)',
         textAlign: 'center',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
       }}>
         
-        {/* 🎓 Cap Icon with Glass Glow */}
+        {/* 🎓 Cap Icon */}
         <div style={{ marginBottom: '20px' }}>
           <img 
             src="/login-cap.png" 
@@ -121,18 +117,16 @@ function Login() {
             style={{ 
               width: '75px', 
               height: 'auto',
-              margin: '0 auto',
-              filter: 'drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15))'
+              margin: '0 auto'
             }}
           />
         </div>
 
         <h2 style={{ 
-          fontSize: '26px', 
+          fontSize: '24px', 
           fontWeight: '700', 
           marginBottom: '25px', 
-          color: '#1d1d1f',
-          textShadow: '0 2px 4px rgba(255, 255, 255, 0.5)'
+          color: '#ffffff'
         }}>
           Portal Login
         </h2>
@@ -150,17 +144,14 @@ function Login() {
                 width: '100%', 
                 padding: '14px 18px', 
                 boxSizing: 'border-box',
-                border: '1.5px solid rgba(255, 255, 255, 0.8)',
-                borderRadius: '50px',
-                background: 'rgba(255, 255, 255, 0.4)',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                color: '#1d1d1f',
+                border: '1px solid #1e4976',
+                borderRadius: '8px',
+                background: '#0a192f',
+                color: '#bae6fd',
                 fontSize: '15px',
                 fontWeight: '500',
                 outline: 'none',
-                boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.06)',
-                transition: 'all 0.25s ease'
+                transition: 'border-color 0.2s ease'
               }} 
               required 
             />
@@ -178,45 +169,35 @@ function Login() {
                 width: '100%', 
                 padding: '14px 18px', 
                 boxSizing: 'border-box',
-                border: '1.5px solid rgba(255, 255, 255, 0.8)',
-                borderRadius: '50px',
-                background: 'rgba(255, 255, 255, 0.4)',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                color: '#1d1d1f',
+                border: '1px solid #1e4976',
+                borderRadius: '8px',
+                background: '#0a192f',
+                color: '#bae6fd',
                 fontSize: '15px',
                 fontWeight: '500',
                 outline: 'none',
-                boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.06)',
-                transition: 'all 0.25s ease'
+                transition: 'border-color 0.2s ease'
               }} 
               required 
             />
           </div>
 
-          {/* 🔘 3D Liquid Glossy Log In Button */}
+          {/* 🔘 Clean Solid Blue Button */}
           <button 
             type="submit" 
             disabled={loading}
             style={{ 
               width: '100%', 
               padding: '14px', 
-              background: loading 
-                ? 'rgba(255, 255, 255, 0.4)' 
-                : 'linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.3) 100%)', 
-              color: '#1d1d1f', 
-              border: '1.5px solid rgba(255, 255, 255, 0.9)', 
-              borderRadius: '50px', 
+              background: loading ? '#003366' : '#0077d6', 
+              color: '#ffffff', 
+              border: 'none', 
+              borderRadius: '8px', 
               cursor: loading ? 'not-allowed' : 'pointer',
               fontSize: '16px',
               fontWeight: '700',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              boxShadow: `
-                0 8px 20px rgba(0, 0, 0, 0.08),
-                inset 0 3px 5px rgba(255, 255, 255, 0.9),
-                inset 0 -3px 5px rgba(0, 0, 0, 0.1)`,
-              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+              boxShadow: '0 4px 12px rgba(0, 119, 214, 0.3)',
+              transition: 'background-color 0.2s ease'
             }}
           >
             {loading ? 'Logging in...' : 'Log In'}
@@ -229,7 +210,7 @@ function Login() {
             to="/forgot-password" 
             style={{ 
               fontSize: '14px', 
-              color: '#4a154b', 
+              color: '#38bdf8', 
               textDecoration: 'none', 
               fontWeight: '600' 
             }}
@@ -238,14 +219,14 @@ function Login() {
           </Link>
         </div>
 
-        <hr style={{ border: '0', borderTop: '1px solid rgba(255, 255, 255, 0.5)', margin: '22px 0' }} />
+        <hr style={{ border: '0', borderTop: '1px solid #1e4976', margin: '22px 0' }} />
 
         {/* 🔗 Register Link */}
-        <p style={{ fontSize: '14px', color: '#424245', fontWeight: '500' }}>
+        <p style={{ fontSize: '14px', color: '#94a3b8', fontWeight: '500' }}>
           Don't have an account?{' '}
           <Link 
             to="/" 
-            style={{ color: '#4a154b', textDecoration: 'none', fontWeight: '700' }}
+            style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: '700' }}
           >
             Register Now
           </Link>

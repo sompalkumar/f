@@ -1,228 +1,76 @@
-/* ==========================================
-   1. Universal Reset & Base Styles
-   ========================================== */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* 1. Reset, Fonts & Root Variables (Light Theme + Blue Accent) */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Colors - Light Theme (Yellow, Blue, Brown & Orange Mix) */
-  --text: #3d2716;
-  --text-h: #1d0f05;
-  --border: rgba(255, 248, 225, 0.7);
-  --code-bg: rgba(255, 243, 224, 0.45);
-  --accent: #ff9800;
-  --accent-bg: rgba(255, 152, 0, 0.18);
-  --accent-border: rgba(255, 255, 255, 0.9);
-  --social-bg: linear-gradient(135deg, rgba(255, 253, 231, 0.8) 0%, rgba(255, 224, 178, 0.35) 100%);
-  
-  /* Liquid Glass Shadow & Insets */
-  --shadow: 0 12px 32px 0 rgba(112, 66, 20, 0.18);
-  --glass-inset: inset 0 3px 5px rgba(255, 255, 255, 0.95), inset 0 -3px 5px rgba(230, 81, 0, 0.15);
-
-  /* Typography Fonts */
-  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --mono: ui-monospace, Consolas, 'Courier New', monospace;
-
-  /* Base Typography */
-  font: 18px/1.45 var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  /* Smooth Theme Switch Effect */
-  transition: background-color 0.3s ease, color 0.3s ease;
+  --text: #1a2b3c; --text-h: #0d1b2a;
+  --border: rgba(0, 119, 214, 0.25); --code-bg: rgba(224, 242, 254, 0.5);
+  --accent: #0077d6; --accent-bg: rgba(0, 119, 214, 0.15); --accent-border: rgba(255, 255, 255, 0.9);
+  --social-bg: linear-gradient(135deg, rgba(224, 242, 254, 0.85) 0%, rgba(186, 230, 253, 0.5) 100%);
+  --shadow: 0 12px 32px rgba(13, 27, 42, 0.15);
+  --glass-inset: inset 0 3px 5px rgba(255, 255, 255, 0.95), inset 0 -3px 5px rgba(0, 75, 135, 0.2);
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+  font: 18px/1.45 var(--sans); letter-spacing: 0.18px; color-scheme: light dark;
+  color: var(--text); -webkit-font-smoothing: antialiased;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* ==========================================
-   2. Colorful Mesh Gradient & Global Layout
-   ========================================== */
+/* 2. Global Layout & Mesh Gradient (Deep Blue Tone Background) */
 html, body {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  /* 🌈 Vibrant Glowing Background (Yellow, Blue, Brown & Orange Mixup) */
-  background: 
-    radial-gradient(at 15% 15%, #ffd54f 0px, transparent 55%), /* Bright Yellow */
-    radial-gradient(at 85% 15%, #29b6f6 0px, transparent 55%), /* Electric Blue */
-    radial-gradient(at 50% 50%, #ff7043 0px, transparent 55%), /* Vivid Orange */
-    radial-gradient(at 15% 85%, #0288d1 0px, transparent 55%), /* Deep Ocean Blue */
-    radial-gradient(at 85% 85%, #8d6e63 0px, transparent 55%); /* Warm Brown */
-  background-color: #fff3e0;
-  background-attachment: fixed;
-  color: var(--text);
+  width: 100%; overflow-x: hidden; color: var(--text); background-attachment: fixed;
+  background: radial-gradient(at 15% 15%, #005291 0, transparent 55%),
+              radial-gradient(at 85% 15%, #003366 0, transparent 55%),
+              radial-gradient(at 50% 50%, #002244 0, transparent 55%),
+              radial-gradient(at 15% 85%, #0d1b2a 0, transparent 55%),
+              radial-gradient(at 85% 85%, #001529 0, transparent 55%), #0a192f;
 }
 
-#root {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+#root { width: 100%; min-height: 100vh; display: flex; flex-direction: column; }
+img, iframe, embed, object { max-width: 100%; height: auto; }
+
+/* 3. Dark Theme Overrides (Combined for Minified Code) */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --theme-dark: 1; } }
+:root.dark, [data-theme="dark"], :root[style*="--theme-dark"] {
+  --text: #bae6fd; --text-h: #ffffff; --border: rgba(56, 189, 248, 0.3);
+  --code-bg: rgba(10, 25, 47, 0.6); --accent: #38bdf8; --accent-bg: rgba(56, 189, 248, 0.2);
+  --accent-border: rgba(186, 230, 253, 0.4);
+  --social-bg: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(3, 105, 161, 0.35) 100%);
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  --glass-inset: inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.7);
 }
 
-/* Responsive Images, Videos & PDF Viewers */
-img, iframe, embed, object {
-  max-width: 100%;
-  height: auto;
-}
+:root.dark #social .button-icon, [data-theme="dark"] #social .button-icon { filter: invert(1) brightness(2); }
 
-/* ==========================================
-   3. Glassmorphism Dark Mode Styles
-   ========================================== */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --text: #ffe0b2;
-    --text-h: #ffffff;
-    --border: rgba(255, 204, 128, 0.3);
-    --code-bg: rgba(30, 20, 10, 0.45);
-    --accent: #ffb74d;
-    --accent-bg: rgba(255, 183, 77, 0.25);
-    --accent-border: rgba(255, 224, 178, 0.5);
-    --social-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 152, 0, 0.1) 100%);
-    --shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.5);
-    --glass-inset: inset 0 2px 4px rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.6);
-  }
+/* 4. Typography, Code & Components */
+h1, h2, h3, h4 { font: 700 var(--sans); color: var(--text-h); text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); }
+h1 { font-size: clamp(2.25rem, 5vw, 3.5rem); letter-spacing: -1.68px; margin: 24px 0; }
+h2 { font-size: clamp(1.25rem, 3vw, 1.5rem); line-height: 1.2; letter-spacing: -0.24px; margin: 0 0 8px; }
+p { margin: 0; }
 
-  html, body {
-    background: 
-      radial-gradient(at 15% 15%, #4a3000 0px, transparent 55%),
-      radial-gradient(at 85% 15%, #0d3b66 0px, transparent 55%),
-      radial-gradient(at 50% 50%, #5c2406 0px, transparent 55%),
-      radial-gradient(at 15% 85%, #05203c 0px, transparent 55%),
-      radial-gradient(at 85% 85%, #2e1c14 0px, transparent 55%);
-    background-color: #120a05;
-    background-attachment: fixed;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-/* Manual Dark Mode Overrides */
-:root.dark,
-[data-theme="dark"] {
-  --text: #ffe0b2;
-  --text-h: #ffffff;
-  --border: rgba(255, 204, 128, 0.3);
-  --code-bg: rgba(30, 20, 10, 0.45);
-  --accent: #ffb74d;
-  --accent-bg: rgba(255, 183, 77, 0.25);
-  --accent-border: rgba(255, 224, 178, 0.5);
-  --social-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 152, 0, 0.1) 100%);
-  --shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.5);
-  --glass-inset: inset 0 2px 4px rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.6);
-}
-
-:root.dark html,
-:root.dark body,
-[data-theme="dark"] html,
-[data-theme="dark"] body {
-  background: 
-    radial-gradient(at 15% 15%, #4a3000 0px, transparent 55%),
-    radial-gradient(at 85% 15%, #0d3b66 0px, transparent 55%),
-    radial-gradient(at 50% 50%, #5c2406 0px, transparent 55%),
-    radial-gradient(at 15% 85%, #05203c 0px, transparent 55%),
-    radial-gradient(at 85% 85%, #2e1c14 0px, transparent 55%);
-  background-color: #120a05;
-  background-attachment: fixed;
-}
-
-:root.dark #social .button-icon,
-[data-theme="dark"] #social .button-icon {
-  filter: invert(1) brightness(2);
-}
-
-/* ==========================================
-   4. Typography & Headings
-   ========================================== */
-h1, h2, h3, h4 {
-  font-family: var(--heading);
-  font-weight: 700;
-  color: var(--text-h);
-  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.4);
-}
-
-h1 {
-  font-size: clamp(2.25rem, 5vw, 3.5rem);
-  letter-spacing: -1.68px;
-  margin: 24px 0;
-}
-
-h2 {
-  font-size: clamp(1.25rem, 3vw, 1.5rem);
-  line-height: 1.2;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-}
-
-p {
-  margin: 0;
-}
-
-/* ==========================================
-   5. Code & Liquid Glossy Counter Elements
-   ========================================== */
 code {
-  font-family: var(--mono);
-  font-size: 15px;
-  line-height: 1.35;
-  padding: 4px 10px;
-  background: var(--code-bg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  color: var(--text-h);
+  font: 15px/1.35 var(--mono); padding: 4px 10px; background: var(--code-bg);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border); border-radius: 8px; color: var(--text-h);
 }
 
-/* 🔘 Glossy Water-Drop Button Style for Counter */
-.counter {
-  font-family: var(--sans);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 22px;
-  border-radius: 50px;
-  font-weight: 600;
-  color: var(--text-h);
-  background: var(--social-bg);
-  backdrop-filter: blur(16px) saturate(200%);
-  -webkit-backdrop-filter: blur(16px) saturate(200%);
-  border: 1.5px solid var(--accent-border);
+/* 5. Blue Navbar & Standard Buttons */
+nav, .navbar, .counter, button, .btn {
+  background: var(--social-bg); color: var(--text-h); font-weight: 600;
+  border: 1.5px solid var(--accent-border); border-radius: 50px;
   box-shadow: var(--shadow), var(--glass-inset);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
+  backdrop-filter: blur(16px) saturate(200%); -webkit-backdrop-filter: blur(16px) saturate(200%);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
+}
+.counter { display: inline-flex; align-items: center; justify-content: center; padding: 10px 22px; }
+.counter:hover, button:hover, .btn:hover { transform: translateY(-2px) scale(1.02); }
+.counter:active, button:active, .btn:active { transform: translateY(1px) scale(0.98); }
+
+/* 6. Special Red Action Buttons (Logout & Close Only) */
+.btn-logout, .btn-close, [data-action="logout"], [data-action="close"] {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+  color: #ffffff !important; border-color: rgba(254, 226, 226, 0.6) !important;
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.4) !important;
 }
 
-.counter:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 15px 30px rgba(93, 64, 55, 0.22), inset 0 4px 6px rgba(255, 255, 255, 1), inset 0 -3px 5px rgba(230, 81, 0, 0.2);
-}
-
-.counter:active {
-  transform: translateY(1px) scale(0.98);
-}
-
-/* ==========================================
-   6. Responsive Screen Adjustments
-   ========================================== */
-@media (max-width: 1024px) {
-  :root {
-    font-size: 16px;
-  }
-
-  h1 {
-    margin: 16px 0;
-  }
-}
+/* 7. Responsive Rules */
+@media (max-width: 1024px) { :root { font-size: 16px; } h1 { margin: 16px 0; } }
