@@ -436,8 +436,8 @@ function AdminDashboard() {
           border-radius: 10px;
           cursor: pointer;
           font-weight: 700;
-          background-color: #0284c7;
-          color: #ffffff;
+          background-color: #0ef11d;
+         
           font-size: 15px;
           transition: all 0.2s ease-in-out;
           box-shadow: none;
@@ -483,7 +483,7 @@ function AdminDashboard() {
         .adm-delete-btn {
           padding: 8px 16px;
           background-color: #e11d48;
-          color: white;
+         
           border: 1px solid #be123c;
           border-radius: 6px;
           cursor: pointer;
