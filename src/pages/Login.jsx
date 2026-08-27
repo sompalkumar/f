@@ -7,6 +7,7 @@ import { API_BASE_URL } from '../config';
 function Login() {
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
+  const [userRole, setUserRole] = useState('candidate');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -16,12 +17,12 @@ function Login() {
       sessionStorage.getItem('isLoggedIn') === 'true' || 
       localStorage.getItem('isLoggedIn') === 'true';
 
-    const userRole = 
+    const storedRole = 
       sessionStorage.getItem('userRole') || 
       localStorage.getItem('userRole');
 
     if (isLoggedIn) {
-      if (userRole === 'admin') {
+      if (storedRole === 'admin') {
         navigate('/admin-dashboard', { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
@@ -71,19 +72,25 @@ function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        const userRole = data.role || data.userRole || 'student';
+        const backendRole = data.role || data.userRole || 'candidate';
+
+        if (userRole === 'admin' && backendRole !== 'admin') {
+          alert('❌ You are not an admin!');
+          setLoading(false);
+          return;
+        }
 
         // 🟢 Session Saving Logic
         sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('token', data.token);
-        sessionStorage.setItem('userRole', userRole);
+        sessionStorage.setItem('token', data.token || '');
+        sessionStorage.setItem('userRole', backendRole);
         if (data.name || data.userName) {
           sessionStorage.setItem('userName', data.name || data.userName);
         }
         if (data.logId) sessionStorage.setItem('logId', data.logId);
 
         // 🔀 Role-Based Dynamic Redirection
-        if (userRole === 'admin') {
+        if (backendRole === 'admin') {
           navigate('/admin-dashboard', { replace: true });
         } else {
           navigate('/dashboard', { replace: true });
@@ -97,6 +104,11 @@ function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Close button handler (Home page navigation)
+  const handleClose = () => {
+    navigate('/');
   };
 
   return (
@@ -116,11 +128,11 @@ function Login() {
           overflow: hidden;
         }
 
-        /* 📦 Futuristic Glassmorphic Card */
+        /* 📦 Futuristic Glassmorphic Card (Updated Padding & Width) */
         .login-card {
           width: 100%;
-          max-width: 420px;
-          padding: 36px 30px;
+          max-width: 460px;
+          padding: 42px 30px 30px 30px;
           background: rgba(30, 41, 59, 0.85);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
@@ -129,6 +141,7 @@ function Login() {
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
           text-align: center;
           box-sizing: border-box;
+          position: relative;
           animation: cardAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -137,14 +150,58 @@ function Login() {
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .login-title {
-          font-size: clamp(20px, 4vw, 24px);
-          font-weight: 800;
-          margin-bottom: 28px;
-          background: linear-gradient(135deg, #38bdf8, #10b981);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          letter-spacing: -0.5px;
+        /* ❌ Repositioned & Scaled Close Button */
+        .close-btn {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          font-size: 13px;
+          cursor: pointer;
+          color: #94a3b8;
+          outline: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+          z-index: 10;
+        }
+
+        .close-btn:hover {
+          background: rgba(255, 255, 255, 0.2);
+          color: #ffffff;
+        }
+
+        /* 🔄 Tab Switcher */
+        .tabs-container {
+          display: flex;
+          margin-bottom: 22px;
+          background: rgba(15, 23, 42, 0.6);
+          padding: 4px;
+          border-radius: 50px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-btn {
+          flex: 1;
+          text-align: center;
+          padding: 9px 0;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 700;
+          color: #94a3b8;
+          border-radius: 50px;
+          transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+          color: #ffffff;
+          background: linear-gradient(135deg, #06b6d4, #10b981);
+          box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
         }
 
         .login-field-group {
@@ -176,7 +233,6 @@ function Login() {
           color: #64748b;
         }
 
-        /* 🔘 Gradient Submit Button */
         .login-btn {
           width: 100%;
           padding: 13px;
@@ -246,10 +302,9 @@ function Login() {
           text-decoration: underline;
         }
 
-        /* 📱 Mobile Fine-tuning */
         @media screen and (max-width: 480px) {
           .login-card {
-            padding: 28px 20px;
+            padding: 36px 20px 24px 20px;
             border-radius: 20px;
           }
           .login-input {
@@ -261,9 +316,26 @@ function Login() {
 
       <div className="login-page-wrapper">
         <div className="login-card">
-          <h2 className="login-title">
-            🔑 Portal Login
-          </h2>
+          {/* ❌ Close Button */}
+          <button onClick={handleClose} className="close-btn" aria-label="Close">
+            ✕
+          </button>
+
+          {/* 🔄 Candidate / Admin Tabs */}
+          <div className="tabs-container">
+            <div 
+              className={`tab-btn ${userRole === 'candidate' ? 'active' : ''}`}
+              onClick={() => setUserRole('candidate')}
+            >
+              Candidate
+            </div>
+            <div 
+              className={`tab-btn ${userRole === 'admin' ? 'active' : ''}`}
+              onClick={() => setUserRole('admin')}
+            >
+              Admin
+            </div>
+          </div>
 
           <form onSubmit={handleLogin}>
             {/* 📱 Mobile Input Box */}
@@ -298,7 +370,7 @@ function Login() {
               disabled={loading}
               className="login-btn"
             >
-              {loading ? 'Logging in...' : 'Log In'}
+              {loading ? 'Logging in...' : (userRole === 'admin' ? 'Admin Log In' : 'Candidate Log In')}
             </button>
           </form>
 
