@@ -98,11 +98,11 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
           return;
         }
       } else {
-        if (userRole === 'admin') {
+        if (backendRole === 'admin') {
           alert('⚠️ आप एक एडमिन हैं। कृपया Admin Tab चुनकर लॉगिन करें!');
           refreshCaptcha();
           setCaptchaInput('');
-          setIsLoading(false);
+          setIsLoading(true);
           return;
         }
       }
