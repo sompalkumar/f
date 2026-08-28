@@ -52,7 +52,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     return strongPasswordRegex.test(pass);
   };
 
-  // 🔑 Fixed Login Handler
+  // 🔑 Fixed Login Handler with Robust Role Verification
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateMobile(mobile)) { 
@@ -84,12 +84,12 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
         return;
       }
 
-      // Backend से मिलने वाला असली रोल
-      const backendRole = (data.role || data.userRole || 'candidate').toLowerCase();
-      const selectedRole = userRole.toLowerCase();
+      // Safe Lowercase Matching for Backend Roles
+      const backendRole = String(data.role || data.userRole || 'candidate').toLowerCase().trim();
+      const currentSelectedRole = String(userRole).toLowerCase().trim();
 
-      // 🛡️ Strict Role Access Enforcement
-      if (selectedRole === 'admin') {
+      // 🛑 Strictly enforce Role Access Control
+      if (currentSelectedRole === 'admin') {
         if (backendRole !== 'admin') {
           alert('❌ Access Denied! केवल अधिकृत Admin ही Admin Tab से लॉगिन कर सकते हैं।');
           refreshCaptcha();
@@ -97,21 +97,21 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
           setIsLoading(false);
           return;
         }
-      } else { // Candidate Tab Selected
+      } else { // Candidate Tab active
         if (backendRole === 'admin') {
-          alert('⚠️ आप एक एडमिन हैं! कृपया ऊपर "Admin" टैब चुनकर लॉगिन करें।');
+          alert('⚠️ आप एक एडमिन हैं। कृपया ऊपर Admin Tab चुनकर लॉगिन करें!');
           refreshCaptcha();
           setCaptchaInput('');
-          setIsLoading(false); // Fix: पहले यह true पर अटक जाता था
+          setIsLoading(false); // Fixed: पहले यहां true सेट हो जाता था जिससे बटन लोडिंग में अटक जाता था
           return;
         }
       }
 
-      // Cleanup Old Session
+      // Cleanup prior auth tokens
       const authKeys = ['token', 'isLoggedIn', 'userName', 'logId', 'userRole', 'userCourse'];
       authKeys.forEach(key => sessionStorage.removeItem(key));
 
-      // Save Session Info
+      // Save valid credentials
       sessionStorage.setItem('token', data.token || '');
       sessionStorage.setItem('isLoggedIn', 'true');
       sessionStorage.setItem('userName', data.name || data.userName || '');
@@ -121,7 +121,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
 
       setShowPortalModal(false);
 
-      // 🚀 Explicit Route Redirection
+      // 🚀 Explicit Page Navigation
       if (backendRole === 'admin') {
         window.location.replace('/admin-dashboard');
       } else {
@@ -129,7 +129,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
       }
 
     } catch (error) {
-      console.error('Login Error:', error);
+      console.error(error);
       alert('सर्वर एरर! कृपया सर्वर कनेक्शन जांचें।');
     } finally {
       setIsLoading(false);
@@ -327,8 +327,29 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
                   display: 'flex', marginBottom: '22px', background: 'rgba(255, 255, 255, 0.3)', 
                   padding: '4px', borderRadius: '50px', border: '1px solid rgba(255, 255, 255, 0.6)'
                 }}>
-                  <div onClick={() => !isLoading && setUserRole('candidate')} style={tabStyle(userRole === 'candidate')}>Candidate</div>
-                  <div onClick={() => !isLoading && setUserRole('admin')} style={tabStyle(userRole === 'admin')}>Admin</div>
+                  {/* Explicit Tab Clicks with State Reset */}
+                  <div 
+                    onClick={() => {
+                      if (!isLoading) {
+                        setUserRole('candidate');
+                        refreshCaptcha();
+                      }
+                    }} 
+                    style={tabStyle(userRole === 'candidate')}
+                  >
+                    Candidate
+                  </div>
+                  <div 
+                    onClick={() => {
+                      if (!isLoading) {
+                        setUserRole('admin');
+                        refreshCaptcha();
+                      }
+                    }} 
+                    style={tabStyle(userRole === 'admin')}
+                  >
+                    Admin
+                  </div>
                 </div>
               )}
 

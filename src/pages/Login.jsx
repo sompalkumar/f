@@ -21,7 +21,7 @@ function Login() {
       localStorage.getItem('userRole');
 
     if (isLoggedIn) {
-      if (userRole === 'admin') {
+      if (userRole && userRole.toLowerCase() === 'admin') {
         navigate('/admin-dashboard', { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
@@ -57,7 +57,9 @@ function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        const userRole = data.role || data.userRole;
+        // 🔧 FIX: Case-insensitive check and clean normalization
+        const rawRole = data.role || data.userRole || '';
+        const userRole = String(rawRole).toLowerCase().trim();
 
         // 🔴 1. अगर यूज़र एडमिन नहीं है तो लॉगिन तुरंत ब्लॉक करें
         if (userRole !== 'admin') {
@@ -67,7 +69,7 @@ function Login() {
           sessionStorage.clear();
           localStorage.clear();
           setLoading(false);
-          return; // ⛔ यही रोक दें! न Storage में डेटा सेव होगा, न Redirect होगा।
+          return; // ⛔ यही रोक दें!
         }
 
         // 🟢 2. केवल Admin होने पर ही Session सेव करें और Admin Dashboard पर भेजें
