@@ -7,21 +7,23 @@ import { API_BASE_URL } from '../config';
 function Login() {
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false); // ⏳ Loading state
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // 🛡️ Guard Check: Agar user pehle se logged-in hai to uske role ke aadhar par sahi Dashboard par bhejo
+  // 🛡️ Guard Check: Agar user pehle se logged-in hai to role ke aadhar par sahi Dashboard par bhejo
   useEffect(() => {
     const isLoggedIn = 
       sessionStorage.getItem('isLoggedIn') === 'true' || 
       localStorage.getItem('isLoggedIn') === 'true';
 
-    const userRole = 
+    const rawRole = 
       sessionStorage.getItem('userRole') || 
-      localStorage.getItem('userRole');
+      localStorage.getItem('userRole') || '';
+
+    const userRole = String(rawRole).toLowerCase().trim();
 
     if (isLoggedIn) {
-      if (userRole && userRole.toLowerCase() === 'admin') {
+      if (userRole === 'admin') {
         navigate('/admin-dashboard', { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
@@ -45,41 +47,34 @@ function Login() {
   // 🔑 Login Handler
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true); // ⏳ Loading chalu karein
+    setLoading(true);
     
     try {
-      // 🟢 FIX: Changed Endpoint from /api/login to /api/admin-login to match backend admin routing
-      const response = await fetch(`${API_BASE_URL}/api/admin-login`, {
+      // General login endpoint for both candidates & admin
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile, password })
+        body: JSON.stringify({ mobile: mobile.trim(), password })
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // 🔧 FIX: Case-insensitive check and clean normalization
-        const rawRole = data.role || data.userRole || '';
+        const rawRole = data.role || data.userRole || 'candidate';
         const userRole = String(rawRole).toLowerCase().trim();
 
-        // 🔴 1. अगर यूज़र एडमिन नहीं है तो लॉगिन तुरंत ब्लॉक करें
-        if (userRole !== 'admin') {
-          alert('❌ You are not an admin! You cannot log in from here. (आप एडमिन नहीं हैं, आप यहाँ से लॉगिन नहीं कर सकते।)');
-          
-          // किसी भी पुराने डेटा को साफ़ करें और यहीं रोक दें
-          sessionStorage.clear();
-          localStorage.clear();
-          setLoading(false);
-          return; // ⛔ यही रोक दें!
-        }
-
-        // 🟢 2. केवल Admin होने पर ही Session सेव करें और Admin Dashboard पर भेजें
+        // Save session details securely
         sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('token', data.token);
+        sessionStorage.setItem('token', data.token || '');
         sessionStorage.setItem('userRole', userRole);
         if (data.logId) sessionStorage.setItem('logId', data.logId);
 
-        navigate('/admin-dashboard', { replace: true });
+        // Role-based navigation
+        if (userRole === 'admin') {
+          navigate('/admin-dashboard', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
       } else {
         alert(data.message || 'लॉगिन विफल रहा!');
       }
@@ -87,7 +82,7 @@ function Login() {
       console.error('Login Error:', error);
       alert('सर्वर से कनेक्शन नहीं हो पाया!');
     } finally {
-      setLoading(false); // ⏳ Loading बंद करें
+      setLoading(false);
     }
   };
 
