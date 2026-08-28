@@ -43,7 +43,7 @@ img, iframe, embed, object {
 h1, h2, h3, h4 { 
   font-weight: 700; 
   font-family: var(--sans); 
-  color: #ffffff; 
+  color: #2d1414; 
 }
 
 h1 { 
@@ -90,9 +90,9 @@ button, .btn, .counter {
   font-family: var(--sans);
   font-weight: bold;
   font-size: 14px;
-  color: #ffffff;
-  background-color: #8b2d29; /* Solid Brownish-Red Color */
-  border: 1px solid #712421;
+  color: #442508;
+  background-color: #ffb5b3; /* Solid Brownish-Red Color */
+  border: 1px solid #0e2d25;
   border-radius: 6px;
   padding: 10px 20px;
   cursor: pointer;
@@ -105,7 +105,7 @@ button, .btn, .counter {
 
 button:hover, .btn:hover, .counter:hover {
   background-color: #e5dfdf;
-  border-color: #581c19;
+  border-color: #090808;
 }
 
 .counter {
