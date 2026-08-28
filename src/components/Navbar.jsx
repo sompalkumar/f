@@ -54,10 +54,10 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
           justify-content: space-between;
           align-items: center;
           padding: 12px 24px;
-          background: rgba(15, 23, 42, 0.75);
+          background: rgba(232, 22, 204, 0.75);
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          border-bottom: 1px solid rgba(236, 172, 9, 0.92);
           width: 100%;
           box-sizing: border-box;
           position: sticky;
@@ -137,7 +137,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
 
         .logout-btn:hover {
           background: rgba(239, 68, 68, 0.9);
-          color: #ffffff;
+          color: #070303;
           box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
         }
 
