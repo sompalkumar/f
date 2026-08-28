@@ -90,9 +90,9 @@ button, .btn, .counter {
   font-family: var(--sans);
   font-weight: bold;
   font-size: 14px;
-  color: #442508;
-  background-color: #ffb5b3; /* Solid Brownish-Red Color */
-  border: 1px solid #0e2d25;
+  color: #0e0803; /*admin pannel kr button ka word ka rang */
+  background-color: #0ae432; /* admin pannel kr button ka rang */
+  
   border-radius: 6px;
   padding: 10px 20px;
   cursor: pointer;
