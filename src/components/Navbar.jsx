@@ -102,28 +102,28 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
         }
 
         .nav-btn:hover {
-          color: #f8fafc;
+          color: #c8ff51;
           background: rgba(255, 255, 255, 0.08);
         }
 
         .nav-btn.active {
           color: #06b6d4;
           background: rgba(6, 182, 212, 0.12);
-          border: 1px solid rgba(6, 182, 212, 0.25);
+         
         }
 
         .login-btn {
           padding: 9px 20px;
-          background: linear-gradient(135deg, #06b6d4, #10b981);
-          color: #ffffff;
-          border: none;
+          background: #06b6d4;
+          color: #f91313;
+        
           border-radius: 12px;
           cursor: pointer;
           font-weight: 700;
           font-size: 13.5px;
-          box-shadow: 0 4px 15px rgba(6, 182, 212, 0.25);
-          white-space: nowrap;
-          transition: all 0.3s ease;
+        
+         
+        
         }
 
         .login-btn:hover {
