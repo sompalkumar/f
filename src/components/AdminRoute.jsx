@@ -19,7 +19,7 @@ const AdminRoute = () => {
   // Case-insensitive & Clean Role format (e.g., "Admin" ya "ADMIN" -> "admin")
   const userRole = String(rawRole).toLowerCase().trim();
 
-  // Debugging log (F12 Console mein check karne ke liye)
+  // Debugging log (Browser Console F12 par check karne ke liye)
   console.log("AdminRoute Check -> isLoggedIn:", isLoggedIn, "| Token Present:", !!token, "| Role:", userRole);
 
   // 2. Auth Check: Login status aur valid token ka hona zaroori hai
@@ -34,7 +34,7 @@ const AdminRoute = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // 4. Access Granted
+  // 4. Access Granted: Admin dashboard components render honge
   return <Outlet />;
 };
 

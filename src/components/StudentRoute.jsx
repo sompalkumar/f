@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
 const StudentRoute = () => {
+  // 1. Session aur LocalStorage se values fetch karein
   const isLoggedIn = 
     sessionStorage.getItem('isLoggedIn') === 'true' || 
     localStorage.getItem('isLoggedIn') === 'true';
@@ -10,20 +11,31 @@ const StudentRoute = () => {
     sessionStorage.getItem('token') || 
     localStorage.getItem('token');
 
-  const userRole = 
+  const rawRole = 
     sessionStorage.getItem('userRole') || 
-    localStorage.getItem('userRole');
+    localStorage.getItem('userRole') || 
+    '';
 
-  // Agar login nahi hai, to Home/Register par redirect karo
-  if (!isLoggedIn || !token) {
+  // Role ko clean & lowercase format mein convert karein
+  const userRole = String(rawRole).toLowerCase().trim();
+
+  // Debugging log (F12 Console mein check karne ke liye)
+  console.log("StudentRoute Check -> isLoggedIn:", isLoggedIn, "| Token Present:", !!token, "| Role:", userRole);
+
+  // 2. Auth Check: Login status aur Token zaroori hai
+  if (!isLoggedIn || !token || token.trim() === '') {
+    console.warn("Access Denied: StudentRoute - User logged in nahi hai ya token missing hai.");
     return <Navigate to="/" replace />;
   }
 
-  // Student Route 'student' aur 'admin' dono ke liye valid hai (Taaki Admin student view dekh sake)
-  if (userRole === 'student' || userRole === 'admin') {
+  // 3. Allowed Roles Check (student, candidate, aur admin sabhi ke liye access valid hai)
+  const isAllowed = ['student', 'candidate', 'admin'].includes(userRole);
+
+  if (isAllowed) {
     return <Outlet />;
   }
 
+  console.warn(`Access Denied: StudentRoute - Invalid role "${userRole}"`);
   return <Navigate to="/" replace />;
 };
 
