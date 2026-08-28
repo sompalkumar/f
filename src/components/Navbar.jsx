@@ -55,16 +55,12 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
           align-items: center;
           padding: 12px 24px;
           background: rgba(232, 22, 204, 0.75);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border-bottom: 1px solid rgba(236, 172, 9, 0.92);
+      
           width: 100%;
           box-sizing: border-box;
           position: sticky;
           top: 0;
           z-index: 1000;
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-          box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
 
         .nav-logo {
