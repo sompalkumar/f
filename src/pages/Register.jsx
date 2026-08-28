@@ -93,7 +93,15 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
           setIsLoading(false);
           return;
         }
-      } 
+      } else { 
+        if (backendRole === 'admin') {
+           window.location.replace('/admin-dashboard');
+          refreshCaptcha();
+          setCaptchaInput('');
+          setIsLoading(false);
+          return;
+        }
+      }
 
       const authKeys = ['token', 'isLoggedIn', 'userName', 'logId', 'userRole', 'userCourse'];
       authKeys.forEach(key => sessionStorage.removeItem(key));
