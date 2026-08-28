@@ -8,9 +8,9 @@
 :root {
   --text: #ffffff;
   --text-h: #ffffff;
-  --border: #1e2d5a;
-  --container-bg: #fef08a; /* Solid Yellow Container */
-  --container-border: #fde047;
+  --border: #1242d3;
+  --container-bg: #f3d70a; /* Solid Yellow Container */
+  
   --sans: Arial, Helvetica, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
   font: 16px/1.45 var(--sans);
@@ -23,7 +23,7 @@ html, body {
   width: 100%;
   overflow-x: hidden;
   color: var(--text);
-  background-color: #0b1329; /* Clean Solid Dark Blue */
+  background-color: #000208; /* Clean Solid Dark Blue */
   font-family: var(--sans);
 }
 
@@ -69,14 +69,14 @@ code {
   background-color: var(--container-bg);
   border: 1px solid var(--container-border);
   border-radius: 4px;
-  color: #712421;
+  color: #370200;
   font-weight: bold;
 }
 
 /* 4. Full Rectangular Header & Navbar (Straight Corners) */
 nav, .navbar {
   width: 100%;
-  background-color: #131e3a;
+  background-color: #690057;
   border-bottom: 2px solid var(--border);
   border-radius: 0; /* Straight Rectangle */
   padding: 14px 24px;
@@ -104,7 +104,7 @@ button, .btn, .counter {
 }
 
 button:hover, .btn:hover, .counter:hover {
-  background-color: #712421;
+  background-color: #e5dfdf;
   border-color: #581c19;
 }
 
@@ -114,8 +114,8 @@ button:hover, .btn:hover, .counter:hover {
 
 /* 6. Action Red Buttons (Logout & Close) */
 .btn-logout, .btn-close, [data-action="logout"], [data-action="close"] {
-  background-color: #dc2626;
-  border: 1px solid #b91c1c;
+  background-color: #29f013;
+
   color: #ffffff;
 }
 
