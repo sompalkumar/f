@@ -108,7 +108,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
 
         .nav-btn.active {
           color: #06b6d4;
-          background: rgba(6, 182, 212, 0.12);
+          background: rgba(51, 6, 212, 0.94);
          
         }
 
@@ -116,20 +116,11 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
           padding: 9px 20px;
           background: #06b6d4;
           color: #f91313;
-        
           border-radius: 12px;
           cursor: pointer;
           font-weight: 700;
           font-size: 13.5px;
         
-         
-        
-        }
-
-        .login-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
-          background: linear-gradient(135deg, #0891b2, #059669);
         }
 
         .action-btn {
