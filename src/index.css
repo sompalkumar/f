@@ -43,7 +43,7 @@ img, iframe, embed, object {
 h1, h2, h3, h4 { 
   font-weight: 700; 
   font-family: var(--sans); 
-  color: #e83f9f; 
+  color: #e83f9f; /* upload material,docoment,live tracing*/
 }
 
 h1 { 
@@ -76,8 +76,6 @@ code {
 /* 4. Full Rectangular Header & Navbar (Straight Corners) */
 nav, .navbar {
   width: 100%;
-  background-color: #690057;
-  border-bottom: 2px solid var(--border);
   border-radius: 0; /* Straight Rectangle */
   padding: 14px 24px;
   display: flex;
@@ -103,20 +101,9 @@ button, .btn, .counter {
   outline: none;
 }
 
-button:hover, .btn:hover, .counter:hover {
-
-  border-color: #090808;
-}
 
 .counter {
   padding: 10px 22px;
-}
-
-/* 6. Action Red Buttons (Logout & Close) */
-.btn-logout, .btn-close, [data-action="logout"], [data-action="close"] {
-  background-color: #258398;
-
-  color: #ffffff;
 }
 
 
