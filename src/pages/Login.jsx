@@ -1,232 +1,165 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { API_BASE_URL } from '../config';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-function Login() {
+// Backend URL ko adjust karein agar zaroorat ho (e.g., process.env.REACT_APP_API_URL || 'http://localhost:5000')
+const API_BASE_URL = 'https://bcaeasylearn.onrender.com'; // Apne actual backend Render URL se replace karein agar alag hai
+
+const Login = () => {
   const [activeTab, setActiveTab] = useState('candidate'); // 'candidate' ya 'admin'
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [captchaText, setCaptchaText] = useState('EZguY'); // Aapka captcha logic
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
   const navigate = useNavigate();
 
-  // Guard Check: Session existing user redirect
-  useEffect(() => {
-    const isLoggedIn = 
-      sessionStorage.getItem('isLoggedIn') === 'true' || 
-      localStorage.getItem('isLoggedIn') === 'true';
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setErrorMsg('');
+  };
 
-    const rawRole = 
-      sessionStorage.getItem('userRole') || 
-      localStorage.getItem('userRole') || '';
-
-    const userRole = String(rawRole).toLowerCase().trim();
-
-    if (isLoggedIn) {
-      if (userRole === 'admin') {
-        navigate('/admin-dashboard', { replace: true });
-      } else {
-        navigate('/dashboard', { replace: true });
-      }
-    }
-  }, [navigate]);
-
-  // Login Submit Handler
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
+
+    if (!mobile || !password) {
+      alert('Kripya Mobile number aur Password bharein.');
+      return;
+    }
+
+    // Captcha validation check (Optional/As per your code)
+    if (captchaInput.trim() !== captchaText.trim()) {
+      alert('Invalid Captcha! Kripya sahi captcha darj karein.');
+      return;
+    }
+
     setLoading(true);
 
-    // Tab ke according API Endpoint set karein
+    // 🟢 BUG FIX HERE: Active tab ke base par sahi API Endpoint select karna
     const endpoint = activeTab === 'admin' 
       ? `${API_BASE_URL}/api/admin-login` 
       : `${API_BASE_URL}/api/login`;
 
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          mobile: mobile.trim(), 
-          password,
-          loginType: activeTab // Tab state backend ko bhejein
-        })
+      const response = await axios.post(endpoint, {
+        mobile: mobile.trim(),
+        password: password.trim()
       });
 
-      const data = await response.json();
+      if (response.status === 200) {
+        const data = response.data;
 
-      if (response.ok) {
-        const rawRole = data.role || data.userRole || (activeTab === 'admin' ? 'admin' : 'candidate');
-        const userRole = String(rawRole).toLowerCase().trim();
+        // Session & LocalStorage storage clear & update
+        localStorage.clear();
+        sessionStorage.clear();
 
-        // Save Auth Credentials
-        sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('token', data.token || '');
-        sessionStorage.setItem('userRole', userRole);
-        if (data.logId) sessionStorage.setItem('logId', data.logId);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userRole', data.role);
+        localStorage.setItem('userName', data.name);
+        if (data.logId) localStorage.setItem('logId', data.logId);
+        if (data.course) localStorage.setItem('userCourse', data.course);
 
-        if (userRole === 'admin') {
-          navigate('/admin-dashboard', { replace: true });
+        // Role ke basis par redirection
+        if (data.role === 'admin') {
+          navigate('/admin-dashboard'); // Apne Admin Dashboard route ke anusar badlein
         } else {
-          navigate('/dashboard', { replace: true });
+          navigate('/student-dashboard'); // Apne Student Dashboard route ke anusar badlein
         }
-      } else {
-        alert(data.message || 'लॉगिन विफल रहा!');
       }
-    } catch (error) {
-      console.error('Login Error:', error);
-      alert('सर्वर से कनेक्शन नहीं हो पाया!');
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Login failed! Server error.';
+      alert(msg);
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ 
-      maxWidth: '450px', 
-      margin: '40px auto', 
-      padding: '30px 25px', 
-      border: '1px solid #ddd', 
-      borderRadius: '15px',
-      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.15)',
-      textAlign: 'center',
-      fontFamily: 'Arial, sans-serif',
-      backgroundColor: '#ffffff'
-    }}>
-      
-      {/* 🎓 Icon Header */}
-      <div style={{ marginBottom: '15px' }}>
-        <img src="/login-cap.png" alt="Cap" style={{ width: '60px', height: 'auto' }} />
-      </div>
-
-      <h2 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '20px', color: '#333' }}>
-        Portal Login
-      </h2>
-
-      {/* 🔀 Candidate / Admin Toggle Tabs */}
-      <div style={{
-        display: 'flex',
-        backgroundColor: '#f1f3f5',
-        borderRadius: '10px',
-        padding: '4px',
-        marginBottom: '20px'
-      }}>
-        <button
-          type="button"
-          onClick={() => setActiveTab('candidate')}
-          style={{
-            flex: 1,
-            padding: '10px',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            fontSize: '14px',
-            backgroundColor: activeTab === 'candidate' ? '#ffffff' : 'transparent',
-            color: activeTab === 'candidate' ? '#4CAF50' : '#666',
-            boxShadow: activeTab === 'candidate' ? '0 2px 5px rgba(0,0,0,0.1)' : 'none',
-            transition: 'all 0.2s'
-          }}
-        >
-          Candidate
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('admin')}
-          style={{
-            flex: 1,
-            padding: '10px',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            fontSize: '14px',
-            backgroundColor: activeTab === 'admin' ? '#ffffff' : 'transparent',
-            color: activeTab === 'admin' ? '#4CAF50' : '#666',
-            boxShadow: activeTab === 'admin' ? '0 2px 5px rgba(0,0,0,0.1)' : 'none',
-            transition: 'all 0.2s'
-          }}
-        >
-          Admin
-        </button>
-      </div>
-
-      <form onSubmit={handleLogin}>
-        <div style={{ marginBottom: '15px' }}>
-          <input 
-            type="tel" 
-            placeholder="Mobile Number" 
-            value={mobile} 
-            onChange={(e) => setMobile(e.target.value)} 
-            style={{ 
-              width: '100%', 
-              padding: '12px 15px', 
-              boxSizing: 'border-box',
-              border: '1px solid #ccc',
-              borderRadius: '8px',
-              backgroundColor: '#f9f9f9',
-              color: '#333',
-              fontSize: '15px',
-              outline: 'none'
-            }} 
-            required 
-          />
+    <div className="login-container">
+      <div className="login-card">
+        {/* Tab Selection Buttons */}
+        <div className="tab-header" style={{ display: 'flex', marginBottom: '15px' }}>
+          <button
+            type="button"
+            className={`tab-btn ${activeTab === 'candidate' ? 'active' : ''}`}
+            onClick={() => handleTabChange('candidate')}
+            style={{
+              flex: 1,
+              padding: '10px',
+              backgroundColor: activeTab === 'candidate' ? '#4CAF50' : '#e0e0e0',
+              color: activeTab === 'candidate' ? '#fff' : '#000',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            Candidate
+          </button>
+          <button
+            type="button"
+            className={`tab-btn ${activeTab === 'admin' ? 'active' : ''}`}
+            onClick={() => handleTabChange('admin')}
+            style={{
+              flex: 1,
+              padding: '10px',
+              backgroundColor: activeTab === 'admin' ? '#4CAF50' : '#e0e0e0',
+              color: activeTab === 'admin' ? '#fff' : '#000',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            Admin
+          </button>
         </div>
 
-        <div style={{ marginBottom: '20px' }}>
-          <input 
-            type="password" 
-            placeholder="Password" 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
-            style={{ 
-              width: '100%', 
-              padding: '12px 15px', 
-              boxSizing: 'border-box',
-              border: '1px solid #ccc',
-              borderRadius: '8px',
-              backgroundColor: '#f9f9f9',
-              color: '#333',
-              fontSize: '15px',
-              outline: 'none'
-            }} 
-            required 
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          {errorMsg && <p style={{ color: 'red', textAlign: 'center' }}>{errorMsg}</p>}
 
-        <button 
-          type="submit" 
-          disabled={loading}
-          style={{ 
-            width: '100%', 
-            padding: '12px', 
-            backgroundColor: loading ? '#a5d6a7' : '#4CAF50', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '8px', 
-            cursor: loading ? 'not-allowed' : 'pointer',
-            fontSize: '16px',
-            fontWeight: 'bold'
-          }}
-        >
-          {loading ? 'Logging in...' : `Log In as ${activeTab === 'admin' ? 'Admin' : 'Candidate'}`}
-        </button>
-      </form>
+          <div className="form-group">
+            <label>Mobile Number / Username *</label>
+            <input
+              type="text"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+              placeholder="Enter mobile number"
+              required
+            />
+          </div>
 
-      <div style={{ marginTop: '20px' }}>
-        <Link to="/forgot-password" style={{ fontSize: '14px', color: '#4CAF50', textDecoration: 'none', fontWeight: 'bold' }}>
-          Forgot Password?
-        </Link>
+          <div className="form-group">
+            <label>Password *</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
+              required
+            />
+          </div>
+
+          {/* Captcha Box */}
+          <div className="captcha-box" style={{ margin: '10px 0' }}>
+            <span style={{ fontWeight: 'bold', fontSize: '18px', letterSpacing: '2px' }}>{captchaText}</span>
+            <input
+              type="text"
+              placeholder="Enter Captcha"
+              value={captchaInput}
+              onChange={(e) => setCaptchaInput(e.target.value)}
+              required
+            />
+          </div>
+
+          <button type="submit" disabled={loading} style={{ width: '100%', padding: '10px' }}>
+            {loading ? 'Processing...' : `Login as ${activeTab.toUpperCase()}`}
+          </button>
+        </form>
       </div>
-
-      <hr style={{ border: '0', borderTop: '1px solid #eee', margin: '20px 0' }} />
-
-      <p style={{ fontSize: '14px', color: '#666' }}>
-        Don't have an account?{' '}
-        <Link to="/" style={{ color: '#4CAF50', textDecoration: 'none', fontWeight: 'bold' }}>
-          Register Now
-        </Link>
-      </p>
     </div>
   );
-}
+};
 
 export default Login;
