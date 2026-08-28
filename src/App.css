@@ -19,9 +19,9 @@ html, body {
   width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  color: #ffffff;
+  color: #8e890e;
   font-family: Arial, Helvetica, sans-serif;
-  background-color: #0b1329; /* Clean Solid Background */
+  background-color: #0b1829; /* Clean Solid Background */
 }
 
 #root {
@@ -40,8 +40,8 @@ img, iframe, svg {
 /* 3. Rectangular Header & Navbar (Straight Edge Corners) */
 nav, .navbar {
   width: 100%;
-  background-color: #131e3a;
-  border-bottom: 2px solid #1e2d5a;
+  background-color: #e3e316;
+  
   border-radius: 0; /* Fully Rectangular Shape */
   padding: 14px 24px;
   display: flex;
@@ -55,8 +55,8 @@ button, .btn, .counter, #next-steps ul a {
   font-weight: bold;
   font-size: 14px;
   color: #ffffff;
-  background-color: #8b2d29; /* Solid Brownish-Red Button (Matching Reference) */
-  border: 1px solid #712421;
+  background-color: #060000; /* Solid Brownish-Red Button (Matching Reference) */
+
   border-radius: 6px;
   padding: 10px 20px;
   cursor: pointer;
@@ -67,10 +67,6 @@ button, .btn, .counter, #next-steps ul a {
   outline: none;
 }
 
-button:hover, .btn:hover, .counter:hover, #next-steps ul a:hover {
-  background-color: #712421;
-  border-color: #581c19;
-}
 
 .counter {
   font-size: 15px;
@@ -85,13 +81,8 @@ button:hover, .btn:hover, .counter:hover, #next-steps ul a:hover {
 
 /* Special Red Buttons (Logout / Action) */
 .btn-logout, .btn-close, [data-action="logout"], [data-action="close"] {
-  background-color: #dc2626;
-  border: 1px solid #b91c1c;
+  background-color: #ec0303;
   color: #ffffff;
-}
-
-.btn-logout:hover, .btn-close:hover, [data-action="logout"]:hover, [data-action="close"]:hover {
-  background-color: #b91c1c;
 }
 
 /* 5. Clean Solid Yellow Containers & Layouts */
@@ -111,7 +102,7 @@ button:hover, .btn:hover, .counter:hover, #next-steps ul a:hover {
   width: 100%;
   max-width: 1000px;
   background-color: var(--container-bg); /* Solid Yellow */
-  color: #712421; /* Solid Dark Text */
+  color: #d3cdcd; /* Solid Dark Text */
   border-radius: 8px;
   border: 2px solid var(--container-border);
   overflow: hidden;

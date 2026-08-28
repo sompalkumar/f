@@ -8,8 +8,8 @@
 :root {
   --text: #ffffff;
   --text-h: #ffffff;
-  --border: #1242d3;
-  --container-bg: #f3d70a; /* Solid Yellow Container */
+ 
+  --container-bg: #080805; /* Solid Yellow Container */
   
   --sans: Arial, Helvetica, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
