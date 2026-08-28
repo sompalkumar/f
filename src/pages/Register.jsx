@@ -2,10 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { API_BASE_URL } from '../config'; 
 
 function Register({ activeTab, showPortalModal, setShowPortalModal }) {
-  const [userRole, setUserRole] = useState('candidate');
+  const [userRole, setUserRole] = useState('candidate'); // 'candidate' or 'admin'
   const [modalView, setModalView] = useState('login'); 
   const [isLoading, setIsLoading] = useState(false);
-
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -53,7 +52,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     return strongPasswordRegex.test(pass);
   };
 
-  // 🔑 Login Handler
+  // 🔑 Fixed Login Handler
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateMobile(mobile)) { 
@@ -69,8 +68,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/login`, 
-        {
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mobile, password })
@@ -86,31 +84,34 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
         return;
       }
 
-      const backendRole = data.role || data.userRole || 'candidate';
+      // Backend से मिलने वाला असली रोल
+      const backendRole = (data.role || data.userRole || 'candidate').toLowerCase();
+      const selectedRole = userRole.toLowerCase();
 
-      // 🛑 Strictly enforce Role Access Control
-      if (userRole === 'admin') {
+      // 🛡️ Strict Role Access Enforcement
+      if (selectedRole === 'admin') {
         if (backendRole !== 'admin') {
-          alert('❌ Access Denied! Only authorized Admins can login from Admin Tab.');
+          alert('❌ Access Denied! केवल अधिकृत Admin ही Admin Tab से लॉगिन कर सकते हैं।');
           refreshCaptcha();
           setCaptchaInput('');
           setIsLoading(false);
           return;
         }
-      } else {
+      } else { // Candidate Tab Selected
         if (backendRole === 'admin') {
-          alert('⚠️ आप एक एडमिन हैं। कृपया Admin Tab चुनकर लॉगिन करें!');
+          alert('⚠️ आप एक एडमिन हैं! कृपया ऊपर "Admin" टैब चुनकर लॉगिन करें।');
           refreshCaptcha();
           setCaptchaInput('');
-          setIsLoading(true);
+          setIsLoading(false); // Fix: पहले यह true पर अटक जाता था
           return;
         }
       }
 
-      // Targeted cleanup instead of clearing all app storage
+      // Cleanup Old Session
       const authKeys = ['token', 'isLoggedIn', 'userName', 'logId', 'userRole', 'userCourse'];
       authKeys.forEach(key => sessionStorage.removeItem(key));
 
+      // Save Session Info
       sessionStorage.setItem('token', data.token || '');
       sessionStorage.setItem('isLoggedIn', 'true');
       sessionStorage.setItem('userName', data.name || data.userName || '');
@@ -120,10 +121,15 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
 
       setShowPortalModal(false);
 
-      window.location.replace(backendRole === 'admin' ? '/admin-dashboard' : '/dashboard');
+      // 🚀 Explicit Route Redirection
+      if (backendRole === 'admin') {
+        window.location.replace('/admin-dashboard');
+      } else {
+        window.location.replace('/dashboard');
+      }
 
     } catch (error) {
-      console.error(error);
+      console.error('Login Error:', error);
       alert('सर्वर एरर! कृपया सर्वर कनेक्शन जांचें।');
     } finally {
       setIsLoading(false);
