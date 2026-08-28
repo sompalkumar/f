@@ -93,15 +93,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
           setIsLoading(false);
           return;
         }
-      } else { 
-        if (backendRole === 'admin') {
-          alert('⚠️ आप एक एडमिन हैं। कृपया ऊपर Admin Tab चुनकर लॉगिन करें!');
-          refreshCaptcha();
-          setCaptchaInput('');
-          setIsLoading(false);
-          return;
-        }
-      }
+      } 
 
       const authKeys = ['token', 'isLoggedIn', 'userName', 'logId', 'userRole', 'userCourse'];
       authKeys.forEach(key => sessionStorage.removeItem(key));
