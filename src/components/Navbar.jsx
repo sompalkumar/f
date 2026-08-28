@@ -72,7 +72,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
           font-size: 20px;
           cursor: pointer;
           font-weight: 800;
-          background: linear-gradient(135deg, #06b6d4, #10b981);
+          background: #06b6d4;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           white-space: nowrap;
@@ -80,10 +80,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
           transition: transform 0.2s ease;
         }
 
-        .nav-logo:hover {
-          transform: scale(1.03);
-        }
-
+       
         .nav-links-container {
           display: flex;
           gap: 6px;
@@ -92,7 +89,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
 
         .nav-btn {
           padding: 8px 16px;
-          color: #94a3b8;
+          color: #1cfa5e;
           border: none;
           border-radius: 12px;
           cursor: pointer;
