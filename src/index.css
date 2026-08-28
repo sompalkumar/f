@@ -104,7 +104,7 @@ button, .btn, .counter {
 }
 
 button:hover, .btn:hover, .counter:hover {
-  background-color: #e5dfdf;
+
   border-color: #090808;
 }
 
@@ -114,13 +114,13 @@ button:hover, .btn:hover, .counter:hover {
 
 /* 6. Action Red Buttons (Logout & Close) */
 .btn-logout, .btn-close, [data-action="logout"], [data-action="close"] {
-  background-color: #29f013;
+  background-color: #258398;
 
   color: #ffffff;
 }
 
 .btn-logout:hover, .btn-close:hover, [data-action="logout"]:hover, [data-action="close"]:hover {
-  background-color: #b91c1c;
+  background-color: #361cb9;
 }
 
 /* 7. Responsive Rules */
