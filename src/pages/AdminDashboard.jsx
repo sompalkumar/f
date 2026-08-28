@@ -5,55 +5,55 @@ import { API_BASE_URL } from '../config';
 function AdminDashboard() {
   const navigate = useNavigate();
 
-  // 🟢 Storage se Credentials fetch karein (Robust Null Checks & Lowercase Sanitization)
+  // 🟢 Storage se Credentials fetch karein
   const isLoggedIn = 
     sessionStorage.getItem('isLoggedIn') === 'true' || 
     localStorage.getItem('isLoggedIn') === 'true';
 
-  const rawRole = 
+  const userRole = 
     sessionStorage.getItem('userRole') || 
-    localStorage.getItem('userRole') || 
-    '';
+    localStorage.getItem('userRole');
 
   const token = 
     sessionStorage.getItem('token') || 
     localStorage.getItem('token');
 
-  const userRole = String(rawRole).toLowerCase().trim();
-
   const [logs, setLogs] = useState([]);
   const [uploadedMaterials, setUploadedMaterials] = useState([]);
 
-  // Upload Form States
+  // अपलोड फॉर्म के लिए स्टेट्स
   const [title, setTitle] = useState('');
   const [course, setCourse] = useState('bca');
   const [semester, setSemester] = useState('1');
   const [file, setFile] = useState(null);
 
-  // Live Filter States
+  // लाइव फ़िल्टर बार के लिए स्टेट्स
   const [filterCourse, setFilterCourse] = useState('all');
   const [filterSemester, setFilterSemester] = useState('all');
 
-  // 🛡️ Complete Role Guard Check
+  // 🛡️ 1. Complete Role Guard Check
   useEffect(() => {
-    if (!isLoggedIn || !token || token.trim() === '') {
+    // A. Login nahi hai -> Login page par bhejo
+    if (!isLoggedIn || !token) {
       navigate('/login', { replace: true });
       return;
     }
 
+    // B. Logged in hai par Candidate hai -> Standard Candidate Dashboard par bhejo
     if (userRole !== 'admin') {
       alert('⚠️ Unauthorized! Admin Panel Access Restricted.');
       navigate('/dashboard', { replace: true });
       return;
     }
 
+    // C. Admin hai -> APIs call karein
     fetchLiveLogs();
     fetchUploadedMaterials();
     const interval = setInterval(fetchLiveLogs, 4000);
     return () => clearInterval(interval);
   }, [isLoggedIn, userRole, token, navigate]);
 
-  // 🔴 Authorization Header ke saath Logs Fetch karein
+  // 🔴 Authorization Header के साथ Logs प्राप्त करें
   const fetchLiveLogs = async () => {
     if (!token) return;
     try {
@@ -78,7 +78,7 @@ function AdminDashboard() {
     }
   };
 
-  // 🔴 Authorization Header ke saath Materials Fetch karein
+  // 🔴 Authorization Header के साथ Materials प्राप्त करें
   const fetchUploadedMaterials = async () => {
     if (!token) return;
     try {
@@ -102,7 +102,7 @@ function AdminDashboard() {
 
   // 🔴 Delete API
   const handleDeleteMaterial = async (id, fileTitle) => {
-    const confirmDelete = window.confirm(`🗑️ Kya aap sach mein "${fileTitle}" ko hamesha ke liye delete karna chahte hain?`);
+    const confirmDelete = window.confirm(`🗑️ क्या आप सच में "${fileTitle}" को हमेशा के लिए डिलीट करना चाहते हैं?`);
     if (!confirmDelete) return;
 
     try {
@@ -121,7 +121,7 @@ function AdminDashboard() {
         alert(data.message); 
       }
     } catch (error) { 
-      alert('File delete error!'); 
+      alert('फ़ाइल डिलीट एरर!'); 
     }
   };
 
@@ -143,7 +143,7 @@ function AdminDashboard() {
         fetchLiveLogs(); 
       }
     } catch (error) { 
-      alert('Connection failed!'); 
+      alert('connection fail!'); 
     }
   };
 
@@ -151,7 +151,7 @@ function AdminDashboard() {
   const handleFileUpload = async (e) => {
     e.preventDefault();
     if (!file) { 
-      alert('File chunein!'); 
+      alert('फाइल चुनें!'); 
       return; 
     }
     const formData = new FormData();
@@ -170,38 +170,35 @@ function AdminDashboard() {
       });
       const data = await response.json();
       if (response.ok) { 
-        alert(data.message || 'File safaltapoorvak upload ho gayi!'); 
+        alert(data.message || 'फ़ाइल सफलतापूर्वक अपलोड हो गई!'); 
         setTitle(''); 
         setFile(null); 
         const fileInput = document.getElementById('fileInput');
         if (fileInput) fileInput.value = ''; 
         fetchUploadedMaterials(); 
       } else { 
-        alert(data.message || 'Upload fail ho gaya!'); 
+        alert(data.message || 'अपलोड फ़ेल हो गया!'); 
       }
     } catch (error) { 
-      alert('Upload error!'); 
+      alert('अपलोड एरर!'); 
     }
   };
 
-  // 🟢 Filter Logic (Normalized Case & Type Handling)
+  // फ़िल्टर लॉजिक
   const filteredMaterials = uploadedMaterials.filter((mat) => {
-    const matCourse = String(mat.course || '').toLowerCase().trim();
-    const matSemester = String(mat.semester || '').trim();
-
-    const matchCourse = filterCourse === 'all' || matCourse === filterCourse.toLowerCase();
-    const matchSemester = filterSemester === 'all' || matSemester === String(filterSemester);
-
+    const matchCourse = filterCourse === 'all' || mat.course === filterCourse;
+    const matchSemester = filterSemester === 'all' || mat.semester === filterSemester;
     return matchCourse && matchSemester;
   });
 
-  // Unauthorized users ke liye render block karein
+  // Agar Unauthorized ya Logged in nahi hai toh rendering block karein
   if (!isLoggedIn || userRole !== 'admin') {
     return null;
   }
 
   return (
     <>
+      {/* 📱💻 Mobile & Desktop Fully Responsive CSS Injection */}
       <style>{`
         .adm-container {
           padding: clamp(12px, 3vw, 25px);
@@ -411,6 +408,7 @@ function AdminDashboard() {
           font-size: 13px;
         }
 
+        /* 📱 Mobile Specific Rules (< 600px) */
         @media screen and (max-width: 600px) {
           .adm-header {
             flex-direction: column;
@@ -443,7 +441,7 @@ function AdminDashboard() {
       `}</style>
 
       <div className="adm-container">
-        {/* Header */}
+        {/* हेडर */}
         <div className="adm-header">
           <div className="adm-avatar-box">
             <div className="adm-avatar">👑</div>
@@ -462,7 +460,7 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* Upload Form Box */}
+        {/* अपलोड फॉर्म बॉक्स */}
         <div className="adm-card">
           <h3 className="adm-card-title">➕ Upload new study material or images</h3>
           <form onSubmit={handleFileUpload}>
@@ -518,10 +516,11 @@ function AdminDashboard() {
           </form>
         </div>
 
-        {/* Document Management */}
+        {/* अपलोडेड दस्तावेज प्रबंधन */}
         <div className="adm-card">
           <h3 className="adm-card-title">📂 Uploaded Documents Management</h3>
           
+          {/* लाइव फ़िल्टर बार */}
           <div className="adm-filter-bar">
             <span style={{ fontWeight: 'bold', color: 'black', fontSize: '13px', minWidth: '130px' }}>🔍 Live Filter List:</span>
             
@@ -548,6 +547,7 @@ function AdminDashboard() {
             </div>
           </div>
 
+          {/* फ़िल्टर की हुई फाइल्स की सूची */}
           <div style={{ overflowY: 'auto', maxHeight: '280px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {filteredMaterials.length > 0 ? (
               filteredMaterials.map((mat) => (
@@ -569,7 +569,7 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* Live Student Tracking */}
+        {/* लाइव छात्र ट्रैकिंग लिस्ट */}
         <div className="adm-card">
           <h3 className="adm-card-title">📊 Student Login Live Tracking List</h3>
           <div className="adm-table-wrapper">
@@ -588,7 +588,7 @@ function AdminDashboard() {
                     <td className="adm-td">{log.userName}</td>
                     <td className="adm-td">{log.mobile}</td>
                     <td className="adm-td">{new Date(log.loginTime).toLocaleString()}</td>
-                    <td className="adm-td" style={{ color: !log.logoutTime ? 'green' : 'red', fontWeight: 'bold' }}>
+                    <td style={{ ...tdStyle, color: !log.logoutTime ? 'green' : 'red', fontWeight: 'bold' }}>
                       {!log.logoutTime ? '● Online' : '○ Offline'}
                     </td>
                   </tr>
@@ -601,5 +601,7 @@ function AdminDashboard() {
     </>
   );
 }
+
+const tdStyle = { padding: '12px 14px', fontSize: '13px' };
 
 export default AdminDashboard;
