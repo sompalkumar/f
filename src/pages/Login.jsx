@@ -48,7 +48,8 @@ function Login() {
     setLoading(true); // ⏳ Loading chalu karein
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/login`, {
+      // 🟢 FIX: Changed Endpoint from /api/login to /api/admin-login to match backend admin routing
+      const response = await fetch(`${API_BASE_URL}/api/admin-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mobile, password })

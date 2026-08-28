@@ -184,10 +184,14 @@ function AdminDashboard() {
     }
   };
 
-  // फ़िल्टर लॉजिक
+  // 🟢 Robust Filter Logic: String conversion aur Case In-sensitivity ke saath
   const filteredMaterials = uploadedMaterials.filter((mat) => {
-    const matchCourse = filterCourse === 'all' || mat.course === filterCourse;
-    const matchSemester = filterSemester === 'all' || mat.semester === filterSemester;
+    const matCourse = String(mat.course || '').toLowerCase().trim();
+    const matSemester = String(mat.semester || '').trim();
+
+    const matchCourse = filterCourse === 'all' || matCourse === filterCourse.toLowerCase();
+    const matchSemester = filterSemester === 'all' || matSemester === String(filterSemester);
+
     return matchCourse && matchSemester;
   });
 
@@ -588,7 +592,7 @@ function AdminDashboard() {
                     <td className="adm-td">{log.userName}</td>
                     <td className="adm-td">{log.mobile}</td>
                     <td className="adm-td">{new Date(log.loginTime).toLocaleString()}</td>
-                    <td style={{ ...tdStyle, color: !log.logoutTime ? 'green' : 'red', fontWeight: 'bold' }}>
+                    <td className="adm-td" style={{ color: !log.logoutTime ? 'green' : 'red', fontWeight: 'bold' }}>
                       {!log.logoutTime ? '● Online' : '○ Offline'}
                     </td>
                   </tr>
@@ -601,7 +605,5 @@ function AdminDashboard() {
     </>
   );
 }
-
-const tdStyle = { padding: '12px 14px', fontSize: '13px' };
 
 export default AdminDashboard;

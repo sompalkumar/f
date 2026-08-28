@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { API_BASE_URL } from '../config'; 
+import './Register.css'; // Pure styling external CSS file se apply hogi
 
 function Register({ activeTab, showPortalModal, setShowPortalModal }) {
-  const [userRole, setUserRole] = useState('candidate'); // 'candidate' or 'admin'
+  const [userRole, setUserRole] = useState('candidate'); 
   const [modalView, setModalView] = useState('login'); 
   const [isLoading, setIsLoading] = useState(false);
   const [mobile, setMobile] = useState('');
@@ -15,7 +16,6 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
   const [captchaInput, setCaptchaInput] = useState('');
   const [currentCaptcha, setCurrentCaptcha] = useState('');
 
-  // 🔄 Memoized Captcha Generator
   const refreshCaptcha = useCallback(() => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -29,7 +29,6 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     refreshCaptcha();
   }, [refreshCaptcha]);
 
-  // 🧹 Reset form states safely
   const resetFormState = () => {
     setMobile('');
     setPassword('');
@@ -52,7 +51,6 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     return strongPasswordRegex.test(pass);
   };
 
-  // 🔑 Fixed Login Handler with Robust Role Verification
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateMobile(mobile)) { 
@@ -84,11 +82,9 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
         return;
       }
 
-      // Safe Lowercase Matching for Backend Roles
       const backendRole = String(data.role || data.userRole || 'candidate').toLowerCase().trim();
       const currentSelectedRole = String(userRole).toLowerCase().trim();
 
-      // 🛑 Strictly enforce Role Access Control
       if (currentSelectedRole === 'admin') {
         if (backendRole !== 'admin') {
           alert('❌ Access Denied! केवल अधिकृत Admin ही Admin Tab से लॉगिन कर सकते हैं।');
@@ -97,21 +93,19 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
           setIsLoading(false);
           return;
         }
-      } else { // Candidate Tab active
+      } else { 
         if (backendRole === 'admin') {
           alert('⚠️ आप एक एडमिन हैं। कृपया ऊपर Admin Tab चुनकर लॉगिन करें!');
           refreshCaptcha();
           setCaptchaInput('');
-          setIsLoading(false); // Fixed: पहले यहां true सेट हो जाता था जिससे बटन लोडिंग में अटक जाता था
+          setIsLoading(false);
           return;
         }
       }
 
-      // Cleanup prior auth tokens
       const authKeys = ['token', 'isLoggedIn', 'userName', 'logId', 'userRole', 'userCourse'];
       authKeys.forEach(key => sessionStorage.removeItem(key));
 
-      // Save valid credentials
       sessionStorage.setItem('token', data.token || '');
       sessionStorage.setItem('isLoggedIn', 'true');
       sessionStorage.setItem('userName', data.name || data.userName || '');
@@ -121,7 +115,6 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
 
       setShowPortalModal(false);
 
-      // 🚀 Explicit Page Navigation
       if (backendRole === 'admin') {
         window.location.replace('/admin-dashboard');
       } else {
@@ -136,7 +129,6 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     }
   };
 
-  // 📝 Register Handler
   const handleRegister = async (e) => {
     e.preventDefault();
     if (!validateMobile(mobile)) { alert('⚠️ मोबाइल नंबर 10 अंकों का होना चाहिए!'); return; }
@@ -165,7 +157,6 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     }
   };
 
-  // 📲 OTP Handler
   const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!validateMobile(mobile)) { alert('वैध नंबर डालें!'); return; }
@@ -192,7 +183,6 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     }
   };
 
-  // 🔄 Verify OTP Handler
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     if (!isPasswordStrong(password)) { alert('⚠️ मजबूत पासवर्ड डालें।'); return; }
@@ -227,259 +217,177 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     about: { title: "ℹ️ About Us", desc: "Since its inception, Bca Portal has been setting new records in the field of higher education." }
   };
 
-  // Dynamic Styles
-  const overlayStyle = { 
-    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', 
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '15px', boxSizing: 'border-box'
-  };
-
-  const modalStyle = { 
-    background: 'rgba(255, 255, 255, 0.35)', backdropFilter: 'blur(25px) saturate(190%)', WebkitBackdropFilter: 'blur(25px) saturate(190%)',
-    padding: '45px clamp(22px, 4vw, 32px) clamp(22px, 4vw, 32px)', borderRadius: '28px', width: '100%', maxWidth: '440px', maxHeight: '90vh',
-    overflowY: 'auto', border: '1.5px solid rgba(255, 255, 255, 0.75)',
-    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.12), inset 0 2px 4px rgba(255, 255, 255, 0.9), inset 0 -2px 4px rgba(0, 0, 0, 0.05)', 
-    position: 'relative', boxSizing: 'border-box', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' 
-  };
-
-  const closeBtnStyle = { 
-    position: 'absolute', top: '14px', right: '14px', background: 'rgba(255, 255, 255, 0.5)', border: '1px solid rgba(255, 255, 255, 0.7)', 
-    width: '26px', height: '26px', borderRadius: '50%', fontSize: '13px', cursor: 'pointer', color: '#1d1d1f', outline: 'none',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.08)', transition: 'all 0.2s ease', zIndex: 10
-  };
-
-  const inputGroupStyle = { marginBottom: '16px', textAlign: 'left' };
-  const labelStyle = { display: 'block', fontSize: '13px', fontWeight: '600', color: '#1d1d1f', marginBottom: '6px' };
-  
-  const inputStyle = { 
-    width: '100%', padding: '12px 16px', boxSizing: 'border-box', border: '1.5px solid rgba(255, 255, 255, 0.8)', 
-    borderRadius: '50px', fontSize: '14px', fontWeight: '500', color: '#1d1d1f', backgroundColor: 'rgba(255, 255, 255, 0.45)', 
-    backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.05)'
-  };
-
-  const maroonBtnStyle = { 
-    width: '100%', padding: '13px', 
-    background: isLoading ? 'rgba(255, 255, 255, 0.4)' : 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.35) 100%)', 
-    color: '#1d1d1f', border: '1.5px solid rgba(255, 255, 255, 0.9)', borderRadius: '50px', 
-    cursor: isLoading ? 'not-allowed' : 'pointer', fontSize: '15px', fontWeight: '700', marginTop: '10px',
-    backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.08), inset 0 3px 5px rgba(255, 255, 255, 0.9), inset 0 -3px 5px rgba(0, 0, 0, 0.1)'
-  };
-
-  const tabStyle = (isActive) => ({ 
-    flex: 1, textAlign: 'center', padding: '10px 0', cursor: 'pointer', fontSize: '14px', fontWeight: '700', 
-    color: isActive ? '#1d1d1f' : '#555', background: isActive ? 'rgba(255, 255, 255, 0.75)' : 'transparent',
-    borderRadius: '50px', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    boxShadow: isActive ? '0 4px 12px rgba(0, 0, 0, 0.08)' : 'none'
-  });
-
   return (
-    <>
-      <style>{`
-        .responsive-card {
-          width: 90%; max-width: 650px; padding: 35px 25px; border-radius: 28px;
-          border: 1.5px solid rgba(255, 255, 255, 0.75);
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.9);
-          background: rgba(255, 255, 255, 0.35); backdrop-filter: blur(25px) saturate(190%);
-          -webkit-backdrop-filter: blur(25px) saturate(190%); text-align: center; box-sizing: border-box;
-          margin: 20px auto; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        @media screen and (max-width: 480px) {
-          .responsive-card { width: 95%; padding: 25px 18px; }
-        }
-      `}</style>
+    <div className="register-hero-wrapper">
+      <div className="responsive-card">
+        <h2>{sectionContent[activeTab]?.title || sectionContent.home.title}</h2>
+        <p>{sectionContent[activeTab]?.desc || sectionContent.home.desc}</p>
+      </div>
 
-      <div style={{ 
-        backgroundImage: "url('/udhnacollege.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', 
-        minHeight: 'calc(100vh - 60px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '15px', boxSizing: 'border-box' 
-      }}>
-        
-        {/* Main Glass Welcome Card */}
-        <div className="responsive-card">
-          <h2 style={{ color: '#1d1d1f', marginBottom: '15px', fontSize: 'clamp(22px, 4vw, 30px)', fontWeight: '800', textShadow: '0 2px 4px rgba(255, 255, 255, 0.6)' }}>
-            {sectionContent[activeTab]?.title || sectionContent.home.title}
-          </h2>
-          <p style={{ color: '#2d2d2f', fontSize: 'clamp(14px, 2.5vw, 16px)', lineHeight: '1.6', margin: 0, fontWeight: '500' }}>
-            {sectionContent[activeTab]?.desc || sectionContent.home.desc}
-          </p>
-        </div>
+      {showPortalModal && (
+        <div className="portal-overlay">
+          <div className="portal-modal">
+            <button 
+              onClick={() => { 
+                if (!isLoading) { 
+                  setShowPortalModal(false); 
+                  setModalView('login'); 
+                  resetFormState();
+                } 
+              }} 
+              className="modal-close-btn"
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
 
-        {/* Liquid Glass Modal Window */}
-        {showPortalModal && (
-          <div style={overlayStyle}>
-            <div style={modalStyle}>
-              <button 
-                onClick={() => { 
-                  if (!isLoading) { 
-                    setShowPortalModal(false); 
-                    setModalView('login'); 
-                    resetFormState();
-                  } 
-                }} 
-                style={closeBtnStyle}
-                aria-label="Close modal"
-              >
-                ✕
-              </button>
+            {modalView === 'login' && (
+              <div className="role-tab-container">
+                <div 
+                  onClick={() => {
+                    if (!isLoading) {
+                      setUserRole('candidate');
+                      refreshCaptcha();
+                    }
+                  }} 
+                  className={`role-tab ${userRole === 'candidate' ? 'active' : ''}`}
+                >
+                  Candidate
+                </div>
+                <div 
+                  onClick={() => {
+                    if (!isLoading) {
+                      setUserRole('admin');
+                      refreshCaptcha();
+                    }
+                  }} 
+                  className={`role-tab ${userRole === 'admin' ? 'active' : ''}`}
+                >
+                  Admin
+                </div>
+              </div>
+            )}
 
-              {modalView === 'login' && (
-                <div style={{ 
-                  display: 'flex', marginBottom: '22px', background: 'rgba(255, 255, 255, 0.3)', 
-                  padding: '4px', borderRadius: '50px', border: '1px solid rgba(255, 255, 255, 0.6)'
-                }}>
-                  {/* Explicit Tab Clicks with State Reset */}
-                  <div 
-                    onClick={() => {
-                      if (!isLoading) {
-                        setUserRole('candidate');
-                        refreshCaptcha();
-                      }
-                    }} 
-                    style={tabStyle(userRole === 'candidate')}
-                  >
-                    Candidate
-                  </div>
-                  <div 
-                    onClick={() => {
-                      if (!isLoading) {
-                        setUserRole('admin');
-                        refreshCaptcha();
-                      }
-                    }} 
-                    style={tabStyle(userRole === 'admin')}
-                  >
-                    Admin
+            {/* Login Form */}
+            {modalView === 'login' && (
+              <form onSubmit={handleLogin}>
+                <div className="input-group">
+                  <label>Mobile Number / Username *</label>
+                  <input type="text" placeholder="Enter Mobile Number" value={mobile} onChange={handleMobileChange} className="custom-input" required disabled={isLoading} />
+                </div>
+                <div className="input-group">
+                  <label>Password *</label>
+                  <div className="password-input-wrapper">
+                    <input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e)=>setPassword(e.target.value)} className="custom-input pad-right" required disabled={isLoading} />
+                    <span onClick={() => setShowPassword(!showPassword)} className="toggle-eye">
+                      {showPassword ? '👁️' : '🙈'}
+                    </span>
                   </div>
                 </div>
-              )}
+                <div className="forgot-password-link">
+                  <span onClick={() => { if (!isLoading) { setModalView('forgot'); resetFormState(); } }}>Forgot Password?</span>
+                </div>
+                
+                <div className="captcha-wrapper">
+                  <div className="captcha-box">
+                    <span>{currentCaptcha}</span>
+                    <span onClick={() => !isLoading && refreshCaptcha()} className="refresh-captcha-btn">🔄 Refresh</span>
+                  </div>
+                </div>
 
-              {/* 🔑 Login Form */}
-              {modalView === 'login' && (
-                <form onSubmit={handleLogin}>
-                  <div style={inputGroupStyle}>
-                    <label style={labelStyle}>Mobile Number / Username *</label>
-                    <input type="text" placeholder="Enter Mobile Number" value={mobile} onChange={handleMobileChange} style={inputStyle} required disabled={isLoading} />
-                  </div>
-                  <div style={inputGroupStyle}>
-                    <label style={labelStyle}>Password *</label>
-                    <div style={{ position: 'relative' }}>
-                      <input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e)=>setPassword(e.target.value)} style={{ ...inputStyle, paddingRight: '45px' }} required disabled={isLoading} />
-                      <span onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: '16px' }}>
-                        {showPassword ? '👁️' : '🙈'}
-                      </span>
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right', marginBottom: '15px' }}>
-                    <span onClick={() => { if (!isLoading) { setModalView('forgot'); resetFormState(); } }} style={{ color: '#4a154b', cursor: 'pointer', fontSize: '13px', fontWeight: '700' }}>Forgot Password?</span>
-                  </div>
-                  
-                  {/* 🛡️ Glossy Captcha Box */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', flexWrap: 'wrap' }}>
-                    <div style={{ 
-                      fontSize: '18px', fontWeight: 'bold', letterSpacing: '3px', color: '#1d1d1f', 
-                      background: 'rgba(255, 255, 255, 0.5)', padding: '10px 18px', borderRadius: '50px', 
-                      border: '1px solid rgba(255, 255, 255, 0.7)', fontStyle: 'italic', display: 'flex', 
-                      alignItems: 'center', gap: '10px', width: '100%', justifyContent: 'space-between', boxSizing: 'border-box' 
-                    }}>
-                      <span>{currentCaptcha}</span>
-                      <span onClick={() => !isLoading && refreshCaptcha()} style={{ color: '#007bff', cursor: 'pointer', fontSize: '13px', fontWeight: '700' }}>🔄 Refresh</span>
-                    </div>
-                  </div>
+                <div className="input-group">
+                  <input type="text" placeholder="Enter Captcha" value={captchaInput} onChange={(e)=>setCaptchaInput(e.target.value)} className="custom-input" required disabled={isLoading} />
+                </div>
 
-                  <div style={inputGroupStyle}>
-                    <input type="text" placeholder="Enter Captcha" value={captchaInput} onChange={(e)=>setCaptchaInput(e.target.value)} style={inputStyle} required disabled={isLoading} />
-                  </div>
+                <button type="submit" className="custom-maroon-btn" disabled={isLoading}>
+                  {isLoading ? 'Processing...' : userRole === 'admin' ? 'Admin Login' : 'Candidate Login'}
+                </button>
 
-                  <button type="submit" style={maroonBtnStyle} disabled={isLoading}>
-                    {isLoading ? 'Processing...' : userRole === 'admin' ? 'Admin Login' : 'Candidate Login'}
-                  </button>
-
-                  <p style={{ textAlign: 'center', marginTop: '18px', fontSize: '14px', color: '#333', fontWeight: '500' }}>
-                    New User? <span onClick={() => { if (!isLoading) { setModalView('register'); resetFormState(); } }} style={{ color: '#007bff', cursor: 'pointer', fontWeight: '700', textDecoration: 'underline' }}>Register Now</span>
-                  </p>
-                </form>
-              )}
-
-              {/* 📝 Registration Form */}
-              {modalView === 'register' && (
-                <form onSubmit={handleRegister}>
-                  <h3 style={{ marginBottom: '18px', color: '#1d1d1f', fontWeight: '800', fontSize: '19px' }}>New Candidate Registration</h3>
-                  <div style={inputGroupStyle}>
-                    <label style={labelStyle}>Full Name *</label>
-                    <input type="text" placeholder="Full Name" value={name} onChange={(e)=>setName(e.target.value)} style={inputStyle} required disabled={isLoading} />
-                  </div>
-                  <div style={inputGroupStyle}>
-                    <label style={labelStyle}>Mobile Number *</label>
-                    <input type="text" placeholder="10 Digits" value={mobile} onChange={handleMobileChange} style={inputStyle} required disabled={isLoading} />
-                  </div>
-                  <div style={inputGroupStyle}>
-                    <label style={labelStyle}>Set Password *</label>
-                    <input type="password" placeholder="Create Strong Password" value={password} onChange={(e)=>setPassword(e.target.value)} style={inputStyle} required disabled={isLoading} />
-                    {password && (
-                      <span style={{ fontSize: '11px', display: 'block', marginTop: '6px', fontWeight: '700', color: isPasswordStrong(password) ? '#155724' : '#721c24' }}>
-                        {isPasswordStrong(password) ? '✅ Strong password' : '❌ Weak password (A, a, 1, @ & 8 chars required)'}
-                      </span>
-                    )}
-                  </div>
-                  <button type="submit" style={{ ...maroonBtnStyle, opacity: (!isPasswordStrong(password) || isLoading) ? 0.6 : 1, cursor: !isPasswordStrong(password) ? 'not-allowed' : 'pointer' }} disabled={!isPasswordStrong(password) || isLoading}>
-                    {isLoading ? 'Registering...' : 'Register'}
-                  </button>
-                  <p style={{ textAlign: 'center', fontSize: '14px', marginTop: '18px', color: '#333', fontWeight: '500' }}>
-                    Already have an account? <span onClick={()=>{ setModalView('login'); resetFormState(); }} style={{ color: '#007bff', cursor: 'pointer', fontWeight: '700' }}>Login here</span>
-                  </p>
-                </form>
-              )}
-
-              {/* 🔒 Forgot Password Form */}
-              {modalView === 'forgot' && (
-                <form onSubmit={isOtpSent ? handleVerifyOtp : handleSendOtp}>
-                  <div style={{ textAlign: 'left' }}>
-                    <h3 style={{ marginBottom: '18px', color: '#1d1d1f', fontWeight: '800', fontSize: '19px' }}>Reset Password</h3>
-                    {!isOtpSent ? (
-                      <>
-                        <div style={inputGroupStyle}>
-                          <label style={labelStyle}>Registered Mobile Number *</label>
-                          <input type="text" placeholder="Enter Registered Mobile" value={mobile} onChange={handleMobileChange} style={inputStyle} required disabled={isLoading} />
-                        </div>
-                        <button type="submit" style={maroonBtnStyle} disabled={isLoading}>
-                          {isLoading ? 'Sending...' : 'Send OTP'}
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <p style={{ fontSize: '13px', color: '#1d1d1f', marginBottom: '12px', textAlign: 'center', fontWeight: '600' }}>Enter OTP sent to your phone</p>
-                        <div style={inputGroupStyle}>
-                          <label style={labelStyle}>Enter 4-Digit OTP *</label>
-                          <input type="text" placeholder="XXXX" value={otp} maxLength="4" onChange={(e)=>setOtp(e.target.value)} style={{ ...inputStyle, textAlign: 'center', letterSpacing: '6px', fontWeight: '700' }} required disabled={isLoading} />
-                        </div>
-                        <div style={inputGroupStyle}>
-                          <label style={labelStyle}>Enter New Password *</label>
-                          <input type="password" placeholder="Create New Password" value={password} onChange={(e)=>setPassword(e.target.value)} style={inputStyle} required disabled={isLoading} />
-                          {password && (
-                            <span style={{ fontSize: '11px', display: 'block', marginTop: '6px', fontWeight: '700', color: isPasswordStrong(password) ? '#155724' : '#721c24' }}>
-                              {isPasswordStrong(password) ? 'Strong Password ✅' : '❌ Weak password (requires A, a, 1, @ & 8 chars)'}
-                            </span>
-                          )}
-                        </div>
-                        <button type="submit" style={{ ...maroonBtnStyle, opacity: (!isPasswordStrong(password) || isLoading) ? 0.6 : 1, cursor: !isPasswordStrong(password) ? 'not-allowed' : 'pointer' }} disabled={!isPasswordStrong(password) || isLoading}>
-                          {isLoading ? 'Updating...' : 'Verify & Update'}
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </form>
-              )}
-
-              {modalView !== 'login' && (
-                <p onClick={()=>{ setModalView('login'); resetFormState(); }} style={{ fontSize: '14px', marginTop: '18px', color: '#1d1d1f', cursor: 'pointer', fontWeight: '700', textAlign: 'center' }}>
-                  ⬅ Back to Login
+                <p className="form-footer-text">
+                  New User? <span onClick={() => { if (!isLoading) { setModalView('register'); resetFormState(); } }} className="action-link">Register Now</span>
                 </p>
-              )}
-            </div>
+              </form>
+            )}
+
+            {/* Registration Form */}
+            {modalView === 'register' && (
+              <form onSubmit={handleRegister}>
+                <h3 className="form-heading">New Candidate Registration</h3>
+                <div className="input-group">
+                  <label>Full Name *</label>
+                  <input type="text" placeholder="Full Name" value={name} onChange={(e)=>setName(e.target.value)} className="custom-input" required disabled={isLoading} />
+                </div>
+                <div className="input-group">
+                  <label>Mobile Number *</label>
+                  <input type="text" placeholder="10 Digits" value={mobile} onChange={handleMobileChange} className="custom-input" required disabled={isLoading} />
+                </div>
+                <div className="input-group">
+                  <label>Set Password *</label>
+                  <input type="password" placeholder="Create Strong Password" value={password} onChange={(e)=>setPassword(e.target.value)} className="custom-input" required disabled={isLoading} />
+                  {password && (
+                    <span className={`password-strength ${isPasswordStrong(password) ? 'strong' : 'weak'}`}>
+                      {isPasswordStrong(password) ? '✅ Strong password' : '❌ Weak password (A, a, 1, @ & 8 chars required)'}
+                    </span>
+                  )}
+                </div>
+                <button type="submit" className={`custom-maroon-btn ${!isPasswordStrong(password) || isLoading ? 'disabled' : ''}`} disabled={!isPasswordStrong(password) || isLoading}>
+                  {isLoading ? 'Registering...' : 'Register'}
+                </button>
+                <p className="form-footer-text">
+                  Already have an account? <span onClick={()=>{ setModalView('login'); resetFormState(); }} className="action-link">Login here</span>
+                </p>
+              </form>
+            )}
+
+            {/* Forgot Password Form */}
+            {modalView === 'forgot' && (
+              <form onSubmit={isOtpSent ? handleVerifyOtp : handleSendOtp}>
+                <div className="form-align-left">
+                  <h3 className="form-heading">Reset Password</h3>
+                  {!isOtpSent ? (
+                    <>
+                      <div className="input-group">
+                        <label>Registered Mobile Number *</label>
+                        <input type="text" placeholder="Enter Registered Mobile" value={mobile} onChange={handleMobileChange} className="custom-input" required disabled={isLoading} />
+                      </div>
+                      <button type="submit" className="custom-maroon-btn" disabled={isLoading}>
+                        {isLoading ? 'Sending...' : 'Send OTP'}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="otp-subheading">Enter OTP sent to your phone</p>
+                      <div className="input-group">
+                        <label>Enter 4-Digit OTP *</label>
+                        <input type="text" placeholder="XXXX" value={otp} maxLength="4" onChange={(e)=>setOtp(e.target.value)} className="custom-input otp-input" required disabled={isLoading} />
+                      </div>
+                      <div className="input-group">
+                        <label>Enter New Password *</label>
+                        <input type="password" placeholder="Create New Password" value={password} onChange={(e)=>setPassword(e.target.value)} className="custom-input" required disabled={isLoading} />
+                        {password && (
+                          <span className={`password-strength ${isPasswordStrong(password) ? 'strong' : 'weak'}`}>
+                            {isPasswordStrong(password) ? 'Strong Password ✅' : '❌ Weak password (requires A, a, 1, @ & 8 chars)'}
+                          </span>
+                        )}
+                      </div>
+                      <button type="submit" className={`custom-maroon-btn ${!isPasswordStrong(password) || isLoading ? 'disabled' : ''}`} disabled={!isPasswordStrong(password) || isLoading}>
+                        {isLoading ? 'Updating...' : 'Verify & Update'}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </form>
+            )}
+
+            {modalView !== 'login' && (
+              <p onClick={()=>{ setModalView('login'); resetFormState(); }} className="back-link">
+                ⬅ Back to Login
+              </p>
+            )}
           </div>
-        )}
-      </div>
-    </>
+        </div>
+      )}
+    </div>
   );
 }
 
