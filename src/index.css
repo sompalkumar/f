@@ -23,7 +23,7 @@ html, body {
   width: 100%;
   overflow-x: hidden;
   color: var(--text);
-  background-color: #000208; /* Clean Solid Dark Blue */
+  background-color: #72798b; /* admin pannel ka background */
   font-family: var(--sans);
 }
 
