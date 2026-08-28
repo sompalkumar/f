@@ -119,9 +119,6 @@ button:hover, .btn:hover, .counter:hover {
   color: #ffffff;
 }
 
-.btn-logout:hover, .btn-close:hover, [data-action="logout"]:hover, [data-action="close"]:hover {
-  background-color: #361cb9;
-}
 
 /* 7. Responsive Rules */
 @media (max-width: 1024px) {
