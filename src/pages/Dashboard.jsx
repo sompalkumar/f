@@ -128,42 +128,14 @@ function Dashboard() {
 
   return (
     <>
-      {/* 📱 Admin Dashboard Matched Dark Glassmorphism Styles */}
+      {/* 📱 Light Theme Styles Matched with Image */}
       <style>{`
         .db-wrapper {
           min-height: calc(100vh - 60px);
           position: relative;
           padding: clamp(20px, 4vw, 40px) clamp(10px, 3vw, 20px);
           box-sizing: border-box;
-          overflow: hidden;
-        }
-
-        .db-wrapper::before {
-          content: '';
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-image: url('/udhnacollege.jpg');
-          background-size: cover;
-          background-position: center;
-          background-attachment: fixed;
-          filter: blur(12px);
-          -webkit-filter: blur(12px);
-          transform: scale(1.05);
-          z-index: -2;
-        }
-
-        .db-wrapper::after {
-          content: '';
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(15, 15, 20, 0.75);
-          z-index: -1;
+          background-color: #f4f6f8;
         }
 
         .db-container {
@@ -177,13 +149,11 @@ function Dashboard() {
         }
 
         .db-admin-notice {
-          background: rgba(255, 193, 7, 0.15);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          color: #ffda6a;
-          border: 1.5px solid rgba(255, 193, 7, 0.4);
+          background: #eef2f5;
+          color: #2b3a42;
+          border: 1.5px solid #008080;
           padding: 14px 20px;
-          border-radius: 50px;
+          border-radius: 12px;
           margin-bottom: 25px;
           display: flex;
           justify-content: space-between;
@@ -192,28 +162,25 @@ function Dashboard() {
           font-weight: 600;
           box-sizing: border-box;
           width: 100%;
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
         }
 
         .db-admin-btn {
-          background: rgba(255, 193, 7, 0.2);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          color: #ffda6a;
-          border: 1px solid rgba(255, 193, 7, 0.5);
+          background: #008080;
+          color: #ffffff;
+          border: none;
           padding: 9px 18px;
-          border-radius: 50px;
+          border-radius: 8px;
           cursor: pointer;
           font-weight: 700;
           font-size: 13px;
           white-space: nowrap;
-          transition: all 0.3s ease;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 6px rgba(0, 128, 128, 0.2);
         }
 
         .db-admin-btn:hover {
-          background: rgba(255, 193, 7, 0.4);
-          color: #fff;
+          background: #006666;
           transform: translateY(-1px);
         }
 
@@ -221,24 +188,21 @@ function Dashboard() {
           margin-bottom: 30px;
           text-align: center;
           padding: 25px;
-          background: rgba(139, 0, 0, 0.55);
-          backdrop-filter: blur(25px) saturate(190%);
-          -webkit-backdrop-filter: blur(25px) saturate(190%);
-          border-radius: 28px;
-          border: 1.5px solid rgba(255, 255, 255, 0.15);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+          background: #ffffff;
+          border-radius: 16px;
+          border: 1.5px solid #d1d5db;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
         }
 
         .db-title {
           margin: 0;
-          color: #ffffff;
+          color: #1a202c;
           font-size: clamp(22px, 5vw, 32px);
           font-weight: 800;
-          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
         }
 
         .db-subtitle {
-          color: rgba(255, 255, 255, 0.85);
+          color: #4a5568;
           margin-top: 10px;
           font-size: clamp(14px, 3.5vw, 16px);
           font-weight: 500;
@@ -256,15 +220,11 @@ function Dashboard() {
 
         .db-card {
           padding: clamp(20px, 3vw, 26px);
-          border: 1.5px solid rgba(255, 255, 255, 0.12);
-          border-radius: 24px;
-          background: rgba(25, 25, 35, 0.55);
-          backdrop-filter: blur(25px) saturate(190%);
-          -webkit-backdrop-filter: blur(25px) saturate(190%);
+          border: 1.5px solid #cbd5e1;
+          border-radius: 14px;
+          background: #e2e8f0;
           text-align: center;
-          box-shadow: 
-            0 15px 35px rgba(0, 0, 0, 0.35),
-            inset 0 1px 1px rgba(255, 255, 255, 0.1);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
           display: flex;
           flex-direction: column;
           justify-content: space-between;
@@ -272,18 +232,18 @@ function Dashboard() {
           gap: 18px;
           box-sizing: border-box;
           width: 100%;
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .db-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-          border-color: rgba(255, 193, 7, 0.3);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+          border-color: #008080;
         }
 
         .db-card-title {
           font-size: clamp(16px, 4vw, 18px);
-          color: #ffffff;
+          color: #1e293b;
           margin: 0;
           line-height: 1.4;
           font-weight: 700;
@@ -292,41 +252,35 @@ function Dashboard() {
         .db-button {
           width: 100%;
           padding: 12px 18px;
-          background: rgba(255, 255, 255, 0.1);
+          background: #008080;
           color: #ffffff;
-          border: 1.5px solid rgba(255, 255, 255, 0.2);
-          border-radius: 50px;
+          border: none;
+          border-radius: 8px;
           cursor: pointer;
           font-weight: 700;
           font-size: 14px;
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          box-shadow: 
-            0 8px 20px rgba(0, 0, 0, 0.2),
-            inset 0 1px 1px rgba(255, 255, 255, 0.1);
+          box-shadow: 0 4px 10px rgba(0, 128, 128, 0.2);
           transition: all 0.2s ease;
         }
 
         .db-button:hover {
-          background: rgba(255, 255, 255, 0.25);
-          border-color: rgba(255, 255, 255, 0.4);
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+          background: #006666;
+          box-shadow: 0 6px 14px rgba(0, 128, 128, 0.3);
         }
 
         .db-button:active {
           transform: scale(0.98);
         }
 
-        /* 🔲 Liquid Glass Pop-up Modal Styling */
+        /* 🔲 PDF Pop-up Modal Styling */
         .pdf-modal-overlay {
           position: fixed;
           top: 0;
           left: 0;
           width: 100vw;
           height: 100vh;
-          background-color: rgba(0, 0, 0, 0.75);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          background-color: rgba(0, 0, 0, 0.6);
+          backdrop-filter: blur(4px);
           display: flex;
           justify-content: center;
           align-items: center;
@@ -336,26 +290,24 @@ function Dashboard() {
         }
 
         .pdf-modal-container {
-          background: rgba(20, 20, 28, 0.85);
-          backdrop-filter: blur(30px) saturate(190%);
-          -webkit-backdrop-filter: blur(30px) saturate(190%);
-          border: 1.5px solid rgba(255, 255, 255, 0.15);
+          background: #ffffff;
+          border: 1.5px solid #cbd5e1;
           width: 100%;
           max-width: 950px;
           height: 88vh;
-          border-radius: 28px;
+          border-radius: 16px;
           display: flex;
           flex-direction: column;
           overflow: hidden;
-          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
           position: relative;
         }
 
         .pdf-modal-header {
           padding: 16px 22px;
-          background: rgba(30, 30, 40, 0.8);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          color: #ffffff;
+          background: #f1f5f9;
+          border-bottom: 1px solid #cbd5e1;
+          color: #0f172a;
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -370,7 +322,7 @@ function Dashboard() {
           overflow: hidden;
           text-overflow: ellipsis;
           max-width: 50%;
-          color: #ffffff;
+          color: #0f172a;
         }
 
         .pdf-header-actions {
@@ -380,29 +332,27 @@ function Dashboard() {
         }
 
         .pdf-download-btn {
-          background: rgba(255, 193, 7, 0.2);
-          border: 1px solid rgba(255, 193, 7, 0.4);
-          color: #ffda6a;
+          background: #008080;
+          border: none;
+          color: #ffffff;
           padding: 8px 16px;
-          border-radius: 50px;
+          border-radius: 6px;
           text-decoration: none;
           font-weight: 700;
           font-size: 13px;
           transition: all 0.2s ease;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .pdf-download-btn:hover {
-          background: rgba(255, 193, 7, 0.4);
-          color: #ffffff;
+          background: #006666;
         }
 
         .pdf-modal-close-btn {
-          background: rgba(255, 255, 255, 0.1);
-          color: #ffffff;
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          background: #e2e8f0;
+          color: #334155;
+          border: 1px solid #cbd5e1;
           padding: 8px 16px;
-          border-radius: 50px;
+          border-radius: 6px;
           cursor: pointer;
           font-weight: 700;
           font-size: 13px;
@@ -410,18 +360,17 @@ function Dashboard() {
         }
 
         .pdf-modal-close-btn:hover {
-          background: rgba(255, 255, 255, 0.25);
+          background: #cbd5e1;
         }
 
         .pdf-modal-body {
           flex: 1;
           width: 100%;
           height: 100%;
-          background-color: rgba(10, 10, 15, 0.5);
+          background-color: #f8fafc;
           position: relative;
         }
 
-        /* 🛡️ SECURITY FIX: Top-Right Pop-out Arrow Blocker */
         .drive-security-blocker {
           position: absolute;
           top: 0;
@@ -433,13 +382,12 @@ function Dashboard() {
           cursor: not-allowed;
         }
 
-        /* 📱 Mobile Screens (< 576px) Special Rules */
         @media screen and (max-width: 576px) {
           .db-admin-notice {
             flex-direction: column;
             text-align: center;
             padding: 14px;
-            border-radius: 20px;
+            border-radius: 12px;
           }
 
           .db-admin-btn {
@@ -457,7 +405,7 @@ function Dashboard() {
 
           .pdf-modal-container {
             height: 92vh;
-            border-radius: 20px;
+            border-radius: 12px;
           }
 
           .pdf-modal-title {
@@ -510,17 +458,15 @@ function Dashboard() {
           {/* 📄 Dynamic Google Drive & Uploaded Materials Section */}
           <div style={{ marginTop: '35px' }}>
             <div style={{
-              background: 'rgba(25, 25, 35, 0.55)',
-              backdropFilter: 'blur(25px) saturate(190%)',
-              WebkitBackdropFilter: 'blur(25px) saturate(190%)',
-              padding: '16px 24px',
-              borderRadius: '50px',
-              border: '1.5px solid rgba(255, 255, 255, 0.12)',
+              background: '#ffffff',
+              padding: '12px 20px',
+              borderRadius: '10px',
+              border: '1.5px solid #cbd5e1',
               display: 'inline-block',
               marginBottom: '20px',
-              boxShadow: '0 8px 20px rgba(0,0,0,0.3)'
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
             }}>
-              <h3 style={{ color: '#ffffff', fontSize: '18px', margin: 0, fontWeight: '800' }}>
+              <h3 style={{ color: '#0f172a', fontSize: '18px', margin: 0, fontWeight: '800' }}>
                 📚 Recent Study Materials & Notes
               </h3>
             </div>
@@ -528,12 +474,11 @@ function Dashboard() {
             {isLoading ? (
               <p style={{ 
                 textAlign: 'center', 
-                color: 'rgba(255, 255, 255, 0.85)', 
+                color: '#334155', 
                 padding: '20px', 
-                background: 'rgba(25, 25, 35, 0.55)', 
-                backdropFilter: 'blur(20px)',
-                borderRadius: '20px', 
-                border: '1.5px solid rgba(255, 255, 255, 0.12)',
+                background: '#e2e8f0', 
+                borderRadius: '12px', 
+                border: '1.5px solid #cbd5e1',
                 fontWeight: '600' 
               }}>Loading uploaded materials...</p>
             ) : materials.length > 0 ? (
@@ -548,12 +493,12 @@ function Dashboard() {
                       <div style={{ width: '100%' }}>
                         <span style={{ 
                           fontSize: '11px', 
-                          background: 'rgba(255, 193, 7, 0.2)', 
-                          border: '1px solid rgba(255, 193, 7, 0.4)',
+                          background: '#ffffff', 
+                          border: '1px solid #94a3b8',
                           padding: '4px 10px', 
-                          borderRadius: '50px', 
+                          borderRadius: '6px', 
                           fontWeight: '800',
-                          color: '#ffda6a'
+                          color: '#0f172a'
                         }}>
                           {mat.course ? mat.course.toUpperCase() : 'BCA'} - SEM {mat.semester || '1'}
                         </span>
@@ -570,7 +515,7 @@ function Dashboard() {
                           View PDF 👁️
                         </button>
                       ) : (
-                        <button className="db-button" disabled style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', cursor: 'not-allowed', color: '#888' }}>
+                        <button className="db-button" disabled style={{ backgroundColor: '#94a3b8', cursor: 'not-allowed', color: '#ffffff', boxShadow: 'none' }}>
                           No File Link
                         </button>
                       )}
@@ -580,13 +525,11 @@ function Dashboard() {
               </div>
             ) : (
               <p style={{ 
-                color: 'rgba(255, 255, 255, 0.85)', 
-                backgroundColor: 'rgba(25, 25, 35, 0.55)', 
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                border: '1.5px solid rgba(255, 255, 255, 0.12)',
+                color: '#334155', 
+                backgroundColor: '#e2e8f0', 
+                border: '1.5px solid #cbd5e1',
                 padding: '20px', 
-                borderRadius: '20px', 
+                borderRadius: '12px', 
                 textAlign: 'center',
                 fontWeight: '600'
               }}>
