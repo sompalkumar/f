@@ -128,7 +128,7 @@ function Dashboard() {
 
   return (
     <>
-      {/* 📱 Liquid Glassmorphism Responsive Styles */}
+      {/* 📱 Admin Dashboard Matched Dark Glassmorphism Styles */}
       <style>{`
         .db-wrapper {
           min-height: calc(100vh - 60px);
@@ -162,7 +162,7 @@ function Dashboard() {
           left: 0;
           width: 100%;
           height: 100%;
-          background: rgba(0, 0, 0, 0.2);
+          background: rgba(15, 15, 20, 0.75);
           z-index: -1;
         }
 
@@ -177,11 +177,11 @@ function Dashboard() {
         }
 
         .db-admin-notice {
-          background: rgba(255, 243, 205, 0.45);
+          background: rgba(255, 193, 7, 0.15);
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
-          color: #533f03;
-          border: 1.5px solid rgba(255, 238, 186, 0.8);
+          color: #ffda6a;
+          border: 1.5px solid rgba(255, 193, 7, 0.4);
           padding: 14px 20px;
           border-radius: 50px;
           margin-bottom: 25px;
@@ -192,15 +192,15 @@ function Dashboard() {
           font-weight: 600;
           box-sizing: border-box;
           width: 100%;
-          box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
 
         .db-admin-btn {
-          background: rgba(29, 29, 31, 0.85);
+          background: rgba(255, 193, 7, 0.2);
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
-          color: #fff;
-          border: 1px solid rgba(255, 255, 255, 0.3);
+          color: #ffda6a;
+          border: 1px solid rgba(255, 193, 7, 0.5);
           padding: 9px 18px;
           border-radius: 50px;
           cursor: pointer;
@@ -208,11 +208,12 @@ function Dashboard() {
           font-size: 13px;
           white-space: nowrap;
           transition: all 0.3s ease;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
-// welcom khushbu
+
         .db-admin-btn:hover {
-          background: rgba(0, 0, 0, 0.95);
+          background: rgba(255, 193, 7, 0.4);
+          color: #fff;
           transform: translateY(-1px);
         }
 
@@ -220,24 +221,24 @@ function Dashboard() {
           margin-bottom: 30px;
           text-align: center;
           padding: 25px;
-          background: rgba(243, 5, 5, 0.94);
+          background: rgba(139, 0, 0, 0.55);
           backdrop-filter: blur(25px) saturate(190%);
           -webkit-backdrop-filter: blur(25px) saturate(190%);
           border-radius: 28px;
-          border: 1.5px solid rgba(255, 255, 255, 0.75);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+          border: 1.5px solid rgba(255, 255, 255, 0.15);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
         .db-title {
           margin: 0;
-          color: #1d1d1f;
+          color: #ffffff;
           font-size: clamp(22px, 5vw, 32px);
           font-weight: 800;
-          text-shadow: 0 2px 4px rgba(255, 255, 255, 0.6);
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
         }
 
         .db-subtitle {
-          color: #2d2d2f;
+          color: rgba(255, 255, 255, 0.85);
           margin-top: 10px;
           font-size: clamp(14px, 3.5vw, 16px);
           font-weight: 500;
@@ -255,15 +256,15 @@ function Dashboard() {
 
         .db-card {
           padding: clamp(20px, 3vw, 26px);
-          border: 1.5px solid rgba(255, 255, 255, 0.75);
+          border: 1.5px solid rgba(255, 255, 255, 0.12);
           border-radius: 24px;
-          background: rgba(255, 255, 255, 0.35);
+          background: rgba(25, 25, 35, 0.55);
           backdrop-filter: blur(25px) saturate(190%);
           -webkit-backdrop-filter: blur(25px) saturate(190%);
           text-align: center;
           box-shadow: 
-            0 15px 35px rgba(0, 0, 0, 0.08),
-            inset 0 2px 4px rgba(255, 255, 255, 0.8);
+            0 15px 35px rgba(0, 0, 0, 0.35),
+            inset 0 1px 1px rgba(255, 255, 255, 0.1);
           display: flex;
           flex-direction: column;
           justify-content: space-between;
@@ -276,12 +277,13 @@ function Dashboard() {
 
         .db-card:hover {
           transform: translateY(-4px);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+          border-color: rgba(255, 193, 7, 0.3);
         }
 
         .db-card-title {
           font-size: clamp(16px, 4vw, 18px);
-          color: #1d1d1f;
+          color: #ffffff;
           margin: 0;
           line-height: 1.4;
           font-weight: 700;
@@ -290,9 +292,9 @@ function Dashboard() {
         .db-button {
           width: 100%;
           padding: 12px 18px;
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.45) 100%);
-          color: #1d1d1f;
-          border: 1.5px solid rgba(255, 255, 255, 0.9);
+          background: rgba(255, 255, 255, 0.1);
+          color: #ffffff;
+          border: 1.5px solid rgba(255, 255, 255, 0.2);
           border-radius: 50px;
           cursor: pointer;
           font-weight: 700;
@@ -300,14 +302,15 @@ function Dashboard() {
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           box-shadow: 
-            0 8px 20px rgba(0, 0, 0, 0.06),
-            inset 0 2px 4px rgba(255, 255, 255, 0.9);
+            0 8px 20px rgba(0, 0, 0, 0.2),
+            inset 0 1px 1px rgba(255, 255, 255, 0.1);
           transition: all 0.2s ease;
         }
 
         .db-button:hover {
-          background: rgba(255, 255, 255, 0.95);
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+          background: rgba(255, 255, 255, 0.25);
+          border-color: rgba(255, 255, 255, 0.4);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
 
         .db-button:active {
@@ -321,9 +324,9 @@ function Dashboard() {
           left: 0;
           width: 100vw;
           height: 100vh;
-          background-color: rgba(0, 0, 0, 0.4);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
+          background-color: rgba(0, 0, 0, 0.75);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           display: flex;
           justify-content: center;
           align-items: center;
@@ -333,10 +336,10 @@ function Dashboard() {
         }
 
         .pdf-modal-container {
-          background: rgba(255, 255, 255, 0.4);
+          background: rgba(20, 20, 28, 0.85);
           backdrop-filter: blur(30px) saturate(190%);
           -webkit-backdrop-filter: blur(30px) saturate(190%);
-          border: 1.5px solid rgba(255, 255, 255, 0.8);
+          border: 1.5px solid rgba(255, 255, 255, 0.15);
           width: 100%;
           max-width: 950px;
           height: 88vh;
@@ -344,15 +347,15 @@ function Dashboard() {
           display: flex;
           flex-direction: column;
           overflow: hidden;
-          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
           position: relative;
         }
 
         .pdf-modal-header {
           padding: 16px 22px;
-          background: rgba(255, 255, 255, 0.5);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-          color: #1d1d1f;
+          background: rgba(30, 30, 40, 0.8);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          color: #ffffff;
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -367,6 +370,7 @@ function Dashboard() {
           overflow: hidden;
           text-overflow: ellipsis;
           max-width: 50%;
+          color: #ffffff;
         }
 
         .pdf-header-actions {
@@ -376,26 +380,27 @@ function Dashboard() {
         }
 
         .pdf-download-btn {
-          background: rgba(255, 255, 255, 0.7);
-          border: 1px solid rgba(255, 255, 255, 0.9);
-          color: #1d1d1f;
+          background: rgba(255, 193, 7, 0.2);
+          border: 1px solid rgba(255, 193, 7, 0.4);
+          color: #ffda6a;
           padding: 8px 16px;
           border-radius: 50px;
           text-decoration: none;
           font-weight: 700;
           font-size: 13px;
           transition: all 0.2s ease;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .pdf-download-btn:hover {
-          background: rgba(255, 255, 255, 0.95);
+          background: rgba(255, 193, 7, 0.4);
+          color: #ffffff;
         }
 
         .pdf-modal-close-btn {
-          background: rgba(255, 255, 255, 0.5);
-          color: #1d1d1f;
-          border: 1px solid rgba(255, 255, 255, 0.8);
+          background: rgba(255, 255, 255, 0.1);
+          color: #ffffff;
+          border: 1px solid rgba(255, 255, 255, 0.2);
           padding: 8px 16px;
           border-radius: 50px;
           cursor: pointer;
@@ -405,14 +410,14 @@ function Dashboard() {
         }
 
         .pdf-modal-close-btn:hover {
-          background: rgba(255, 255, 255, 0.85);
+          background: rgba(255, 255, 255, 0.25);
         }
 
         .pdf-modal-body {
           flex: 1;
           width: 100%;
           height: 100%;
-          background-color: rgba(255, 255, 255, 0.2);
+          background-color: rgba(10, 10, 15, 0.5);
           position: relative;
         }
 
@@ -505,17 +510,17 @@ function Dashboard() {
           {/* 📄 Dynamic Google Drive & Uploaded Materials Section */}
           <div style={{ marginTop: '35px' }}>
             <div style={{
-              background: 'rgba(255, 255, 255, 0.35)',
+              background: 'rgba(25, 25, 35, 0.55)',
               backdropFilter: 'blur(25px) saturate(190%)',
               WebkitBackdropFilter: 'blur(25px) saturate(190%)',
               padding: '16px 24px',
               borderRadius: '50px',
-              border: '1.5px solid rgba(255, 255, 255, 0.75)',
+              border: '1.5px solid rgba(255, 255, 255, 0.12)',
               display: 'inline-block',
               marginBottom: '20px',
-              boxShadow: '0 8px 20px rgba(0,0,0,0.06)'
+              boxShadow: '0 8px 20px rgba(0,0,0,0.3)'
             }}>
-              <h3 style={{ color: '#1d1d1f', fontSize: '18px', margin: 0, fontWeight: '800' }}>
+              <h3 style={{ color: '#ffffff', fontSize: '18px', margin: 0, fontWeight: '800' }}>
                 📚 Recent Study Materials & Notes
               </h3>
             </div>
@@ -523,11 +528,12 @@ function Dashboard() {
             {isLoading ? (
               <p style={{ 
                 textAlign: 'center', 
-                color: '#1d1d1f', 
+                color: 'rgba(255, 255, 255, 0.85)', 
                 padding: '20px', 
-                background: 'rgba(255, 255, 255, 0.35)', 
+                background: 'rgba(25, 25, 35, 0.55)', 
                 backdropFilter: 'blur(20px)',
                 borderRadius: '20px', 
+                border: '1.5px solid rgba(255, 255, 255, 0.12)',
                 fontWeight: '600' 
               }}>Loading uploaded materials...</p>
             ) : materials.length > 0 ? (
@@ -542,12 +548,12 @@ function Dashboard() {
                       <div style={{ width: '100%' }}>
                         <span style={{ 
                           fontSize: '11px', 
-                          background: 'rgba(255, 255, 255, 0.65)', 
-                          border: '1px solid rgba(255, 255, 255, 0.8)',
+                          background: 'rgba(255, 193, 7, 0.2)', 
+                          border: '1px solid rgba(255, 193, 7, 0.4)',
                           padding: '4px 10px', 
                           borderRadius: '50px', 
                           fontWeight: '800',
-                          color: '#1d1d1f'
+                          color: '#ffda6a'
                         }}>
                           {mat.course ? mat.course.toUpperCase() : 'BCA'} - SEM {mat.semester || '1'}
                         </span>
@@ -560,12 +566,11 @@ function Dashboard() {
                         <button 
                           onClick={() => openPdfModal(fileTargetUrl, mat.title)}
                           className="db-button"
-                          style={{ background: 'rgba(255, 255, 255, 0.85)', color: '#1d1d1f' }}
                         >
                           View PDF 👁️
                         </button>
                       ) : (
-                        <button className="db-button" disabled style={{ backgroundColor: 'rgba(200, 200, 200, 0.4)', cursor: 'not-allowed', color: '#666' }}>
+                        <button className="db-button" disabled style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', cursor: 'not-allowed', color: '#888' }}>
                           No File Link
                         </button>
                       )}
@@ -575,11 +580,11 @@ function Dashboard() {
               </div>
             ) : (
               <p style={{ 
-                color: '#1d1d1f', 
-                backgroundColor: 'rgba(255, 255, 255, 0.35)', 
+                color: 'rgba(255, 255, 255, 0.85)', 
+                backgroundColor: 'rgba(25, 25, 35, 0.55)', 
                 backdropFilter: 'blur(20px)',
                 WebkitBackdropFilter: 'blur(20px)',
-                border: '1.5px solid rgba(255, 255, 255, 0.75)',
+                border: '1.5px solid rgba(255, 255, 255, 0.12)',
                 padding: '20px', 
                 borderRadius: '20px', 
                 textAlign: 'center',
