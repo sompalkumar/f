@@ -180,7 +180,7 @@ function Dashboard() {
         }
 
         .db-admin-btn:hover {
-          background: #006666;
+          background: #008080;
           transform: translateY(-1px);
         }
 
@@ -264,7 +264,7 @@ function Dashboard() {
         }
 
         .db-button:hover {
-          background: #006666;
+          background: #008080;
           box-shadow: 0 6px 14px rgba(0, 128, 128, 0.3);
         }
 

@@ -54,7 +54,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
           justify-content: space-between;
           align-items: center;
           padding: 10px 32px;
-          background: #00ddb3; /* Image Teal / Cyan Color */
+          background: #008080; /* Image Teal / Cyan Color */
           width: 100%;
           box-sizing: border-box;
           position: sticky;
