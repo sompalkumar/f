@@ -85,22 +85,12 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
       const backendRole = String(data.role || data.userRole || 'candidate').toLowerCase().trim();
       const currentSelectedRole = String(userRole).toLowerCase().trim();
 
-      if (currentSelectedRole === 'admin') {
-        if (backendRole !== 'admin') {
-          alert('❌ Access Denied! केवल अधिकृत Admin ही Admin Tab से लॉगिन कर सकते हैं।');
-          refreshCaptcha();
-          setCaptchaInput('');
-          setIsLoading(false);
-          return;
-        }
-      } else { 
-        if (backendRole === 'admin') {
-           window.location.replace('/admin-dashboard');
-          refreshCaptcha();
-          setCaptchaInput('');
-          setIsLoading(false);
-          return;
-        }
+      if (currentSelectedRole === 'admin' && backendRole !== 'admin') {
+        alert('❌ Access Denied! केवल अधिकृत Admin ही Admin Tab से लॉगिन कर सकते हैं।');
+        refreshCaptcha();
+        setCaptchaInput('');
+        setIsLoading(false);
+        return;
       }
 
       const authKeys = ['token', 'isLoggedIn', 'userName', 'logId', 'userRole', 'userCourse'];

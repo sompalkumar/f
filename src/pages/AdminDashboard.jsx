@@ -58,7 +58,7 @@ function AdminDashboard() {
       if (response.status === 401 || response.status === 403) {
         sessionStorage.clear(); 
         localStorage.clear(); 
-        navigate('/login', { replace: true }); 
+        navigate('/', { replace: true }); 
         return;
       }
 
@@ -92,7 +92,7 @@ function AdminDashboard() {
   // 🛡️ Role Guard Check & Lifecycle Polling
   useEffect(() => {
     if (!isLoggedIn || !token) {
-      navigate('/login', { replace: true });
+      navigate('/', { replace: true });
       return;
     }
 

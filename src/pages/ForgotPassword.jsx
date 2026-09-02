@@ -61,6 +61,11 @@ function ForgotPassword() {
     }
   };
 
+  const isPasswordStrong = (pass) => {
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return strongPasswordRegex.test(pass);
+  };
+
   // Step 2: Verify OTP and Reset Password
   const handleVerifyAndReset = async (e) => {
     e.preventDefault();
@@ -70,8 +75,8 @@ function ForgotPassword() {
       return;
     }
 
-    if (!newPassword || newPassword.length < 6) {
-      alert('नया पासवर्ड कम से कम 6 अक्षरों का होना चाहिए!');
+    if (!isPasswordStrong(newPassword)) {
+      alert('⚠️ पासवर्ड कम से कम 8 अक्षरों का होना चाहिए और उसमें कम से कम 1 बड़ा अक्षर (A-Z), 1 छोटा अक्षर (a-z), 1 संख्या (0-9) और 1 विशेष वर्ण (@$!%*?&) होना चाहिए!');
       return;
     }
 
@@ -86,7 +91,7 @@ function ForgotPassword() {
 
       if (response.ok) {
         alert(data.message || 'पासवर्ड सफलतापूर्वक बदल दिया गया है!');
-        navigate('/login');
+        navigate('/');
       } else {
         alert(data.message || 'OTP या पासवर्ड रीसेट विफल');
       }
@@ -369,7 +374,7 @@ function ForgotPassword() {
           )}
 
           <div>
-            <Link to="/login" className="fp-back-link">
+            <Link to="/" className="fp-back-link">
               ⬅ Back to Login
             </Link>
           </div>

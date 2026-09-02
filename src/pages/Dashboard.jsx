@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 
@@ -35,18 +35,8 @@ function Dashboard() {
     localStorage.getItem('userRole') || 
     'student';
 
-  // 🛡️ Security Check: Agar user logged in nahi hai ya token missing hai toh Root (/) par bhejen
-  useEffect(() => {
-    if (!isLoggedIn || !token) {
-      navigate('/', { replace: true });
-      return;
-    }
-
-    fetchUploadedMaterials();
-  }, [isLoggedIn, token, navigate]);
-
   // 🔴 Fetch Uploaded Materials from Backend API
-  const fetchUploadedMaterials = async () => {
+  const fetchUploadedMaterials = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await fetch(`${API_BASE_URL}/api/materials`, {
@@ -72,7 +62,17 @@ function Dashboard() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [token, navigate]);
+
+  // 🛡️ Security Check: Agar user logged in nahi hai ya token missing hai toh Root (/) par bhejen
+  useEffect(() => {
+    if (!isLoggedIn || !token) {
+      navigate('/', { replace: true });
+      return;
+    }
+
+    fetchUploadedMaterials();
+  }, [isLoggedIn, token, navigate, fetchUploadedMaterials]);
 
   // Courses List
   const courses = [

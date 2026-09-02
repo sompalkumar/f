@@ -38,8 +38,14 @@ function SemMaterial() {
     setLoading(true);
 
     const fetchMaterials = async () => {
+      const token = sessionStorage.getItem('token') || localStorage.getItem('token');
       try {
-        const response = await fetch(`${API_BASE_URL}/api/materials/${courseId}/${semId}`);
+        const response = await fetch(`${API_BASE_URL}/api/materials/${courseId}/${semId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` })
+          }
+        });
         
         if (response.ok) {
           const data = await response.json();
