@@ -13,12 +13,19 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   const fileId = extractDriveFileId(pdfUrl);
   const isGoogleDrive = Boolean(pdfUrl && (pdfUrl.includes('drive.google.com') || fileId));
 
-  // 🛠 Construct Clean Embed URL
-  const embedUrl = isGoogleDrive && fileId 
-    ? `https://drive.google.com/file/d/${fileId}/preview` 
-    : pdfUrl;
+  // 🛠 Construct Clean Embed URL with Native PDF Toolbar (#toolbar=1)
+  const getEmbedUrl = () => {
+    if (!pdfUrl) return '';
+    if (isGoogleDrive && fileId) {
+      return `https://drive.google.com/file/d/${fileId}/preview`;
+    }
+    // #toolbar=1 ensures the native PDF viewer toolbar (Page counter, Zoom, Rotate, Draw, Print, Download) shows up
+    return pdfUrl.includes('#') ? pdfUrl : `${pdfUrl}#toolbar=1&navpanes=1`;
+  };
 
-  // ⌨️ Close Modal on 'Escape' key press & Strict Background Scroll Lock Fix
+  const embedUrl = getEmbedUrl();
+
+  // ⌨️ Close Modal on 'Escape' key press & Strict Background Scroll Lock
   useEffect(() => {
     if (!isOpen) return;
 
@@ -28,14 +35,14 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
       }
     };
 
-    // 🔒 Complete Background Scroll Prevention (Desktop + Mobile Touch Devices)
+    // 🔒 Background Scroll Prevention
     const originalBodyOverflow = document.body.style.overflow;
     const originalHtmlOverflow = document.documentElement.style.overflow;
     const originalTouchAction = document.body.style.touchAction;
 
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
-    document.body.style.touchAction = 'none'; // Mobile touch scroll lock
+    document.body.style.touchAction = 'none';
 
     document.addEventListener('keydown', handleKeyDown);
 
@@ -54,7 +61,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     setDownloading(true);
 
     if (fileId) {
-      // Direct Export Endpoint
       const directDownloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
       const hiddenIframe = document.createElement('iframe');
       hiddenIframe.style.display = 'none';
@@ -83,7 +89,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   return (
     <>
       <style>{`
-        /* Modal Backdrop - Navbar overlapping prevented */
+        /* Modal Backdrop */
         .pdf-modal-backdrop {
           position: fixed;
           top: 0;
@@ -103,8 +109,8 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           box-sizing: border-box;
           z-index: 99999;
           animation: modalFadeIn 0.25s ease-out;
-          overscroll-behavior: contain; /* Prevents back-page bounce */
-          touch-action: pan-y; /* Allows scrolling inside modal only */
+          overscroll-behavior: contain;
+          touch-action: pan-y;
         }
 
         @keyframes modalFadeIn {
@@ -112,7 +118,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           to { opacity: 1; }
         }
 
-        /* Container height adjusted for screen bounds */
+        /* Container */
         .pdf-modal-container {
           background: rgba(30, 41, 59, 0.95);
           backdrop-filter: blur(16px);
@@ -261,7 +267,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           {/* Modal Body */}
           <div style={{ flex: 1, width: '100%', height: '100%', backgroundColor: '#0f172a', position: 'relative', overflow: 'hidden', overscrollBehavior: 'contain' }}>
             
-            {/* Top-Right Arrow Click Guard (Protects External Popout Navigation) */}
+            {/* Top-Right Arrow Click Guard (Protects External Popout Navigation for Google Drive) */}
             {isGoogleDrive && (
               <div 
                 style={{
