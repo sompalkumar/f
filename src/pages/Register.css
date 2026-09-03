@@ -10,23 +10,22 @@
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* Base Responsive Hero Card */
 .responsive-card {
   max-width: 950px;
   width: 100%;
-  margin: 0 auto;
-  background: #bf0303;
+  margin: 0 auto 24px auto;
+  background: #ffffff;
   border: 1.5px solid #d1d5db;
   border-radius: 16px;
   padding: 30px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   text-align: center;
   box-sizing: border-box;
-  
 }
 
 .responsive-card h2 {
@@ -45,7 +44,336 @@
   margin: 0;
 }
 
-/* Modal Overlay & Container */
+/* --------------------------------------------------
+   1. HERO BANNER & CTA SECTION
+-------------------------------------------------- */
+.hero-banner-section {
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 40px;
+}
+
+.hero-cta-box {
+  text-align: center;
+  padding: 30px 20px;
+  background: linear-gradient(135deg, #e6f2f2 0%, #ffffff 100%);
+  border: 1.5px solid #cbd5e1;
+  border-radius: 16px;
+  margin-top: 15px;
+}
+
+.hero-main-title {
+  color: #0f172a;
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 800;
+  line-height: 1.3;
+  margin-bottom: 12px;
+}
+
+.hero-sub-title {
+  color: #475569;
+  font-size: clamp(15px, 2vw, 18px);
+  margin-bottom: 24px;
+}
+
+.hero-action-btns {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cta-primary-btn {
+  background: #008080;
+  color: #ffffff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 128, 128, 0.2);
+}
+
+.cta-primary-btn:hover {
+  background: #006666;
+  transform: translateY(-1px);
+}
+
+.cta-secondary-btn {
+  background: #ffffff;
+  color: #008080;
+  border: 1.5px solid #008080;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cta-secondary-btn:hover {
+  background: #e6f2f2;
+}
+
+/* Common Section Heading */
+.section-heading {
+  text-align: center;
+  color: #1e293b;
+  font-size: clamp(20px, 3.5vw, 28px);
+  font-weight: 800;
+  margin-bottom: 24px;
+}
+
+/* --------------------------------------------------
+   2. SEMESTER PREVIEW CARDS
+-------------------------------------------------- */
+.semester-preview-container {
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 50px;
+}
+
+.semester-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.sem-card {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease;
+}
+
+.sem-card:hover {
+  transform: translateY(-3px);
+  border-color: #008080;
+}
+
+.sem-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.sem-card-header h3 {
+  font-size: 16px;
+  color: #0f172a;
+  margin: 0;
+  font-weight: 700;
+}
+
+.lock-icon {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.sem-card p {
+  color: #64748b;
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.unlock-btn-wrapper {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.unlock-all-btn, .complete-unlock-btn {
+  background: #008080;
+  color: #ffffff;
+  border: none;
+  padding: 12px 30px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 128, 128, 0.2);
+}
+
+.unlock-all-btn:hover, .complete-unlock-btn:hover {
+  background: #006666;
+}
+
+/* --------------------------------------------------
+   3. MEMBERSHIP COMPARISON TABLE
+-------------------------------------------------- */
+.comparison-container {
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 50px;
+}
+
+.comparison-table-wrapper {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.table-col {
+  flex: 1;
+  min-width: 280px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.registered-col {
+  border-color: #008080;
+  box-shadow: 0 4px 14px rgba(0, 128, 128, 0.15);
+}
+
+.col-header {
+  padding: 14px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 16px;
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.registered-col .col-header {
+  background: #008080;
+  color: #ffffff;
+}
+
+.col-body {
+  padding: 20px;
+}
+
+.col-body p {
+  font-size: 14px;
+  color: #334155;
+  margin: 10px 0;
+  font-weight: 600;
+}
+
+.cross-text {
+  color: #94a3b8 !important;
+  text-decoration: line-through;
+}
+
+/* --------------------------------------------------
+   4. LIVE STATS & SOCIAL PROOF
+-------------------------------------------------- */
+.stats-container {
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 50px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  text-align: center;
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.stat-card h2 {
+  font-size: 32px;
+  color: #008080;
+  margin: 0;
+  font-weight: 800;
+}
+
+.stat-card p {
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 6px 0 0 0;
+}
+
+.trust-badge p {
+  font-size: 16px;
+}
+
+/* --------------------------------------------------
+   5. FOOTER SECTION
+-------------------------------------------------- */
+.main-footer {
+  width: 100%;
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 40px 20px 20px 20px;
+  margin-top: auto;
+  box-sizing: border-box;
+}
+
+.footer-content-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid #334155;
+}
+
+.footer-col h3 {
+  color: #ffffff;
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.footer-col p {
+  color: #94a3b8;
+  font-size: 13.5px;
+  margin: 8px 0;
+}
+
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-col ul li {
+  margin-bottom: 8px;
+}
+
+.footer-col ul li a {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 13.5px;
+  transition: color 0.2s ease;
+}
+
+.footer-col ul li a:hover {
+  color: #2dd4bf;
+}
+
+.footer-copyright-bar {
+  text-align: center;
+  padding-top: 20px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+/* --------------------------------------------------
+   6. MODAL OVERLAY & CONTAINERS
+-------------------------------------------------- */
 .portal-overlay {
   position: fixed;
   top: 0;
@@ -157,7 +485,7 @@
   margin-bottom: 6px;
 }
 
-/* Input Fields (Matched with Image Inner Fields) */
+/* Input Fields */
 .custom-input {
   width: 100%;
   padding: 12px 14px;
@@ -277,7 +605,7 @@
   color: #dc2626;
 }
 
-/* Buttons (Matched Teal Theme from Image Button) */
+/* Buttons */
 .custom-maroon-btn {
   width: 100%;
   padding: 13px;

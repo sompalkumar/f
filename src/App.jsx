@@ -8,6 +8,11 @@ import AdminDashboard from './pages/AdminDashboard';
 import SemMaterial from './pages/SemMaterial';
 import ForgotPassword from './pages/ForgotPassword';
 
+// 📜 Legal Pages Import
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import Terms from './pages/Terms';
+import Disclaimer from './pages/Disclaimer';
+
 // 🟢 Role-based route guards
 import AdminRoute from './components/AdminRoute';
 import StudentRoute from './components/StudentRoute';
@@ -107,6 +112,11 @@ function App() {
 
         {/* Password Reset Route */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
+
+        {/* Legal & Policy Public Routes */}
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/disclaimer" element={<Disclaimer />} />
 
         {/* Student Protected Routes */}
         <Route element={<StudentRoute />}>

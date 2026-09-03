@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../config'; 
 import './Register.css'; // Pure styling external CSS file se apply hogi
 
@@ -207,13 +208,156 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
     about: { title: "ℹ️ About Us", desc: "Since its inception, Bca Portal has been setting new records in the field of higher education." }
   };
 
+  // Helper function to trigger login modal
+  const triggerLoginModal = (view = 'register') => {
+    setModalView(view);
+    setShowPortalModal(true);
+  };
+
   return (
     <div className="register-hero-wrapper">
-      <div className="responsive-card">
-        <h2>{sectionContent[activeTab]?.title || sectionContent.home.title}</h2>
-        <p>{sectionContent[activeTab]?.desc || sectionContent.home.desc}</p>
+      
+      {/* 🌟 MAIN HERO SECTION */}
+      <div className="hero-banner-section">
+        <div className="responsive-card">
+          <h2>{sectionContent[activeTab]?.title || sectionContent.home.title}</h2>
+          <p>{sectionContent[activeTab]?.desc || sectionContent.home.desc}</p>
+        </div>
+
+        <div className="hero-cta-box">
+          <h1 className="hero-main-title">
+            Master Your BCA Degree with Premium Notes, PYQs & Project Source Codes
+          </h1>
+          <p className="hero-sub-title">
+            Unlock all resources. Create a free student account today.
+          </p>
+          <div className="hero-action-btns">
+            <button className="cta-primary-btn" onClick={() => triggerLoginModal('register')}>
+              Register for Free
+            </button>
+            <button className="cta-secondary-btn" onClick={() => triggerLoginModal('login')}>
+              Explore Preview
+            </button>
+          </div>
+        </div>
       </div>
 
+      {/* 🔒 SEMESTER RESOURCES PREVIEW (LOCKED CARDS) */}
+      <section className="semester-preview-container">
+        <h2 className="section-heading">Semester Resources Preview</h2>
+        <div className="semester-grid">
+          
+          <div className="sem-card">
+            <div className="sem-card-header">
+              <h3>Semester 1: Foundation</h3>
+              <span className="lock-icon">🔒 LOCK</span>
+            </div>
+            <p>C Programming, DBMS, Mathematics, Digital Electronics...</p>
+          </div>
+
+          <div className="sem-card">
+            <div className="sem-card-header">
+              <h3>Semester 2: Evaluation</h3>
+              <span className="lock-icon">🔒 LOCK</span>
+            </div>
+            <p>C++ OOPs, Data Structures, Organization Structure...</p>
+          </div>
+
+          <div className="sem-card">
+            <div className="sem-card-header">
+              <h3>Semester 3: Processing</h3>
+              <span className="lock-icon">🔒 LOCK</span>
+            </div>
+            <p>Java Programming, Operating Systems, Web Tech...</p>
+          </div>
+
+          <div className="sem-card">
+            <div className="sem-card-header">
+              <h3>Semester 4: Education</h3>
+              <span className="lock-icon">🔒 LOCK</span>
+            </div>
+            <p>Software Engineering, Python, Computer Networks...</p>
+          </div>
+
+          <div className="sem-card">
+            <div className="sem-card-header">
+              <h3>Semester 5: Engineering</h3>
+              <span className="lock-icon">🔒 LOCK</span>
+            </div>
+            <p>PHP & MySQL, Cloud Computing, Major Projects...</p>
+          </div>
+
+          <div className="sem-card">
+            <div className="sem-card-header">
+              <h3>Semester 6: Booking</h3>
+              <span className="lock-icon">🔒 LOCK</span>
+            </div>
+            <p>Cyber Security, AI Basics, Final Industrial Project...</p>
+          </div>
+
+        </div>
+
+        <div className="unlock-btn-wrapper">
+          <button className="unlock-all-btn" onClick={() => triggerLoginModal('login')}>
+            Unlock Semesters (Login Required)
+          </button>
+        </div>
+      </section>
+
+      {/* 📊 MEMBERSHIP COMPARISON TABLE */}
+      <section className="comparison-container">
+        <h2 className="section-heading">Membership Comparison Table</h2>
+        <div className="comparison-table-wrapper">
+          <div className="table-col guest-col">
+            <div className="col-header">Guest User</div>
+            <div className="col-body">
+              <p>✔ Only Syllabus & 1 Sample Paper</p>
+              <p className="cross-text">✖ Full PDF Downloads</p>
+              <p className="cross-text">✖ Handwritten Notes</p>
+              <p className="cross-text">✖ Solved PYQs & Lab Code</p>
+              <p className="cross-text">✖ Project Source Files</p>
+            </div>
+          </div>
+
+          <div className="table-col registered-col">
+            <div className="col-header">Registered Student</div>
+            <div className="col-body">
+              <p>✔ Full PDF Downloads</p>
+              <p>✔ Handwritten Notes</p>
+              <p>✔ Solved PYQs (Last 5 Years)</p>
+              <p>✔ Practical Lab Codes (C, Java, Web)</p>
+              <p>✔ Minor & Major Project Files</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="unlock-btn-wrapper">
+          <button className="complete-unlock-btn" onClick={() => triggerLoginModal('register')}>
+            Complete All Semesters to Unlock
+          </button>
+        </div>
+      </section>
+
+      {/* 📈 LIVE STATS & SOCIAL PROOF */}
+      <section className="stats-container">
+        <h2 className="section-heading">Live Stats & Social Proof</h2>
+        <div className="stats-grid">
+          <div className="stat-card">
+            <h2>1500+</h2>
+            <p>Students Registered</p>
+          </div>
+          <div className="stat-card">
+            <h2>200+</h2>
+            <p>Notes Downloaded</p>
+          </div>
+          <div className="stat-card trust-badge">
+            <p>⭐⭐⭐⭐⭐</p>
+            <p>Top Rated BCA Portal</p>
+          </div>
+        </div>
+      </section>
+
+      {/* 🚪 PORTAL MODAL (ORIGINAL LOGIN / REGISTER / FORGOT PASSWORD) */}
       {showPortalModal && (
         <div className="portal-overlay">
           <div className="portal-modal">
@@ -377,6 +521,38 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
           </div>
         </div>
       )}
+
+      {/* 🦶 FOOTER SECTION */}
+      <footer className="main-footer">
+        <div className="footer-content-grid">
+          
+          {/* Contact Support */}
+          <div className="footer-col">
+            <h3>Contact Support</h3>
+            <p>📧 Email: support@bcaeasylearn.com</p>
+            <p>📱 WhatsApp Help: +91 827 827 0339</p>
+            <p>📍 Location: BCA Student Helpdesk</p>
+            <p>🕒 Mon - Sat (10:00 AM - 6:00 PM)</p>
+          </div>
+
+          {/* Useful Links */}
+          <div className="footer-col">
+            <h3>Useful Links</h3>
+            <ul>
+              <li><a href="#home">Home</a></li>
+              <li><Link to="/privacy-policy">Privacy Policy</Link></li>
+              <li><Link to="/terms">Terms & Conditions</Link></li>
+              <li><Link to="/disclaimer">Disclaimer</Link></li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div className="footer-copyright-bar">
+          <p>© 2026 BCA Portal (bcaeazylearn.vercel.app). All Rights Reserved.</p>
+        </div>
+      </footer>
+
     </div>
   );
 }
