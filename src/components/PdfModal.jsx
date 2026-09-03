@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   const [downloading, setDownloading] = useState(false);
   const [printing, setPrinting] = useState(false);
-  const [zoom, setZoom] = useState(100);
   const [rotation, setRotation] = useState(0);
 
   const iframeRef = useRef(null);
@@ -21,7 +20,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   // 🛠 Reset controls on modal open
   useEffect(() => {
     if (isOpen) {
-      setZoom(100);
       setRotation(0);
     }
   }, [isOpen]);
@@ -65,45 +63,34 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     };
   }, [isOpen, onClose]);
 
-  // 🖨️ Direct Print Functionality
-  const handlePrint = useCallback(async () => {
+  // 🖨️ Direct Printable Fix for Cross-Origin & Google Drive PDFs
+  const handlePrint = useCallback(() => {
     if (!pdfUrl) return;
     setPrinting(true);
 
     try {
-      let printSource = pdfUrl;
-      if (fileId) {
-        printSource = `https://drive.google.com/uc?export=download&id=${fileId}`;
-      }
-
-      // Fetch PDF binary blob to bypass cross-origin restrictions
-      const response = await fetch(printSource);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      const printFrame = document.createElement('iframe');
-      printFrame.style.display = 'none';
-      printFrame.src = blobUrl;
-      document.body.appendChild(printFrame);
-
-      printFrame.onload = () => {
-        setTimeout(() => {
-          printFrame.contentWindow?.focus();
-          printFrame.contentWindow?.print();
-          setPrinting(false);
-        }, 500);
-      };
-    } catch (error) {
-      console.error("Direct print error, falling back to window print:", error);
-      // Fallback if CORS blocks direct fetch
-      if (iframeRef.current && iframeRef.current.contentWindow) {
-        iframeRef.current.contentWindow.print();
+      if (isGoogleDrive && fileId) {
+        // Direct print trigger window for Google Drive bypassing CORS lock
+        const printWindow = window.open(`https://drive.google.com/file/d/${fileId}/preview`, '_blank', 'width=800,height=600');
+        if (printWindow) {
+          printWindow.onload = () => {
+            printWindow.print();
+          };
+        }
       } else {
-        window.open(pdfUrl, '_blank');
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+          iframeRef.current.contentWindow.focus();
+          iframeRef.current.contentWindow.print();
+        } else {
+          window.print();
+        }
       }
-      setPrinting(false);
+    } catch (err) {
+      console.error("Printing failed:", err);
+    } finally {
+      setTimeout(() => setPrinting(false), 1000);
     }
-  }, [pdfUrl, fileId]);
+  }, [pdfUrl, isGoogleDrive, fileId]);
 
   // ⬇️ Direct In-App Download Function
   const handleDirectDownload = useCallback(() => {
@@ -143,9 +130,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     }
   };
 
-  // 🔍 Zoom & Rotate Handlers
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 15, 200));
-  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 15, 50));
+  // 🔄 Rotation Control
   const handleRotate = () => setRotation((prev) => (prev + 90) % 360);
 
   if (!isOpen) return null;
@@ -198,7 +183,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           to { transform: scale(1); opacity: 1; }
         }
 
-        /* Toolbar Styling like PDF Viewer */
         .pdf-modal-header {
           padding: 10px 16px;
           background: #0f172a;
@@ -220,7 +204,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          max-width: 200px;
+          max-width: 250px;
         }
 
         .pdf-toolbar-controls {
@@ -250,14 +234,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
         .pdf-tool-btn:hover {
           background: rgba(255, 255, 255, 0.1);
           color: #ffffff;
-        }
-
-        .pdf-zoom-label {
-          color: #94a3b8;
-          font-size: 12px;
-          font-weight: 700;
-          min-width: 42px;
-          text-align: center;
         }
 
         .pdf-divider {
@@ -290,16 +266,19 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           height: 100%;
           background-color: #0f172a;
           position: relative;
-          overflow: auto;
-          display: flex;
-          justify-content: center;
-          align-items: center;
+          overflow: hidden;
         }
 
-        .pdf-modal-iframe-wrapper {
-          width: 100%;
-          height: 100%;
-          transition: transform 0.2s ease-out;
+        /* Fixed Pop-out Click Shield Guard */
+        .pdf-click-guard {
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 90px;
+          height: 75px;
+          background-color: transparent;
+          z-index: 999999;
+          cursor: not-allowed;
         }
 
         .pdf-modal-iframe {
@@ -307,6 +286,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           height: 100%;
           border: none;
           display: block;
+          transition: transform 0.2s ease;
         }
 
         @media screen and (max-width: 768px) {
@@ -324,24 +304,14 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           className="pdf-modal-container"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Enhanced Toolbar Header */}
+          {/* Header */}
           <div className="pdf-modal-header">
             <h3 className="pdf-modal-title" title={title || 'Document'}>
               📄 {title || 'Document'}
             </h3>
 
-            {/* Central Toolbar Actions (Zoom, Rotate, Print, Drive, Download) */}
+            {/* Controls */}
             <div className="pdf-toolbar-controls">
-              <button onClick={handleZoomOut} className="pdf-tool-btn" title="Zoom Out">
-                ➖
-              </button>
-              <span className="pdf-zoom-label">{zoom}%</span>
-              <button onClick={handleZoomIn} className="pdf-tool-btn" title="Zoom In">
-                ➕
-              </button>
-
-              <div className="pdf-divider" />
-
               <button onClick={handleRotate} className="pdf-tool-btn" title="Rotate Document">
                 🔄 Rotate
               </button>
@@ -353,11 +323,11 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
               </button>
 
               <button onClick={handlePrint} disabled={printing} className="pdf-tool-btn" title="Print PDF">
-                {printing ? '⏳ Printing...' : '🖨️ Print'}
+                {printing ? '⏳ Opening Print...' : '🖨️ Print'}
               </button>
 
               <button onClick={handleDirectDownload} disabled={downloading} className="pdf-tool-btn" title="Download PDF">
-                {downloading ? '⏳ ...' : '⬇️ Download'}
+                {downloading ? '⏳ Downloading...' : '⬇️ Download'}
               </button>
             </div>
 
@@ -368,18 +338,10 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
 
           {/* Modal Body */}
           <div className="pdf-modal-body">
+            {/* Absolute Fixed Click Guard Shield for Pop-out Button */}
             {isGoogleDrive && (
               <div 
-                style={{
-                  position: 'absolute',
-                  top: '0px',
-                  right: '0px',
-                  width: '75px',
-                  height: '75px',
-                  backgroundColor: 'transparent',
-                  zIndex: 9999,
-                  cursor: 'not-allowed'
-                }}
+                className="pdf-click-guard"
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -387,20 +349,15 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
               />
             )}
 
-            <div 
-              className="pdf-modal-iframe-wrapper"
+            <iframe 
+              ref={iframeRef}
+              src={embedUrl} 
+              title="PDF Preview"
+              className="pdf-modal-iframe"
               style={{
-                transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
-                transformOrigin: 'center center'
+                transform: `rotate(${rotation}deg)`
               }}
-            >
-              <iframe 
-                ref={iframeRef}
-                src={embedUrl} 
-                title="PDF Preview"
-                className="pdf-modal-iframe"
-              />
-            </div>
+            />
           </div>
         </div>
       </div>
