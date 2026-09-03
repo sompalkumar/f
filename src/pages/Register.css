@@ -1,11 +1,11 @@
 /* --------------------------------------------------
-   Register.css - Light Slate & Teal Theme
+   Register.css - Deep Teal & Cyan Theme (Exact Image Match)
 -------------------------------------------------- */
 
 /* Global Wrapper & Background */
 .register-hero-wrapper {
   min-height: calc(100vh - 60px);
-  background-color: #f4f6f8;
+  background: #f0fdfa;
   padding: clamp(20px, 4vw, 40px) clamp(10px, 3vw, 20px);
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -20,16 +20,16 @@
   width: 100%;
   margin: 0 auto 24px auto;
   background: #ffffff;
-  border: 1.5px solid #d1d5db;
+  border: 1.5px solid #cbd5e1;
   border-radius: 16px;
   padding: 30px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(2, 73, 89, 0.06);
   text-align: center;
   box-sizing: border-box;
 }
 
 .responsive-card h2 {
-  color: #1a202c;
+  color: #0f172a;
   font-size: clamp(22px, 5vw, 32px);
   font-weight: 800;
   margin-top: 0;
@@ -37,7 +37,7 @@
 }
 
 .responsive-card p {
-  color: #4a5568;
+  color: #475569;
   font-size: clamp(14px, 3.5vw, 16px);
   font-weight: 500;
   line-height: 1.6;
@@ -55,15 +55,16 @@
 
 .hero-cta-box {
   text-align: center;
-  padding: 30px 20px;
-  background: linear-gradient(135deg, #e6f2f2 0%, #ffffff 100%);
-  border: 1.5px solid #cbd5e1;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #024959 0%, #008080 100%);
   border-radius: 16px;
   margin-top: 15px;
+  color: #ffffff;
+  box-shadow: 0 10px 25px rgba(2, 73, 89, 0.2);
 }
 
 .hero-main-title {
-  color: #0f172a;
+  color: #ffffff;
   font-size: clamp(24px, 4vw, 36px);
   font-weight: 800;
   line-height: 1.3;
@@ -71,7 +72,7 @@
 }
 
 .hero-sub-title {
-  color: #475569;
+  color: #ccfbf1;
   font-size: clamp(15px, 2vw, 18px);
   margin-bottom: 24px;
 }
@@ -84,29 +85,29 @@
 }
 
 .cta-primary-btn {
-  background: #008080;
-  color: #ffffff;
+  background: #6ee7b7;
+  color: #064e3b;
   border: none;
   padding: 12px 28px;
-  border-radius: 8px;
+  border-radius: 50px;
   font-weight: 700;
   font-size: 15px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(0, 128, 128, 0.2);
+  box-shadow: 0 4px 12px rgba(110, 231, 183, 0.3);
 }
 
 .cta-primary-btn:hover {
-  background: #006666;
-  transform: translateY(-1px);
+  background: #a7f3d0;
+  transform: translateY(-2px);
 }
 
 .cta-secondary-btn {
-  background: #ffffff;
-  color: #008080;
-  border: 1.5px solid #008080;
+  background: transparent;
+  color: #ffffff;
+  border: 1.5px solid #ffffff;
   padding: 12px 28px;
-  border-radius: 8px;
+  border-radius: 50px;
   font-weight: 700;
   font-size: 15px;
   cursor: pointer;
@@ -114,13 +115,13 @@
 }
 
 .cta-secondary-btn:hover {
-  background: #e6f2f2;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* Common Section Heading */
 .section-heading {
   text-align: center;
-  color: #1e293b;
+  color: #0f172a;
   font-size: clamp(20px, 3.5vw, 28px);
   font-weight: 800;
   margin-bottom: 24px;
@@ -142,7 +143,7 @@
 }
 
 .sem-card {
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
   border: 1.5px solid #cbd5e1;
   border-radius: 12px;
   padding: 20px;
@@ -170,9 +171,9 @@
 }
 
 .lock-icon {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
   font-size: 11px;
   font-weight: 800;
   padding: 4px 8px;
@@ -198,14 +199,14 @@
   padding: 12px 30px;
   font-size: 15px;
   font-weight: 700;
-  border-radius: 8px;
+  border-radius: 50px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(0, 128, 128, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 128, 128, 0.25);
 }
 
 .unlock-all-btn:hover, .complete-unlock-btn:hover {
-  background: #006666;
+  background: #024959;
 }
 
 /* --------------------------------------------------
@@ -242,7 +243,7 @@
   text-align: center;
   font-weight: 800;
   font-size: 16px;
-  background: #e2e8f0;
+  background: #f1f5f9;
   color: #334155;
 }
 
@@ -313,7 +314,7 @@
 -------------------------------------------------- */
 .main-footer {
   width: 100%;
-  background: #0f172a;
+  background: #024959;
   color: #f8fafc;
   padding: 40px 20px 20px 20px;
   margin-top: auto;
@@ -327,7 +328,7 @@
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 30px;
   padding-bottom: 30px;
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .footer-col h3 {
@@ -338,7 +339,7 @@
 }
 
 .footer-col p {
-  color: #94a3b8;
+  color: #cbd5e1;
   font-size: 13.5px;
   margin: 8px 0;
 }
@@ -354,20 +355,20 @@
 }
 
 .footer-col ul li a {
-  color: #94a3b8;
+  color: #cbd5e1;
   text-decoration: none;
   font-size: 13.5px;
   transition: color 0.2s ease;
 }
 
 .footer-col ul li a:hover {
-  color: #2dd4bf;
+  color: #5eead4;
 }
 
 .footer-copyright-bar {
   text-align: center;
   padding-top: 20px;
-  color: #64748b;
+  color: #94a3b8;
   font-size: 13px;
 }
 
@@ -432,7 +433,7 @@
 /* Candidate / Admin Tabs */
 .role-tab-container {
   display: flex;
-  background: #e2e8f0;
+  background: #f1f5f9;
   border: 1.5px solid #cbd5e1;
   border-radius: 10px;
   padding: 4px;
@@ -460,7 +461,7 @@
 
 /* Headings & Form Layout */
 .form-heading {
-  color: #1e293b;
+  color: #0f172a;
   font-size: 20px;
   font-weight: 800;
   margin-top: 0;
@@ -489,10 +490,10 @@
 .custom-input {
   width: 100%;
   padding: 12px 14px;
-  background-color: #e2e8f0;
+  background-color: #f8fafc;
   border: 1.5px solid #cbd5e1;
   border-radius: 8px;
-  color: #1e293b;
+  color: #0f172a;
   font-size: 14px;
   font-weight: 500;
   box-sizing: border-box;
@@ -560,7 +561,7 @@
 }
 
 .captcha-box {
-  background: #e2e8f0;
+  background: #f1f5f9;
   border: 1.5px dashed #008080;
   padding: 10px 16px;
   border-radius: 8px;
@@ -622,8 +623,8 @@
 }
 
 .custom-maroon-btn:hover:not(:disabled) {
-  background: #006666;
-  box-shadow: 0 6px 14px rgba(0, 128, 128, 0.3);
+  background: #024959;
+  box-shadow: 0 6px 14px rgba(2, 73, 89, 0.3);
 }
 
 .custom-maroon-btn:active:not(:disabled) {

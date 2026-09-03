@@ -44,23 +44,29 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
     }
   }, [navigate]);
 
+  // 🏠 Home button click handler (Always redirects to Main Home Page)
+  const handleHomeClick = (tabName) => {
+    if (onTabChange) onTabChange(tabName);
+    navigate('/'); // Ensures navigation back to home page from Legal pages
+  };
+
   return (
     <>
-      {/* 📱💻 Image Matching Cyan/Teal Exact CSS Styling */}
+      {/* 📱💻 Image Matching Deep Teal / Cyan Gradient Styling */}
       <style>{`
         .navbar-container {
           display: flex;
           flex-wrap: wrap;
           justify-content: space-between;
           align-items: center;
-          padding: 10px 32px;
-          background: #008080; /* Image Teal / Cyan Color */
+          padding: 12px 32px;
+          background: linear-gradient(135deg, #024959 0%, #008080 100%);
           width: 100%;
           box-sizing: border-box;
           position: sticky;
           top: 0;
           z-index: 1000;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
         }
 
         .nav-logo {
@@ -68,7 +74,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
           font-size: 20px;
           cursor: pointer;
           font-weight: 800;
-          color: #1a1a1a;
+          color: #ffffff;
           white-space: nowrap;
           letter-spacing: -0.3px;
           display: flex;
@@ -78,13 +84,13 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
 
         .nav-links-container {
           display: flex;
-          gap: 12px;
+          gap: 10px;
           align-items: center;
         }
 
         .nav-btn {
           padding: 8px 18px;
-          color: #1a1a1a;
+          color: #e2e8f0;
           border: none;
           border-radius: 50px;
           cursor: pointer;
@@ -97,39 +103,41 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
         }
 
         .nav-btn:hover {
-          background: rgba(255, 255, 255, 0.2);
+          color: #ffffff;
+          background: rgba(255, 255, 255, 0.12);
         }
 
         /* Active Tab Capsule Pill - Exact as Image */
         .nav-btn.active {
-          color: #1a1a1a;
-          background: #b2f5e8;
+          color: #0f172a;
+          background: #a7f3d0;
           font-weight: 700;
         }
 
         /* Login Button - Exact White Capsule as Image */
         .login-btn {
-          padding: 9px 24px;
+          padding: 9px 22px;
           background: #ffffff;
-          color: #1a1a1a;
+          color: #0f172a;
           border: none;
           border-radius: 50px;
           cursor: pointer;
           font-weight: 700;
           font-size: 13.5px;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
           transition: all 0.2s ease;
         }
 
         .login-btn:hover {
           transform: translateY(-1px);
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+          background: #f8fafc;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
         }
 
         .action-btn {
           padding: 8px 18px;
           background: #ffffff;
-          color: #1a1a1a;
+          color: #0f172a;
           border: none;
           border-radius: 50px;
           cursor: pointer;
@@ -139,16 +147,16 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
         }
 
         .action-btn:hover {
-          background: rgba(255, 255, 255, 0.85);
+          background: rgba(255, 255, 255, 0.9);
         }
 
         .logout-btn {
-          background: #ff4d4d;
+          background: #ef4444;
           color: #ffffff;
         }
 
         .logout-btn:hover {
-          background: #e60000;
+          background: #dc2626;
         }
 
         /* 📱 Mobile Responsiveness Adjustments */
@@ -188,10 +196,7 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
         {/* Logo / Title */}
         <h2 
           className="nav-logo"
-          onClick={() => { 
-            if (onTabChange) onTabChange('home'); 
-            navigate('/'); 
-          }}
+          onClick={() => handleHomeClick('home')}
         >
           📚 BCA Portal
         </h2>
@@ -200,25 +205,25 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
         {!isLoggedIn && (
           <div className="nav-links-container">
             <button 
-              onClick={() => onTabChange?.('home')} 
+              onClick={() => handleHomeClick('home')} 
               className={`nav-btn ${activeTab === 'home' ? 'active' : ''}`}
             >
               Home
             </button>
             <button 
-              onClick={() => onTabChange?.('chairman')} 
+              onClick={() => handleHomeClick('chairman')} 
               className={`nav-btn ${activeTab === 'chairman' ? 'active' : ''}`}
             >
               Chairman's Message
             </button>
             <button 
-              onClick={() => onTabChange?.('students')} 
+              onClick={() => handleHomeClick('students')} 
               className={`nav-btn ${activeTab === 'students' ? 'active' : ''}`}
             >
               For Students
             </button>
             <button 
-              onClick={() => onTabChange?.('about')} 
+              onClick={() => handleHomeClick('about')} 
               className={`nav-btn ${activeTab === 'about' ? 'active' : ''}`}
             >
               About Us

@@ -110,6 +110,7 @@ function CourseDetail() {
 
   return (
     <>
+      {/* 🎨 Updated Teal & Cyan Theme Styles matching Project UI */}
       <style>{`
         .cd-wrapper {
           min-height: calc(100vh - 60px);
@@ -117,6 +118,7 @@ function CourseDetail() {
           padding: clamp(20px, 4vw, 40px) clamp(10px, 3vw, 20px);
           box-sizing: border-box;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          background: #f0fdfa;
         }
 
         .cd-wrapper::before {
@@ -133,7 +135,7 @@ function CourseDetail() {
           filter: blur(12px);
           -webkit-filter: blur(12px);
           transform: scale(1.05);
-          z-index: -2;
+          z-index: 0;
         }
 
         .cd-wrapper::after {
@@ -143,12 +145,12 @@ function CourseDetail() {
           left: 0;
           width: 100%;
           height: 100%;
-          background: rgba(0, 0, 0, 0.2);
-          z-index: -1;
+          background: rgba(2, 73, 89, 0.45);
+          z-index: 0;
         }
 
         .cd-container {
-          max-width: 650px;
+          max-width: 700px;
           margin: 0 auto;
           box-sizing: border-box;
           position: relative;
@@ -156,41 +158,45 @@ function CourseDetail() {
         }
 
         .cd-header {
-          background: rgba(255, 255, 255, 0.35);
-          backdrop-filter: blur(25px) saturate(190%);
-          -webkit-backdrop-filter: blur(25px) saturate(190%);
-          padding: 22px 20px;
-          border-radius: 28px;
-          border: 1.5px solid rgba(255, 255, 255, 0.75);
-          box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          padding: 24px 20px;
+          border-radius: 20px;
+          border: 1.5px solid #cbd5e1;
+          box-shadow: 0 10px 25px rgba(2, 73, 89, 0.15);
           text-align: center;
           margin-bottom: 25px;
         }
 
         .cd-title {
           text-transform: uppercase;
-          color: #1d1d1f;
+          color: #024959;
           font-weight: 800;
           margin: 0 0 8px 0;
           font-size: clamp(20px, 4.5vw, 26px);
         }
 
         .cd-subtitle {
-          color: #2d2d2f;
+          color: #475569;
           margin: 0;
           font-size: 14px;
-          font-weight: 500;
+          font-weight: 600;
         }
 
         .cd-sem-card {
-          border: 1.5px solid rgba(255, 255, 255, 0.75);
-          border-radius: 20px;
+          border: 1.5px solid #cbd5e1;
+          border-radius: 16px;
           overflow: hidden;
-          background: rgba(255, 255, 255, 0.3);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
-          transition: all 0.3s ease;
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+          transition: all 0.2s ease;
+        }
+
+        .cd-sem-card:hover {
+          border-color: #008080;
         }
 
         .cd-sem-header {
@@ -201,27 +207,27 @@ function CourseDetail() {
           justify-content: space-between;
           align-items: center;
           user-select: none;
-          transition: all 0.3s ease;
+          transition: all 0.2s ease;
         }
 
         .cd-sem-header.active {
-          background: rgba(255, 255, 255, 0.65);
-          color: #1d1d1f;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+          background: #008080;
+          color: #ffffff;
         }
 
         .cd-sem-header.inactive {
-          background: rgba(255, 255, 255, 0.25);
-          color: #1d1d1f;
+          background: #ffffff;
+          color: #0f172a;
         }
 
         .cd-sem-header:hover {
-          background: rgba(255, 255, 255, 0.5);
+          opacity: 0.95;
         }
 
         .cd-sem-body {
           padding: 18px;
-          background: rgba(255, 255, 255, 0.2);
+          background: #f8fafc;
+          border-top: 1px solid #e2e8f0;
         }
 
         .cd-mat-item {
@@ -229,51 +235,47 @@ function CourseDetail() {
           justify-content: space-between;
           align-items: center;
           padding: 12px 16px;
-          background: rgba(255, 255, 255, 0.45);
-          backdrop-filter: blur(15px);
-          -webkit-backdrop-filter: blur(15px);
-          border-radius: 14px;
-          border: 1px solid rgba(255, 255, 255, 0.8);
+          background: #ffffff;
+          border-radius: 10px;
+          border: 1.5px solid #cbd5e1;
           flex-wrap: wrap;
           gap: 10px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
         }
 
         .cd-btn-view {
-          padding: 8px 18px;
-          background: rgba(255, 255, 255, 0.8);
-          border: 1px solid rgba(255, 255, 255, 0.9);
-          color: #1d1d1f;
+          padding: 8px 20px;
+          background: #008080;
+          border: none;
+          color: #ffffff;
           border-radius: 50px;
           cursor: pointer;
           font-weight: 700;
           font-size: 13px;
           transition: all 0.2s ease;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          box-shadow: 0 2px 8px rgba(0, 128, 128, 0.2);
         }
 
         .cd-btn-view:hover {
-          background: rgba(255, 255, 255, 0.98);
+          background: #024959;
           transform: translateY(-1px);
         }
 
         .cd-back-btn {
           display: inline-block;
-          background: rgba(255, 255, 255, 0.4);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1.5px solid rgba(255, 255, 255, 0.75);
-          color: #1d1d1f;
+          background: #008080;
+          border: none;
+          color: #ffffff;
           text-decoration: none;
           font-weight: 700;
-          padding: 12px 24px;
+          padding: 12px 28px;
           border-radius: 50px;
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-          transition: all 0.3s ease;
+          box-shadow: 0 4px 12px rgba(0, 128, 128, 0.3);
+          transition: all 0.2s ease;
         }
 
         .cd-back-btn:hover {
-          background: rgba(255, 255, 255, 0.75);
+          background: #024959;
           transform: translateY(-2px);
         }
 
@@ -284,9 +286,9 @@ function CourseDetail() {
           left: 0;
           width: 100%;
           height: 100%;
-          background: rgba(0, 0, 0, 0.4);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          background: rgba(0, 0, 0, 0.6);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -296,19 +298,17 @@ function CourseDetail() {
         }
 
         .cd-img-card {
-          background: rgba(255, 255, 255, 0.45);
-          backdrop-filter: blur(30px);
-          -webkit-backdrop-filter: blur(30px);
-          border: 1.5px solid rgba(255, 255, 255, 0.8);
+          background: #ffffff;
+          border: 1.5px solid #cbd5e1;
           padding: 20px;
-          border-radius: 24px;
+          border-radius: 16px;
           position: relative;
           max-width: 90%;
           max-height: 90%;
           display: flex;
           flex-direction: column;
           align-items: center;
-          box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
 
         .cd-close-btn {
@@ -317,17 +317,22 @@ function CourseDetail() {
           right: -12px;
           width: 36px;
           height: 36px;
-          background: rgba(255, 255, 255, 0.85);
-          color: #1d1d1f;
-          border: 1px solid rgba(255, 255, 255, 0.9);
+          background: #024959;
+          color: #ffffff;
+          border: 2px solid #ffffff;
           border-radius: 50%;
           cursor: pointer;
           font-weight: 800;
           font-size: 16px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
           display: flex;
           align-items: center;
           justify-content: center;
+          transition: all 0.2s ease;
+        }
+
+        .cd-close-btn:hover {
+          background: #ef4444;
         }
       `}</style>
 
@@ -356,19 +361,19 @@ function CourseDetail() {
                 {/* Expanded Semester Content */}
                 {selectedSem === sem && (
                   <div className="cd-sem-body">
-                    <h4 style={{ margin: '0 0 14px 0', color: '#1d1d1f', fontWeight: '800', fontSize: '15px' }}>
+                    <h4 style={{ margin: '0 0 14px 0', color: '#0f172a', fontWeight: '800', fontSize: '15px' }}>
                       Available Materials:
                     </h4>
                     
                     {loading ? (
-                      <p style={{ color: '#1d1d1f', fontWeight: '700', margin: 0, textAlign: 'center', padding: '10px' }}>
+                      <p style={{ color: '#008080', fontWeight: '700', margin: 0, textAlign: 'center', padding: '10px' }}>
                         ⏳ Loading materials...
                       </p>
                     ) : dbMaterials.length > 0 ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {dbMaterials.map((mat) => (
                           <div key={mat._id || mat.id} className="cd-mat-item">
-                            <span style={{ fontWeight: '700', color: '#1d1d1f', fontSize: '14px' }}>
+                            <span style={{ fontWeight: '700', color: '#0f172a', fontSize: '14px' }}>
                               {mat.fileType === 'pdf' ? '📄' : '🖼️'} {mat.title}
                             </span>
                             
@@ -385,7 +390,7 @@ function CourseDetail() {
                         ))}
                       </div>
                     ) : ( 
-                      <p style={{ color: '#444', margin: 0, fontSize: '14px', textAlign: 'center', fontWeight: '500', padding: '10px' }}>
+                      <p style={{ color: '#64748b', margin: 0, fontSize: '14px', textAlign: 'center', fontWeight: '600', padding: '10px' }}>
                         No material has been uploaded yet for this semester.
                       </p> 
                     )}
@@ -395,7 +400,7 @@ function CourseDetail() {
             ))}
           </div>
 
-          {/* 🖼️ Live Image Preview Lightbox (Click outside to close added) */}
+          {/* 🖼️ Live Image Preview Lightbox */}
           {previewImage && (
             <div className="cd-img-overlay" onClick={() => setPreviewImage(null)}>
               <div className="cd-img-card" onClick={(e) => e.stopPropagation()}>
@@ -408,7 +413,7 @@ function CourseDetail() {
                 <img 
                   src={previewImage} 
                   alt="Preview Notice" 
-                  style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', borderRadius: '12px' }} 
+                  style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', borderRadius: '8px' }} 
                 />
               </div>
             </div>
