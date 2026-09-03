@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import ReactDOM from 'react-dom';
 
 function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   const [downloading, setDownloading] = useState(false);
@@ -17,14 +18,14 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   const fileId = extractDriveFileId(pdfUrl);
   const isGoogleDrive = Boolean(pdfUrl && (pdfUrl.includes('drive.google.com') || fileId));
 
-  // 🛠 Reset controls on modal open
+  // Reset controls on modal open
   useEffect(() => {
     if (isOpen) {
       setRotation(0);
     }
   }, [isOpen]);
 
-  // 🛠 Construct Clean Embed URL
+  // Construct Clean Embed URL
   const getEmbedUrl = () => {
     if (!pdfUrl) return '';
     if (isGoogleDrive && fileId) {
@@ -35,7 +36,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
 
   const embedUrl = getEmbedUrl();
 
-  // ⌨️ Close Modal on 'Escape' key press & Strict Background Scroll Lock
+  // Close Modal on 'Escape' key press & Strict Background Scroll Lock
   useEffect(() => {
     if (!isOpen) return;
 
@@ -47,11 +48,9 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
 
     const originalBodyOverflow = document.body.style.overflow;
     const originalHtmlOverflow = document.documentElement.style.overflow;
-    const originalTouchAction = document.body.style.touchAction;
 
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
-    document.body.style.touchAction = 'none';
 
     document.addEventListener('keydown', handleKeyDown);
 
@@ -59,36 +58,66 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = originalBodyOverflow || 'unset';
       document.documentElement.style.overflow = originalHtmlOverflow || 'unset';
-      document.body.style.touchAction = originalTouchAction || 'auto';
     };
   }, [isOpen, onClose]);
 
-  // 🖨️ Direct Printable Fix for Cross-Origin & Google Drive PDFs
-  const handlePrint = useCallback(() => {
+  // 🖨️ Real Native System Print Fix
+  const handlePrint = useCallback(async () => {
     if (!pdfUrl) return;
     setPrinting(true);
 
     try {
+      let fetchUrl = pdfUrl;
       if (isGoogleDrive && fileId) {
-        // Direct print trigger window for Google Drive bypassing CORS lock
-        const printWindow = window.open(`https://drive.google.com/file/d/${fileId}/preview`, '_blank', 'width=800,height=600');
-        if (printWindow) {
-          printWindow.onload = () => {
-            printWindow.print();
-          };
-        }
-      } else {
-        if (iframeRef.current && iframeRef.current.contentWindow) {
-          iframeRef.current.contentWindow.focus();
-          iframeRef.current.contentWindow.print();
-        } else {
-          window.print();
-        }
+        fetchUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
       }
-    } catch (err) {
-      console.error("Printing failed:", err);
-    } finally {
-      setTimeout(() => setPrinting(false), 1000);
+
+      // Fetch PDF as Blob to create native local printable object
+      const response = await fetch(fetchUrl);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      // Create temporary printable iframe
+      const printIframe = document.createElement('iframe');
+      printIframe.style.position = 'fixed';
+      printIframe.style.right = '0';
+      printIframe.style.bottom = '0';
+      printIframe.style.width = '0px';
+      printIframe.style.height = '0px';
+      printIframe.style.border = 'none';
+      printIframe.src = blobUrl;
+
+      document.body.appendChild(printIframe);
+
+      printIframe.onload = () => {
+        setTimeout(() => {
+          printIframe.contentWindow?.focus();
+          printIframe.contentWindow?.print();
+          setPrinting(false);
+          setTimeout(() => {
+            if (document.body.contains(printIframe)) {
+              document.body.removeChild(printIframe);
+            }
+            URL.revokeObjectURL(blobUrl);
+          }, 2000);
+        }, 300);
+      };
+    } catch (error) {
+      console.warn("Direct blob print blocked, triggering fallback window print...", error);
+      // Fallback Native Print Dialog
+      const printWin = window.open(
+        isGoogleDrive && fileId 
+          ? `https://drive.google.com/file/d/${fileId}/preview` 
+          : pdfUrl, 
+        '_blank'
+      );
+      if (printWin) {
+        printWin.focus();
+        setTimeout(() => {
+          printWin.print();
+        }, 1000);
+      }
+      setPrinting(false);
     }
   }, [pdfUrl, isGoogleDrive, fileId]);
 
@@ -135,27 +164,28 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
 
   if (!isOpen) return null;
 
-  return (
+  // React Portal ensures the Modal renders outside normal DOM hierarchy (Over Navbar)
+  return ReactDOM.createPortal(
     <>
       <style>{`
         .pdf-modal-backdrop {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          background: rgba(15, 23, 42, 0.85);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 20px;
-          box-sizing: border-box;
-          z-index: 99999;
-          animation: modalFadeIn 0.25s ease-out;
-          overscroll-behavior: contain;
-          touch-action: pan-y;
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          background: rgba(2, 6, 23, 0.94) !important;
+          backdrop-filter: blur(16px) !important;
+          -webkit-backdrop-filter: blur(16px) !important;
+          display: flex !important;
+          justify-content: center !important;
+          align-items: center !important;
+          padding: 20px !important;
+          box-sizing: border-box !important;
+          z-index: 2147483647 !important; /* Maximum possible CSS Z-Index */
+          animation: modalFadeIn 0.2s ease-out;
         }
 
         @keyframes modalFadeIn {
@@ -164,35 +194,28 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
         }
 
         .pdf-modal-container {
-          background: #1e293b;
-          border: 1px solid rgba(255, 255, 255, 0.12);
+          background: #0f172a;
+          border: 1px solid rgba(255, 255, 255, 0.15);
           width: 100%;
-          max-width: 1250px;
-          height: 92vh;
-          border-radius: 16px;
+          max-width: 1300px;
+          height: 94vh;
+          border-radius: 14px;
           display: flex;
           flex-direction: column;
           overflow: hidden;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
           position: relative;
-          animation: modalZoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes modalZoomIn {
-          from { transform: scale(0.96); opacity: 0; }
-          to { transform: scale(1); opacity: 1; }
         }
 
         .pdf-modal-header {
-          padding: 10px 16px;
-          background: #0f172a;
+          padding: 12px 18px;
+          background: #020617;
           display: flex;
           justify-content: space-between;
           align-items: center;
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
           z-index: 10;
           gap: 12px;
-          flex-wrap: wrap;
         }
 
         .pdf-modal-title {
@@ -200,7 +223,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           font-size: 14px;
           font-weight: 600;
           color: #f8fafc;
-          font-family: 'Inter', -apple-system, sans-serif;
+          font-family: system-ui, -apple-system, sans-serif;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -211,28 +234,29 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           display: flex;
           align-items: center;
           gap: 8px;
-          background: rgba(255, 255, 255, 0.05);
-          padding: 4px 10px;
+          background: rgba(255, 255, 255, 0.06);
+          padding: 4px 12px;
           border-radius: 8px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .pdf-tool-btn {
           background: transparent;
           color: #cbd5e1;
           border: none;
-          padding: 6px 10px;
+          padding: 6px 12px;
           border-radius: 6px;
           font-size: 13px;
           font-weight: 600;
           cursor: pointer;
           display: flex;
           align-items: center;
-          gap: 4px;
+          gap: 6px;
           transition: all 0.2s;
         }
 
         .pdf-tool-btn:hover {
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.12);
           color: #ffffff;
         }
 
@@ -240,14 +264,14 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           width: 1px;
           height: 18px;
           background: rgba(255, 255, 255, 0.15);
-          margin: 0 4px;
+          margin: 0 2px;
         }
 
         .pdf-close-btn {
           background: rgba(239, 68, 68, 0.2);
           color: #fca5a5;
           border: 1px solid rgba(239, 68, 68, 0.4);
-          padding: 6px 14px;
+          padding: 6px 16px;
           border-radius: 8px;
           cursor: pointer;
           font-weight: 700;
@@ -269,7 +293,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           overflow: hidden;
         }
 
-        /* Fixed Pop-out Click Shield Guard */
+        /* Fixed Pop-out Shield Guard */
         .pdf-click-guard {
           position: absolute;
           top: 0;
@@ -277,7 +301,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           width: 90px;
           height: 75px;
           background-color: transparent;
-          z-index: 999999;
+          z-index: 99999;
           cursor: not-allowed;
         }
 
@@ -287,15 +311,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           border: none;
           display: block;
           transition: transform 0.2s ease;
-        }
-
-        @media screen and (max-width: 768px) {
-          .pdf-modal-header {
-            padding: 8px;
-          }
-          .pdf-modal-title {
-            display: none;
-          }
         }
       `}</style>
 
@@ -310,7 +325,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
               📄 {title || 'Document'}
             </h3>
 
-            {/* Controls */}
+            {/* Navbar Controls */}
             <div className="pdf-toolbar-controls">
               <button onClick={handleRotate} className="pdf-tool-btn" title="Rotate Document">
                 🔄 Rotate
@@ -336,9 +351,8 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
             </button>
           </div>
 
-          {/* Modal Body */}
+          {/* Body */}
           <div className="pdf-modal-body">
-            {/* Absolute Fixed Click Guard Shield for Pop-out Button */}
             {isGoogleDrive && (
               <div 
                 className="pdf-click-guard"
@@ -361,7 +375,8 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body // Appends directly to HTML body to overlap everything
   );
 }
 
