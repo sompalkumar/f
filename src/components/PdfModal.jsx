@@ -18,7 +18,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     ? `https://drive.google.com/file/d/${fileId}/preview` 
     : pdfUrl;
 
-  // ⌨️ Close Modal on 'Escape' key press & Manage Body Scroll Lock
+  // ⌨️ Close Modal on 'Escape' key press & Strict Background Scroll Lock Fix
   useEffect(() => {
     if (!isOpen) return;
 
@@ -28,12 +28,23 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
       }
     };
 
+    // 🔒 Complete Background Scroll Prevention (Desktop + Mobile Touch Devices)
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalTouchAction = document.body.style.touchAction;
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none'; // Mobile touch scroll lock
+
     document.addEventListener('keydown', handleKeyDown);
-    document.body.style.overflow = 'hidden'; // Stop background scrolling
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset'; // Restore background scrolling
+      // 🔓 Restore Scroll States
+      document.body.style.overflow = originalBodyOverflow || 'unset';
+      document.documentElement.style.overflow = originalHtmlOverflow || 'unset';
+      document.body.style.touchAction = originalTouchAction || 'auto';
     };
   }, [isOpen, onClose]);
 
@@ -92,6 +103,8 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           box-sizing: border-box;
           z-index: 99999;
           animation: modalFadeIn 0.25s ease-out;
+          overscroll-behavior: contain; /* Prevents back-page bounce */
+          touch-action: pan-y; /* Allows scrolling inside modal only */
         }
 
         @keyframes modalFadeIn {
@@ -115,6 +128,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
           position: relative;
           animation: modalZoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          overscroll-behavior: contain;
         }
 
         @keyframes modalZoomIn {
@@ -224,7 +238,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           {/* Header */}
           <div className="pdf-modal-header">
             <h3 className="pdf-modal-title">
-             📄 {title || 'PDF Preview'}
+              📄 {title || 'PDF Preview'}
             </h3>
             <div className="pdf-btn-group">
               <button 
@@ -245,7 +259,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           </div>
 
           {/* Modal Body */}
-          <div style={{ flex: 1, width: '100%', height: '100%', backgroundColor: '#0f172a', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ flex: 1, width: '100%', height: '100%', backgroundColor: '#0f172a', position: 'relative', overflow: 'hidden', overscrollBehavior: 'contain' }}>
             
             {/* Top-Right Arrow Click Guard (Protects External Popout Navigation) */}
             {isGoogleDrive && (
