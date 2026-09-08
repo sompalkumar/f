@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 
-// 🟢 Move static styles to the top to avoid hoisting/TDZ errors
+// 🟢 Static styles
 const tdStyle = { padding: '14px', fontSize: '13px' };
 
 function AdminDashboard() {
@@ -44,7 +44,14 @@ function AdminDashboard() {
   const [filterCourse, setFilterCourse] = useState('all');
   const [filterSemester, setFilterSemester] = useState('all');
 
-  // 🔴 Fetch Live Logs (Wrapped in useCallback)
+  // 🟡 Edit Modal States
+  const [editingMaterial, setEditingMaterial] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editCourse, setEditCourse] = useState('bca');
+  const [editSemester, setEditSemester] = useState('1');
+  const [editCategory, setEditCategory] = useState('notes');
+
+  // 🔴 Fetch Live Logs
   const fetchLiveLogs = useCallback(async () => {
     if (!token) return;
     try {
@@ -69,7 +76,7 @@ function AdminDashboard() {
     }
   }, [token, navigate]);
 
-  // 🔴 Fetch Uploaded Materials (Wrapped in useCallback)
+  // 🔴 Fetch Uploaded Materials
   const fetchUploadedMaterials = useCallback(async () => {
     if (!token) return;
     try {
@@ -131,6 +138,48 @@ function AdminDashboard() {
       }
     } catch (error) { 
       alert('फ़ाइल डिलीट एरर!'); 
+    }
+  };
+
+  // 🟡 Open Edit Modal
+  const handleOpenEditModal = (mat) => {
+    setEditingMaterial(mat);
+    setEditTitle(mat.title || '');
+    setEditCourse(mat.course || 'bca');
+    setEditSemester(mat.semester || '1');
+    setEditCategory(mat.category || 'notes');
+  };
+
+  // 🟡 Update Material Handler
+  const handleUpdateMaterial = async (e) => {
+    e.preventDefault();
+    if (!editingMaterial) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/edit-material/${editingMaterial._id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: editTitle,
+          course: editCourse,
+          semester: editSemester,
+          category: editCategory
+        })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert(data.message || 'सफलतापूर्वक अपडेट हो गया!');
+        setEditingMaterial(null);
+        fetchUploadedMaterials();
+      } else {
+        alert(data.message || 'अपडेट फ़ेल हो गया!');
+      }
+    } catch (error) {
+      alert('अपडेट एरर!');
     }
   };
 
@@ -303,7 +352,7 @@ function AdminDashboard() {
           width: auto;
         }
 
-        .adm-candidate-btn {
+        .adm-candidate-btn, .adm-logout-btn {
           padding: 12px 18px;
           background: #008080;
           color: white;
@@ -315,23 +364,7 @@ function AdminDashboard() {
           transition: all 0.2s ease;
         }
 
-        .adm-candidate-btn:hover {
-          background: #006666;
-        }
-
-        .adm-logout-btn {
-          padding: 12px 18px;
-          background: #008080;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 600;
-          font-size: 13px;
-          transition: all 0.2s ease;
-        }
-
-        .adm-logout-btn:hover {
+        .adm-candidate-btn:hover, .adm-logout-btn:hover {
           background: #006666;
         }
 
@@ -383,11 +416,6 @@ function AdminDashboard() {
         .adm-input:focus {
           border-color: #008080;
           box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.15);
-        }
-
-        .adm-input option {
-          background-color: #ffffff;
-          color: #0f172a;
         }
 
         .adm-row-group {
@@ -459,9 +487,30 @@ function AdminDashboard() {
           background: #f8fafc;
         }
 
+        .adm-action-btns {
+          display: flex;
+          gap: 8px;
+        }
+
+        .adm-edit-btn {
+          padding: 8px 16px;
+          background: #0284c7;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 12px;
+          transition: all 0.2s ease;
+        }
+
+        .adm-edit-btn:hover {
+          background: #0369a1;
+        }
+
         .adm-delete-btn {
           padding: 8px 16px;
-          background: #008080;
+          background: #dc2626;
           color: white;
           border: none;
           border-radius: 6px;
@@ -472,7 +521,7 @@ function AdminDashboard() {
         }
 
         .adm-delete-btn:hover {
-          background: #006666;
+          background: #b91c1c;
         }
 
         .adm-table-wrapper {
@@ -502,6 +551,30 @@ function AdminDashboard() {
           color: #334155;
         }
 
+        /* Modal Backdrop and Box */
+        .adm-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(15, 23, 42, 0.6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 20px;
+        }
+
+        .adm-modal-content {
+          background: #ffffff;
+          padding: 24px;
+          border-radius: 12px;
+          width: 100%;
+          max-width: 500px;
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
         @media screen and (max-width: 600px) {
           .adm-header {
             flex-direction: column;
@@ -526,9 +599,14 @@ function AdminDashboard() {
             align-items: flex-start;
           }
 
-          .adm-delete-btn {
+          .adm-action-btns {
             width: 100%;
-            margin-top: 5px;
+            margin-top: 8px;
+          }
+
+          .adm-edit-btn, .adm-delete-btn {
+            flex: 1;
+            text-align: center;
           }
         }
       `}</style>
@@ -720,7 +798,10 @@ function AdminDashboard() {
                       {mat.driveUrl && <span style={{ color: '#008080' }}><b>[Drive Linked]</b></span>}
                     </div>
                   </div>
-                  <button onClick={() => handleDeleteMaterial(mat._id, mat.title)} className="adm-delete-btn">🗑️ Delete</button>
+                  <div className="adm-action-btns">
+                    <button onClick={() => handleOpenEditModal(mat)} className="adm-edit-btn">✏️ Edit</button>
+                    <button onClick={() => handleDeleteMaterial(mat._id, mat.title)} className="adm-delete-btn">🗑️ Delete</button>
+                  </div>
                 </div>
               ))
             ) : ( 
@@ -758,6 +839,76 @@ function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* 🟡 Edit Modal Section */}
+      {editingMaterial && (
+        <div className="adm-modal-overlay">
+          <div className="adm-modal-content">
+            <h3 style={{ marginTop: 0, color: '#0f172a' }}>✏️ Edit Material Details</h3>
+            <form onSubmit={handleUpdateMaterial}>
+              
+              <div className="adm-input-group">
+                <label className="adm-label">Title / Topic Name</label>
+                <input 
+                  type="text" 
+                  value={editTitle} 
+                  onChange={(e) => setEditTitle(e.target.value)} 
+                  className="adm-input" 
+                  required 
+                />
+              </div>
+
+              <div className="adm-input-group">
+                <label className="adm-label">Course</label>
+                <select value={editCourse} onChange={(e) => setEditCourse(e.target.value)} className="adm-input">
+                  <option value="bca">BCA</option>
+                  <option value="bcom">B.Com</option>
+                  <option value="arts">Arts</option>
+                  <option value="science">Science</option>
+                </select>
+              </div>
+
+              <div className="adm-input-group">
+                <label className="adm-label">Semester</label>
+                <select value={editSemester} onChange={(e) => setEditSemester(e.target.value)} className="adm-input">
+                  <option value="1">Sem-1</option>
+                  <option value="2">Sem-2</option>
+                  <option value="3">Sem-3</option>
+                  <option value="4">Sem-4</option>
+                  <option value="5">Sem-5</option>
+                  <option value="6">Sem-6</option>
+                </select>
+              </div>
+
+              <div className="adm-input-group">
+                <label className="adm-label">Category</label>
+                <select value={editCategory} onChange={(e) => setEditCategory(e.target.value)} className="adm-input">
+                  <option value="notes">📘 Study Notes / Material</option>
+                  <option value="pyq">📝 Previous Year Question Paper (PYQ)</option>
+                  <option value="quiz">❓ Interactive Student Quiz</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setEditingMaterial(null)} 
+                  style={{ padding: '10px 16px', background: '#cbd5e1', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', color: '#334155' }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  style={{ padding: '10px 16px', background: '#008080', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', color: '#ffffff' }}
+                >
+                  Save Changes
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }
