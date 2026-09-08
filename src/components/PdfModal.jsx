@@ -5,8 +5,9 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   const [downloading, setDownloading] = useState(false);
   const [printing, setPrinting] = useState(false);
   const [rotation, setRotation] = useState(0);
+  const [zoom, setZoom] = useState(1); // 🔍 Zoom Level State
 
-  // Extract Google Drive File ID
+  // Extract Google Drive File ID safely
   const extractDriveFileId = useCallback((url) => {
     if (!url) return null;
     const match = url.match(/(?:d\/|id=|file\/d\/|src=)([\w-]{25,})/);
@@ -19,10 +20,11 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   useEffect(() => {
     if (isOpen) {
       setRotation(0);
+      setZoom(1);
     }
   }, [isOpen]);
 
-  // Construct Embed URL
+  // Embed URL Generator
   const getEmbedUrl = () => {
     if (!pdfUrl) return '';
     if (isGoogleDrive && fileId) {
@@ -33,7 +35,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
 
   const embedUrl = getEmbedUrl();
 
-  // Close on Escape & Lock Scroll
+  // 🛑 BACKGROUND SCROLL LOCK & ESCAPE KEY ENGINE
   useEffect(() => {
     if (!isOpen) return;
 
@@ -41,35 +43,52 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
       if (e.key === 'Escape') onClose();
     };
 
-    const origOverflow = document.body.style.overflow;
+    // Store original styles
+    const origOverflowBody = document.body.style.overflow;
+    const origOverflowDoc = document.documentElement.style.overflow;
+    const origTouchAction = document.body.style.touchAction;
+
+    // Completely freeze background page scroll (Desktop + Mobile Touch)
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+
     document.addEventListener('keydown', handleKeyDown);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = origOverflow || 'unset';
+      // Restore background scroll on modal close
+      document.body.style.overflow = origOverflowBody || '';
+      document.documentElement.style.overflow = origOverflowDoc || '';
+      document.body.style.touchAction = origTouchAction || '';
     };
   }, [isOpen, onClose]);
 
-  // 🖨️ DIRECT PRINT ENGINE (Bypasses Google Drive CORS Block)
+  // 🔍 ZOOM ACTIONS
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 2.5));
+  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5));
+  const handleResetZoom = () => setZoom(1);
+
+  // 🔄 ROTATION ACTION
+  const handleRotate = () => setRotation((prev) => (prev + 90) % 360);
+
+  // 🖨️ SYSTEM PRINT ENGINE
   const handlePrint = useCallback(async () => {
     if (!pdfUrl) return;
     setPrinting(true);
 
     try {
-      let directPdfUrl = pdfUrl;
+      let fetchUrl = pdfUrl;
       if (isGoogleDrive && fileId) {
-        directPdfUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+        fetchUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
       }
 
-      // Fetch PDF data directly and convert to Object Blob URL
-      const response = await fetch(directPdfUrl);
+      const response = await fetch(fetchUrl);
       if (!response.ok) throw new Error("Fetch failed");
       
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
 
-      // Create hidden iframe dedicated to printing
       const printFrame = document.createElement('iframe');
       printFrame.style.position = 'fixed';
       printFrame.style.top = '-9999px';
@@ -85,38 +104,74 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           printFrame.contentWindow?.focus();
           printFrame.contentWindow?.print();
           setPrinting(false);
-          
-          // Cleanup memory
+
           setTimeout(() => {
             if (document.body.contains(printFrame)) {
               document.body.removeChild(printFrame);
             }
             URL.revokeObjectURL(blobUrl);
-          }, 2000);
+          }, 3000);
         }, 500);
       };
     } catch (err) {
-      console.warn("Direct blob print blocked, opening system print window:", err);
-      // Fallback: Opens target URL directly in printable frame
-      const win = window.open(
-        isGoogleDrive && fileId ? `https://drive.google.com/file/d/${fileId}/view` : pdfUrl, 
-        '_blank'
-      );
-      if (win) {
-        win.focus();
-        setTimeout(() => win.print(), 1000);
-      }
-      setPrinting(false);
+      console.warn("Direct print restricted, fallback preview trigger:", err);
+      const fallbackUrl = isGoogleDrive && fileId 
+        ? `https://drive.google.com/file/d/${fileId}/preview` 
+        : pdfUrl;
+        
+      const tempFrame = document.createElement('iframe');
+      tempFrame.style.display = 'none';
+      tempFrame.src = fallbackUrl;
+      document.body.appendChild(tempFrame);
+
+      setTimeout(() => {
+        try {
+          tempFrame.contentWindow?.focus();
+          tempFrame.contentWindow?.print();
+        } catch (e) {
+          window.open(fallbackUrl, '_blank');
+        }
+        if (document.body.contains(tempFrame)) {
+          document.body.removeChild(tempFrame);
+        }
+        setPrinting(false);
+      }, 1000);
     }
   }, [pdfUrl, isGoogleDrive, fileId]);
 
-  // ⬇️ DIRECT DOWNLOAD ENGINE
-  const handleDirectDownload = useCallback(() => {
+  // ⬇️ DIRECT FILE DOWNLOAD ENGINE
+  const handleDirectDownload = useCallback(async () => {
     if (!pdfUrl) return;
     setDownloading(true);
 
-    if (fileId) {
-      const downloadLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    try {
+      let downloadSource = pdfUrl;
+      if (isGoogleDrive && fileId) {
+        downloadSource = `https://lh3.googleusercontent.com/d/${fileId}`;
+      }
+
+      const response = await fetch(downloadSource);
+      if (!response.ok) throw new Error("Download stream failed");
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = blobUrl;
+      a.download = `${title || 'Resource-Document'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+      setDownloading(false);
+    } catch (err) {
+      console.warn("Fallback download triggered:", err);
+      const downloadLink = isGoogleDrive && fileId 
+        ? `https://drive.google.com/uc?export=download&id=${fileId}`
+        : pdfUrl;
+
       const hiddenIframe = document.createElement('iframe');
       hiddenIframe.style.display = 'none';
       hiddenIframe.src = downloadLink;
@@ -128,14 +183,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
         }
         setDownloading(false);
       }, 3000);
-    } else {
-      const a = document.createElement('a');
-      a.href = pdfUrl;
-      a.download = `${title || 'Document'}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setDownloading(false);
     }
   }, [pdfUrl, fileId, title]);
 
@@ -147,9 +194,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
       window.open(`https://drive.google.com/upload`, '_blank');
     }
   };
-
-  // 🔄 ROTATION ACTION
-  const handleRotate = () => setRotation((prev) => (prev + 90) % 360);
 
   if (!isOpen) return null;
 
@@ -164,16 +208,17 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           bottom: 0 !important;
           width: 100vw !important;
           height: 100vh !important;
-          background: rgba(2, 6, 23, 0.95) !important;
-          backdrop-filter: blur(16px) !important;
-          -webkit-backdrop-filter: blur(16px) !important;
+          background: rgba(2, 6, 23, 0.88) !important;
+          backdrop-filter: blur(12px) !important;
+          -webkit-backdrop-filter: blur(12px) !important;
           display: flex !important;
           justify-content: center !important;
           align-items: center !important;
-          padding: 16px !important;
+          padding: 8px !important;
           box-sizing: border-box !important;
-          z-index: 2147483647 !important; /* Maximum possible Z-Index */
+          z-index: 2147483647 !important;
           animation: modalFadeIn 0.2s ease-out;
+          touch-action: none; /* Prevents touch dragging background */
         }
 
         @keyframes modalFadeIn {
@@ -186,61 +231,73 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           border: 1px solid rgba(255, 255, 255, 0.15);
           width: 100%;
           max-width: 1300px;
-          height: 94vh;
-          border-radius: 14px;
+          height: 96vh;
+          border-radius: 12px;
           display: flex;
           flex-direction: column;
           overflow: hidden;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
           position: relative;
         }
 
+        /* 📱 RESPONSIVE NAVBAR HEADER */
         .pdf-modal-header {
-          padding: 10px 18px;
+          padding: 8px 12px;
           background: #020617;
           display: flex;
           justify-content: space-between;
           align-items: center;
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
           z-index: 10;
-          gap: 12px;
+          gap: 8px;
+          flex-wrap: nowrap;
         }
 
         .pdf-modal-title {
           margin: 0;
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 600;
           color: #f8fafc;
           font-family: system-ui, -apple-system, sans-serif;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          max-width: 250px;
+          max-width: 180px;
+          flex-shrink: 1;
         }
 
+        /* TOOLBAR SCROLL CONTAINER */
         .pdf-toolbar-controls {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 4px;
           background: rgba(255, 255, 255, 0.06);
-          padding: 4px 12px;
+          padding: 4px 8px;
           border-radius: 8px;
           border: 1px solid rgba(255, 255, 255, 0.08);
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .pdf-toolbar-controls::-webkit-scrollbar {
+          display: none;
         }
 
         .pdf-tool-btn {
           background: transparent;
           color: #cbd5e1;
           border: none;
-          padding: 6px 12px;
+          padding: 6px 8px;
           border-radius: 6px;
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 600;
           cursor: pointer;
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 4px;
+          white-space: nowrap;
           transition: all 0.2s;
+          touch-action: manipulation;
         }
 
         .pdf-tool-btn:hover {
@@ -248,23 +305,35 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           color: #ffffff;
         }
 
+        .pdf-zoom-text {
+          font-size: 11px;
+          color: #38bdf8;
+          font-weight: 700;
+          padding: 0 4px;
+          cursor: pointer;
+          min-width: 40px;
+          text-align: center;
+        }
+
         .pdf-divider {
           width: 1px;
-          height: 18px;
+          height: 16px;
           background: rgba(255, 255, 255, 0.15);
           margin: 0 2px;
+          flex-shrink: 0;
         }
 
         .pdf-close-btn {
           background: rgba(239, 68, 68, 0.2);
           color: #fca5a5;
           border: 1px solid rgba(239, 68, 68, 0.4);
-          padding: 6px 16px;
-          border-radius: 8px;
+          padding: 6px 12px;
+          border-radius: 6px;
           cursor: pointer;
           font-weight: 700;
-          font-size: 13px;
+          font-size: 12px;
           transition: all 0.2s;
+          flex-shrink: 0;
         }
 
         .pdf-close-btn:hover {
@@ -272,25 +341,25 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           color: #ffffff;
         }
 
+        /* 🖼️ VIEWER BODY */
         .pdf-modal-body {
           flex: 1;
           width: 100%;
           height: 100%;
           background-color: #0f172a;
           position: relative;
-          overflow: hidden;
+          overflow: auto; /* Internal scrolling only */
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          touch-action: pan-x pan-y; /* Allows modal internal panning */
         }
 
-        /* Pop-out shield guard overlay */
-        .pdf-click-guard {
-          position: absolute;
-          top: 0;
-          right: 0;
-          width: 90px;
-          height: 75px;
-          background-color: transparent;
-          z-index: 99999;
-          cursor: not-allowed;
+        .pdf-iframe-wrapper {
+          width: 100%;
+          height: 100%;
+          transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          transform-origin: center center;
         }
 
         .pdf-modal-iframe {
@@ -298,7 +367,39 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           height: 100%;
           border: none;
           display: block;
-          transition: transform 0.2s ease;
+        }
+
+        /* 📱 MOBILE RESPONSIVE QUERIES */
+        @media (max-width: 640px) {
+          .pdf-modal-backdrop {
+            padding: 4px !important;
+          }
+          .pdf-modal-container {
+            height: 98vh;
+            border-radius: 8px;
+          }
+          .pdf-modal-title {
+            max-width: 90px;
+            font-size: 12px;
+          }
+          .btn-label {
+            display: none;
+          }
+          .pdf-tool-btn {
+            padding: 6px 6px;
+            font-size: 14px;
+          }
+        }
+
+        @media (min-width: 641px) {
+          .pdf-modal-title {
+            max-width: 250px;
+            font-size: 14px;
+          }
+          .pdf-tool-btn {
+            padding: 6px 10px;
+            font-size: 13px;
+          }
         }
       `}</style>
 
@@ -309,56 +410,74 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
         >
           {/* Custom Navbar Header */}
           <div className="pdf-modal-header">
-            <h3 className="pdf-modal-title" title={title || 'Document'}>
-              📄 {title || 'Document'}
+            <h3 className="pdf-modal-title" title={title || 'Resource Preview'}>
+              📄 {title || 'Resource Preview'}
             </h3>
 
-            {/* Custom Toolbar Controls */}
+            {/* Custom Responsive Toolbar Controls */}
             <div className="pdf-toolbar-controls">
-              <button onClick={handleRotate} className="pdf-tool-btn" title="Rotate Document">
-                🔄 Rotate
+              {/* Zoom Out Button */}
+              <button onClick={handleZoomOut} className="pdf-tool-btn" title="Zoom Out">
+                ➖ <span className="btn-label">Out</span>
+              </button>
+
+              {/* Reset Zoom Percentage Label */}
+              <span className="pdf-zoom-text" onClick={handleResetZoom} title="Reset Zoom">
+                {Math.round(zoom * 100)}%
+              </span>
+
+              {/* Zoom In Button */}
+              <button onClick={handleZoomIn} className="pdf-tool-btn" title="Zoom In">
+                ➕ <span className="btn-label">In</span>
               </button>
 
               <div className="pdf-divider" />
 
+              {/* Rotate Button */}
+              <button onClick={handleRotate} className="pdf-tool-btn" title="Rotate Document">
+                🔄 <span className="btn-label">Rotate</span>
+              </button>
+
+              <div className="pdf-divider" />
+
+              {/* Save to Drive Button */}
               <button onClick={handleSaveToDrive} className="pdf-tool-btn" title="Save to Google Drive">
-                ☁️ Save to Drive
+                ☁️ <span className="btn-label">Drive</span>
               </button>
 
+              {/* Print Button */}
               <button onClick={handlePrint} disabled={printing} className="pdf-tool-btn" title="Print PDF">
-                {printing ? '⏳ Preparing Print...' : '🖨️ Print'}
+                🖨️ <span className="btn-label">{printing ? 'Preparing...' : 'Print'}</span>
               </button>
 
+              {/* Download Button */}
               <button onClick={handleDirectDownload} disabled={downloading} className="pdf-tool-btn" title="Download PDF">
-                {downloading ? '⏳ Downloading...' : '⬇️ Download'}
+                ⬇️ <span className="btn-label">{downloading ? 'Downloading...' : 'Download'}</span>
               </button>
             </div>
 
-            <button onClick={onClose} className="pdf-close-btn">
-              ✕ Close
+            {/* Close Button */}
+            <button onClick={onClose} className="pdf-close-btn" title="Close Modal">
+              ✕ <span className="btn-label">Close</span>
             </button>
           </div>
 
           {/* Viewer Container */}
           <div className="pdf-modal-body">
-            {isGoogleDrive && (
-              <div 
-                className="pdf-click-guard"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
-              />
-            )}
-
-            <iframe 
-              src={embedUrl} 
-              title="PDF Viewer"
-              className="pdf-modal-iframe"
+            <div 
+              className="pdf-iframe-wrapper"
               style={{
-                transform: `rotate(${rotation}deg)`
+                transform: `scale(${zoom}) rotate(${rotation}deg)`,
+                transformOrigin: 'center center'
               }}
-            />
+            >
+              <iframe 
+                src={embedUrl} 
+                title="PDF Viewer"
+                className="pdf-modal-iframe"
+                allow="autoplay"
+              />
+            </div>
           </div>
         </div>
       </div>

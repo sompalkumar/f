@@ -200,7 +200,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
       setIsLoading(false);
     }
   };
-
+// Navbar ke liye section content ke liye kya likha hai adar 
   const sectionContent = {
     home: { title: "🏫 Welcome to BCA PORTAL", desc: "A leading institute in the field of education, continuously dedicated to the bright future and overall development of the students." },
     chairman: { title: "🙏 Chairman's Message", desc: "Our aim is not only to impart bookish knowledge but also to enhance the hidden talent within the students." },
