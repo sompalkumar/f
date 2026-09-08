@@ -6,41 +6,33 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   const [printing, setPrinting] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [zoom, setZoom] = useState(1);
-  const [viewEngine, setViewEngine] = useState('gview'); // 'gview' | 'drive' | 'direct'
 
-  // Safe Google Drive ID Extractor
+  // 1. URL Analysis (Checking if Folder vs Single File)
+  const isGoogleDriveFolder = Boolean(pdfUrl && pdfUrl.includes('/drive/folders/'));
+
   const extractDriveFileId = useCallback((url) => {
-    if (!url) return null;
+    if (!url || isGoogleDriveFolder) return null;
     const match = url.match(/(?:d\/|id=|file\/d\/|src=)([\w-]{25,})/);
     return match ? match[1] : null;
-  }, []);
+  }, [isGoogleDriveFolder]);
 
   const fileId = extractDriveFileId(pdfUrl);
-  const isGoogleDrive = Boolean(pdfUrl && (pdfUrl.includes('drive.google.com') || fileId));
+  const isGoogleDriveFile = Boolean(pdfUrl && (pdfUrl.includes('drive.google.com') || fileId) && !isGoogleDriveFolder);
 
   useEffect(() => {
     if (isOpen) {
       setRotation(0);
       setZoom(1);
-      setViewEngine('gview'); // Default to 403-proof Google Docs Viewer
     }
   }, [isOpen, pdfUrl]);
 
-  // 🛡️ GUARANTEED 403-FREE EMBED URL GENERATOR
+  // 2. Safe URL Generator (Strictly Prevents 403 Robots Page)
   const getEmbedUrl = () => {
-    if (!pdfUrl) return '';
+    if (!pdfUrl || isGoogleDriveFolder) return '';
 
-    if (isGoogleDrive && fileId) {
+    if (isGoogleDriveFile && fileId) {
       const rawDirectUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
-
-      if (viewEngine === 'gview') {
-        // Universal Google Docs Engine - Completely Bypasses 403 & Third-Party Cookie Locks
-        return `https://docs.google.com/gview?url=${encodeURIComponent(rawDirectUrl)}&embedded=true`;
-      }
-      
-      if (viewEngine === 'drive') {
-        return `https://drive.google.com/file/d/${fileId}/preview`;
-      }
+      return `https://docs.google.com/gview?url=${encodeURIComponent(rawDirectUrl)}&embedded=true`;
     }
 
     return pdfUrl;
@@ -48,7 +40,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
 
   const embedUrl = getEmbedUrl();
 
-  // 🛑 BACKGROUND SCROLL LOCK & ESCAPE ENGINE
+  // 3. Lock Background Scrolling
   useEffect(() => {
     if (!isOpen) return;
 
@@ -60,7 +52,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     const origOverflowDoc = document.documentElement.style.overflow;
     const origTouchAction = document.body.style.touchAction;
 
-    // Lock page background scrolling
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
     document.body.style.touchAction = 'none';
@@ -75,46 +66,26 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     };
   }, [isOpen, onClose]);
 
-  // 🔍 ZOOM CONTROLS
+  // Actions
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 2.5));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5));
   const handleResetZoom = () => setZoom(1);
-
-  // 🔄 ROTATE CONTROL
   const handleRotate = () => setRotation((prev) => (prev + 90) % 360);
 
-  // 🖨️ RELIABLE PRINT ACTION
-  const handlePrint = useCallback(() => {
-    if (!pdfUrl) return;
-    setPrinting(true);
-    const targetUrl = isGoogleDrive && fileId 
-      ? `https://drive.google.com/file/d/${fileId}/view`
-      : pdfUrl;
+  const handleOpenFolderOrFile = () => {
+    window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+  };
 
-    window.open(targetUrl, '_blank');
-    setPrinting(false);
-  }, [pdfUrl, isGoogleDrive, fileId]);
-
-  // ⬇️ RELIABLE DOWNLOAD ACTION
   const handleDirectDownload = useCallback(() => {
     if (!pdfUrl) return;
     setDownloading(true);
-    const downloadLink = isGoogleDrive && fileId 
+    const downloadLink = isGoogleDriveFile && fileId 
       ? `https://drive.google.com/uc?export=download&id=${fileId}`
       : pdfUrl;
 
     window.open(downloadLink, '_blank');
     setDownloading(false);
-  }, [pdfUrl, isGoogleDrive, fileId]);
-
-  // ☁️ SAVE TO DRIVE ACTION
-  const handleSaveToDrive = () => {
-    if (fileId) {
-      window.open(`https://drive.google.com/file/d/${fileId}/view`, '_blank');
-    } else {
-      window.open(`https://drive.google.com/upload`, '_blank');
-    }
-  };
+  }, [pdfUrl, isGoogleDriveFile, fileId]);
 
   if (!isOpen) return null;
 
@@ -161,7 +132,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           position: relative;
         }
 
-        /* HEADER NAVBAR */
         .pdf-modal-header {
           padding: 8px 12px;
           background: #020617;
@@ -171,7 +141,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
           z-index: 10;
           gap: 8px;
-          flex-wrap: nowrap;
         }
 
         .pdf-modal-title {
@@ -179,12 +148,10 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           font-size: 13px;
           font-weight: 600;
           color: #f8fafc;
-          font-family: system-ui, -apple-system, sans-serif;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          max-width: 180px;
-          flex-shrink: 1;
+          max-width: 220px;
         }
 
         .pdf-toolbar-controls {
@@ -195,12 +162,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           padding: 4px 8px;
           border-radius: 8px;
           border: 1px solid rgba(255, 255, 255, 0.08);
-          overflow-x: auto;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-        .pdf-toolbar-controls::-webkit-scrollbar {
-          display: none;
         }
 
         .pdf-tool-btn {
@@ -217,30 +178,11 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           gap: 4px;
           white-space: nowrap;
           transition: all 0.2s;
-          touch-action: manipulation;
         }
 
         .pdf-tool-btn:hover {
           background: rgba(255, 255, 255, 0.12);
           color: #ffffff;
-        }
-
-        .pdf-zoom-text {
-          font-size: 11px;
-          color: #38bdf8;
-          font-weight: 700;
-          padding: 0 4px;
-          cursor: pointer;
-          min-width: 40px;
-          text-align: center;
-        }
-
-        .pdf-divider {
-          width: 1px;
-          height: 16px;
-          background: rgba(255, 255, 255, 0.15);
-          margin: 0 2px;
-          flex-shrink: 0;
         }
 
         .pdf-close-btn {
@@ -252,8 +194,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           cursor: pointer;
           font-weight: 700;
           font-size: 12px;
-          transition: all 0.2s;
-          flex-shrink: 0;
         }
 
         .pdf-close-btn:hover {
@@ -261,117 +201,125 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           color: #ffffff;
         }
 
-        /* VIEWER BODY */
         .pdf-modal-body {
           flex: 1;
           width: 100%;
           height: 100%;
           background-color: #0f172a;
           position: relative;
-          overflow: auto;
           display: flex;
           align-items: center;
           justify-content: center;
-          touch-action: pan-x pan-y;
+        }
+
+        .pdf-folder-card {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 40px 24px;
+          text-align: center;
+          background: #1e293b;
+          border-radius: 16px;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          max-width: 460px;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+          margin: 16px;
+        }
+
+        .pdf-folder-btn {
+          background: #2563eb;
+          color: #ffffff;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          border: none;
+          cursor: pointer;
+          font-size: 14px;
+          margin-top: 16px;
+          transition: background 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .pdf-folder-btn:hover {
+          background: #1d4ed8;
         }
 
         .pdf-iframe-wrapper {
           width: 100%;
           height: 100%;
           transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-          transform-origin: center center;
         }
 
         .pdf-modal-iframe {
           width: 100%;
           height: 100%;
           border: none;
-          display: block;
           background: #ffffff;
-        }
-
-        @media (max-width: 640px) {
-          .pdf-modal-backdrop { padding: 4px !important; }
-          .pdf-modal-container { height: 98vh; border-radius: 8px; }
-          .pdf-modal-title { max-width: 90px; font-size: 12px; }
-          .btn-label { display: none; }
-          .pdf-tool-btn { padding: 6px 6px; font-size: 14px; }
-        }
-
-        @media (min-width: 641px) {
-          .pdf-modal-title { max-width: 250px; font-size: 14px; }
-          .pdf-tool-btn { padding: 6px 10px; font-size: 13px; }
         }
       `}</style>
 
       <div className="pdf-modal-backdrop" onClick={onClose}>
-        <div 
-          className="pdf-modal-container"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header Navbar */}
+        <div className="pdf-modal-container" onClick={(e) => e.stopPropagation()}>
+          
+          {/* Header */}
           <div className="pdf-modal-header">
-            <h3 className="pdf-modal-title" title={title || 'Resource Preview'}>
-              📄 {title || 'Resource Preview'}
+            <h3 className="pdf-modal-title" title={title || 'Resource'}>
+              📄 {title || 'Resource View'}
             </h3>
 
-            {/* Controls Toolbar */}
-            <div className="pdf-toolbar-controls">
-              <button onClick={handleZoomOut} className="pdf-tool-btn" title="Zoom Out">
-                ➖ <span className="btn-label">Out</span>
-              </button>
+            {!isGoogleDriveFolder && (
+              <div className="pdf-toolbar-controls">
+                <button onClick={handleZoomOut} className="pdf-tool-btn">➖ Out</button>
+                <span style={{ color: '#38bdf8', fontSize: '11px', fontWeight: 'bold' }}>
+                  {Math.round(zoom * 100)}%
+                </span>
+                <button onClick={handleZoomIn} className="pdf-tool-btn">➕ In</button>
+                <button onClick={handleRotate} className="pdf-tool-btn">🔄 Rotate</button>
+                <button onClick={handleDirectDownload} className="pdf-tool-btn">⬇️ Download</button>
+              </div>
+            )}
 
-              <span className="pdf-zoom-text" onClick={handleResetZoom} title="Reset Zoom">
-                {Math.round(zoom * 100)}%
-              </span>
-
-              <button onClick={handleZoomIn} className="pdf-tool-btn" title="Zoom In">
-                ➕ <span className="btn-label">In</span>
-              </button>
-
-              <div className="pdf-divider" />
-
-              <button onClick={handleRotate} className="pdf-tool-btn" title="Rotate Document">
-                🔄 <span className="btn-label">Rotate</span>
-              </button>
-
-              <div className="pdf-divider" />
-
-              <button onClick={handleSaveToDrive} className="pdf-tool-btn" title="Save to Google Drive">
-                ☁️ <span className="btn-label">Drive</span>
-              </button>
-
-              <button onClick={handlePrint} disabled={printing} className="pdf-tool-btn" title="Print PDF">
-                🖨️ <span className="btn-label">{printing ? 'Preparing...' : 'Print'}</span>
-              </button>
-
-              <button onClick={handleDirectDownload} disabled={downloading} className="pdf-tool-btn" title="Download PDF">
-                ⬇️ <span className="btn-label">{downloading ? 'Downloading...' : 'Download'}</span>
-              </button>
-            </div>
-
-            <button onClick={onClose} className="pdf-close-btn" title="Close Modal">
-              ✕ <span className="btn-label">Close</span>
-            </button>
+            <button onClick={onClose} className="pdf-close-btn">✕ Close</button>
           </div>
 
-          {/* Modal Body Engine */}
+          {/* Body */}
           <div className="pdf-modal-body">
-            <div 
-              className="pdf-iframe-wrapper"
-              style={{
-                transform: `scale(${zoom}) rotate(${rotation}deg)`,
-                transformOrigin: 'center center'
-              }}
-            >
-              <iframe 
-                src={embedUrl} 
-                title="PDF Viewer"
-                className="pdf-modal-iframe"
-                allow="autoplay"
-              />
-            </div>
+            {isGoogleDriveFolder ? (
+              /* Google Drive Folder Safe Handler */
+              <div className="pdf-folder-card">
+                <div style={{ fontSize: '48px', marginBottom: '12px' }}>📁</div>
+                <h4 style={{ margin: 0, fontSize: '18px', color: '#f8fafc' }}>
+                  Google Drive Folder Access
+                </h4>
+                <p style={{ margin: '8px 0 0', fontSize: '13px', color: '#94a3b8', lineHeight: '1.5' }}>
+                  सुरक्षा कारणों (X-Frame Restrictions) की वजह से फ़ोल्डर डायरेक्ट वेबसाइट में एम्बेड नहीं हो सकता। नीचे दिए बटन से इसे खोलें:
+                </p>
+                <button onClick={handleOpenFolderOrFile} className="pdf-folder-btn">
+                  📂 Open Course Materials on Drive ↗
+                </button>
+              </div>
+            ) : (
+              /* PDF Single File Viewer */
+              <div 
+                className="pdf-iframe-wrapper"
+                style={{
+                  transform: `scale(${zoom}) rotate(${rotation}deg)`,
+                  transformOrigin: 'center center'
+                }}
+              >
+                <iframe 
+                  src={embedUrl} 
+                  title="PDF Viewer"
+                  className="pdf-modal-iframe"
+                  allow="autoplay"
+                />
+              </div>
+            )}
           </div>
+
         </div>
       </div>
     </>,
