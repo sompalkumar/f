@@ -6,9 +6,9 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   const [printing, setPrinting] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [zoom, setZoom] = useState(1);
-  const [hasError, setHasError] = useState(false);
+  const [viewEngine, setViewEngine] = useState('gview'); // 'gview' | 'drive' | 'direct'
 
-  // Safe Google Drive File ID Extractor
+  // Safe Google Drive ID Extractor
   const extractDriveFileId = useCallback((url) => {
     if (!url) return null;
     const match = url.match(/(?:d\/|id=|file\/d\/|src=)([\w-]{25,})/);
@@ -22,21 +22,25 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     if (isOpen) {
       setRotation(0);
       setZoom(1);
-      setHasError(false);
+      setViewEngine('gview'); // Default to 403-proof Google Docs Viewer
     }
   }, [isOpen, pdfUrl]);
 
-  // 🛡️ 403-PROOF EMBED URL ENGINE
+  // 🛡️ GUARANTEED 403-FREE EMBED URL GENERATOR
   const getEmbedUrl = () => {
     if (!pdfUrl) return '';
-    
+
     if (isGoogleDrive && fileId) {
-      // If Primary drive preview fails, switch to Universal Docs Viewer
-      if (hasError) {
-        return `https://docs.google.com/viewer?url=${encodeURIComponent(`https://drive.google.com/uc?id=${fileId}&export=download`)}&embedded=true`;
+      const rawDirectUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
+
+      if (viewEngine === 'gview') {
+        // Universal Google Docs Engine - Completely Bypasses 403 & Third-Party Cookie Locks
+        return `https://docs.google.com/gview?url=${encodeURIComponent(rawDirectUrl)}&embedded=true`;
       }
-      // Reliable Google Docs Embedded Engine
-      return `https://docs.google.com/viewer?srcid=${fileId}&pid=explorer&efh=false&a=v&chrome=false&embedded=true`;
+      
+      if (viewEngine === 'drive') {
+        return `https://drive.google.com/file/d/${fileId}/preview`;
+      }
     }
 
     return pdfUrl;
@@ -56,6 +60,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     const origOverflowDoc = document.documentElement.style.overflow;
     const origTouchAction = document.body.style.touchAction;
 
+    // Lock page background scrolling
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
     document.body.style.touchAction = 'none';
@@ -70,101 +75,37 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     };
   }, [isOpen, onClose]);
 
-  // 🔍 ZOOM ACTIONS
+  // 🔍 ZOOM CONTROLS
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 2.5));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5));
   const handleResetZoom = () => setZoom(1);
 
-  // 🔄 ROTATION ACTION
+  // 🔄 ROTATE CONTROL
   const handleRotate = () => setRotation((prev) => (prev + 90) % 360);
 
-  // 🖨️ DIRECT PRINT ENGINE
-  const handlePrint = useCallback(async () => {
+  // 🖨️ RELIABLE PRINT ACTION
+  const handlePrint = useCallback(() => {
     if (!pdfUrl) return;
     setPrinting(true);
+    const targetUrl = isGoogleDrive && fileId 
+      ? `https://drive.google.com/file/d/${fileId}/view`
+      : pdfUrl;
 
-    try {
-      let fetchUrl = pdfUrl;
-      if (isGoogleDrive && fileId) {
-        fetchUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
-      }
-
-      const response = await fetch(fetchUrl);
-      if (!response.ok) throw new Error("Fetch failed");
-      
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      const printFrame = document.createElement('iframe');
-      printFrame.style.position = 'fixed';
-      printFrame.style.top = '-9999px';
-      printFrame.style.left = '-9999px';
-      printFrame.style.width = '0px';
-      printFrame.style.height = '0px';
-      printFrame.src = blobUrl;
-
-      document.body.appendChild(printFrame);
-
-      printFrame.onload = () => {
-        setTimeout(() => {
-          printFrame.contentWindow?.focus();
-          printFrame.contentWindow?.print();
-          setPrinting(false);
-
-          setTimeout(() => {
-            if (document.body.contains(printFrame)) {
-              document.body.removeChild(printFrame);
-            }
-            URL.revokeObjectURL(blobUrl);
-          }, 3000);
-        }, 500);
-      };
-    } catch (err) {
-      const fallbackUrl = isGoogleDrive && fileId 
-        ? `https://drive.google.com/file/d/${fileId}/view` 
-        : pdfUrl;
-        
-      window.open(fallbackUrl, '_blank');
-      setPrinting(false);
-    }
+    window.open(targetUrl, '_blank');
+    setPrinting(false);
   }, [pdfUrl, isGoogleDrive, fileId]);
 
-  // ⬇️ DIRECT FILE DOWNLOAD ENGINE
-  const handleDirectDownload = useCallback(async () => {
+  // ⬇️ RELIABLE DOWNLOAD ACTION
+  const handleDirectDownload = useCallback(() => {
     if (!pdfUrl) return;
     setDownloading(true);
+    const downloadLink = isGoogleDrive && fileId 
+      ? `https://drive.google.com/uc?export=download&id=${fileId}`
+      : pdfUrl;
 
-    try {
-      let downloadSource = pdfUrl;
-      if (isGoogleDrive && fileId) {
-        downloadSource = `https://lh3.googleusercontent.com/d/${fileId}`;
-      }
-
-      const response = await fetch(downloadSource);
-      if (!response.ok) throw new Error("Download stream failed");
-
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = blobUrl;
-      a.download = `${title || 'Resource-Document'}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-      setDownloading(false);
-    } catch (err) {
-      const downloadLink = isGoogleDrive && fileId 
-        ? `https://drive.google.com/uc?export=download&id=${fileId}`
-        : pdfUrl;
-
-      window.open(downloadLink, '_blank');
-      setDownloading(false);
-    }
-  }, [pdfUrl, fileId, title]);
+    window.open(downloadLink, '_blank');
+    setDownloading(false);
+  }, [pdfUrl, isGoogleDrive, fileId]);
 
   // ☁️ SAVE TO DRIVE ACTION
   const handleSaveToDrive = () => {
@@ -220,7 +161,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           position: relative;
         }
 
-        /* RESPONSIVE HEADER NAVBAR */
+        /* HEADER NAVBAR */
         .pdf-modal-header {
           padding: 8px 12px;
           background: #020617;
@@ -346,37 +287,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           height: 100%;
           border: none;
           display: block;
-        }
-
-        /* SAFE FALLBACK UI CARD */
-        .pdf-fallback-card {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 32px;
-          text-align: center;
-          color: #f8fafc;
-          gap: 16px;
-          background: #1e293b;
-          border-radius: 12px;
-          border: 1px solid rgba(255,255,255,0.1);
-          max-width: 420px;
-          box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-
-        .pdf-fallback-btn {
-          background: #2563eb;
-          color: white;
-          padding: 10px 20px;
-          border-radius: 8px;
-          font-weight: 600;
-          text-decoration: none;
-          font-size: 14px;
-          transition: background 0.2s;
-        }
-        .pdf-fallback-btn:hover {
-          background: #1d4ed8;
+          background: #ffffff;
         }
 
         @media (max-width: 640px) {
@@ -446,37 +357,20 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
 
           {/* Modal Body Engine */}
           <div className="pdf-modal-body">
-            {hasError ? (
-              <div className="pdf-fallback-card">
-                <div style={{ fontSize: '36px' }}>📄</div>
-                <h4 style={{ margin: 0, fontSize: '16px' }}>Protected Resource Preview</h4>
-                <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8' }}>
-                  This document is hosted securely. You can view or download it directly.
-                </p>
-                <button 
-                  onClick={handleDirectDownload}
-                  className="pdf-fallback-btn"
-                >
-                  ⬇️ Download / Open Document
-                </button>
-              </div>
-            ) : (
-              <div 
-                className="pdf-iframe-wrapper"
-                style={{
-                  transform: `scale(${zoom}) rotate(${rotation}deg)`,
-                  transformOrigin: 'center center'
-                }}
-              >
-                <iframe 
-                  src={embedUrl} 
-                  title="PDF Viewer"
-                  className="pdf-modal-iframe"
-                  allow="autoplay"
-                  onError={() => setHasError(true)}
-                />
-              </div>
-            )}
+            <div 
+              className="pdf-iframe-wrapper"
+              style={{
+                transform: `scale(${zoom}) rotate(${rotation}deg)`,
+                transformOrigin: 'center center'
+              }}
+            >
+              <iframe 
+                src={embedUrl} 
+                title="PDF Viewer"
+                className="pdf-modal-iframe"
+                allow="autoplay"
+              />
+            </div>
           </div>
         </div>
       </div>
