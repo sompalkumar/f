@@ -6,9 +6,9 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   const [printing, setPrinting] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [zoom, setZoom] = useState(1);
-  const [iframeError, setIframeError] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
-  // Safe Google Drive ID Extractor
+  // Safe Google Drive File ID Extractor
   const extractDriveFileId = useCallback((url) => {
     if (!url) return null;
     const match = url.match(/(?:d\/|id=|file\/d\/|src=)([\w-]{25,})/);
@@ -22,26 +22,29 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     if (isOpen) {
       setRotation(0);
       setZoom(1);
-      setIframeError(false);
+      setHasError(false);
     }
   }, [isOpen, pdfUrl]);
 
-  // Robust Embed URL Generation (Bypasses 403 Drive Errors)
+  // 🛡️ 403-PROOF EMBED URL ENGINE
   const getEmbedUrl = () => {
     if (!pdfUrl) return '';
+    
     if (isGoogleDrive && fileId) {
-      // Primary: Google Docs External Viewer Fallback engine
-      if (iframeError) {
+      // If Primary drive preview fails, switch to Universal Docs Viewer
+      if (hasError) {
         return `https://docs.google.com/viewer?url=${encodeURIComponent(`https://drive.google.com/uc?id=${fileId}&export=download`)}&embedded=true`;
       }
-      return `https://drive.google.com/file/d/${fileId}/preview`;
+      // Reliable Google Docs Embedded Engine
+      return `https://docs.google.com/viewer?srcid=${fileId}&pid=explorer&efh=false&a=v&chrome=false&embedded=true`;
     }
+
     return pdfUrl;
   };
 
   const embedUrl = getEmbedUrl();
 
-  // Background Scroll Lock Engine
+  // 🛑 BACKGROUND SCROLL LOCK & ESCAPE ENGINE
   useEffect(() => {
     if (!isOpen) return;
 
@@ -67,13 +70,15 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     };
   }, [isOpen, onClose]);
 
-  // Controls Actions
+  // 🔍 ZOOM ACTIONS
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 2.5));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5));
   const handleResetZoom = () => setZoom(1);
+
+  // 🔄 ROTATION ACTION
   const handleRotate = () => setRotation((prev) => (prev + 90) % 360);
 
-  // Print Action
+  // 🖨️ DIRECT PRINT ENGINE
   const handlePrint = useCallback(async () => {
     if (!pdfUrl) return;
     setPrinting(true);
@@ -116,7 +121,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
       };
     } catch (err) {
       const fallbackUrl = isGoogleDrive && fileId 
-        ? `https://drive.google.com/file/d/${fileId}/preview` 
+        ? `https://drive.google.com/file/d/${fileId}/view` 
         : pdfUrl;
         
       window.open(fallbackUrl, '_blank');
@@ -124,7 +129,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     }
   }, [pdfUrl, isGoogleDrive, fileId]);
 
-  // Direct Download Action
+  // ⬇️ DIRECT FILE DOWNLOAD ENGINE
   const handleDirectDownload = useCallback(async () => {
     if (!pdfUrl) return;
     setDownloading(true);
@@ -161,7 +166,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     }
   }, [pdfUrl, fileId, title]);
 
-  // Save to Drive
+  // ☁️ SAVE TO DRIVE ACTION
   const handleSaveToDrive = () => {
     if (fileId) {
       window.open(`https://drive.google.com/file/d/${fileId}/view`, '_blank');
@@ -215,6 +220,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           position: relative;
         }
 
+        /* RESPONSIVE HEADER NAVBAR */
         .pdf-modal-header {
           padding: 8px 12px;
           background: #020617;
@@ -314,6 +320,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           color: #ffffff;
         }
 
+        /* VIEWER BODY */
         .pdf-modal-body {
           flex: 1;
           width: 100%;
@@ -341,36 +348,48 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           display: block;
         }
 
+        /* SAFE FALLBACK UI CARD */
+        .pdf-fallback-card {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 32px;
+          text-align: center;
+          color: #f8fafc;
+          gap: 16px;
+          background: #1e293b;
+          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.1);
+          max-width: 420px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .pdf-fallback-btn {
+          background: #2563eb;
+          color: white;
+          padding: 10px 20px;
+          border-radius: 8px;
+          font-weight: 600;
+          text-decoration: none;
+          font-size: 14px;
+          transition: background 0.2s;
+        }
+        .pdf-fallback-btn:hover {
+          background: #1d4ed8;
+        }
+
         @media (max-width: 640px) {
-          .pdf-modal-backdrop {
-            padding: 4px !important;
-          }
-          .pdf-modal-container {
-            height: 98vh;
-            border-radius: 8px;
-          }
-          .pdf-modal-title {
-            max-width: 90px;
-            font-size: 12px;
-          }
-          .btn-label {
-            display: none;
-          }
-          .pdf-tool-btn {
-            padding: 6px 6px;
-            font-size: 14px;
-          }
+          .pdf-modal-backdrop { padding: 4px !important; }
+          .pdf-modal-container { height: 98vh; border-radius: 8px; }
+          .pdf-modal-title { max-width: 90px; font-size: 12px; }
+          .btn-label { display: none; }
+          .pdf-tool-btn { padding: 6px 6px; font-size: 14px; }
         }
 
         @media (min-width: 641px) {
-          .pdf-modal-title {
-            max-width: 250px;
-            font-size: 14px;
-          }
-          .pdf-tool-btn {
-            padding: 6px 10px;
-            font-size: 13px;
-          }
+          .pdf-modal-title { max-width: 250px; font-size: 14px; }
+          .pdf-tool-btn { padding: 6px 10px; font-size: 13px; }
         }
       `}</style>
 
@@ -379,7 +398,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           className="pdf-modal-container"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
+          {/* Header Navbar */}
           <div className="pdf-modal-header">
             <h3 className="pdf-modal-title" title={title || 'Resource Preview'}>
               📄 {title || 'Resource Preview'}
@@ -425,23 +444,39 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
             </button>
           </div>
 
-          {/* Modal Body */}
+          {/* Modal Body Engine */}
           <div className="pdf-modal-body">
-            <div 
-              className="pdf-iframe-wrapper"
-              style={{
-                transform: `scale(${zoom}) rotate(${rotation}deg)`,
-                transformOrigin: 'center center'
-              }}
-            >
-              <iframe 
-                src={embedUrl} 
-                title="PDF Viewer"
-                className="pdf-modal-iframe"
-                allow="autoplay"
-                onError={() => setIframeError(true)}
-              />
-            </div>
+            {hasError ? (
+              <div className="pdf-fallback-card">
+                <div style={{ fontSize: '36px' }}>📄</div>
+                <h4 style={{ margin: 0, fontSize: '16px' }}>Protected Resource Preview</h4>
+                <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8' }}>
+                  This document is hosted securely. You can view or download it directly.
+                </p>
+                <button 
+                  onClick={handleDirectDownload}
+                  className="pdf-fallback-btn"
+                >
+                  ⬇️ Download / Open Document
+                </button>
+              </div>
+            ) : (
+              <div 
+                className="pdf-iframe-wrapper"
+                style={{
+                  transform: `scale(${zoom}) rotate(${rotation}deg)`,
+                  transformOrigin: 'center center'
+                }}
+              >
+                <iframe 
+                  src={embedUrl} 
+                  title="PDF Viewer"
+                  className="pdf-modal-iframe"
+                  allow="autoplay"
+                  onError={() => setHasError(true)}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
