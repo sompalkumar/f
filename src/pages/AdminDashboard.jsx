@@ -122,7 +122,8 @@ function AdminDashboard() {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/delete-material/${id}`, {
+      const materialId = id || (typeof id === 'object' ? id._id || id.id : id);
+      const response = await fetch(`${API_BASE_URL}/api/admin/delete-material/${materialId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -150,13 +151,22 @@ function AdminDashboard() {
     setEditCategory(mat.category || 'notes');
   };
 
-  // 🟡 Update Material Handler
+  // 🟡 Update Material Handler (FIXED)
   const handleUpdateMaterial = async (e) => {
     e.preventDefault();
     if (!editingMaterial) return;
 
+    // _id और id दोनों को सेफ़ली हैंडल करना
+    const materialId = editingMaterial._id || editingMaterial.id;
+
+    if (!materialId) {
+      alert('⚠️ Invalid Material ID!');
+      return;
+    }
+
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/edit-material/${editingMaterial._id}`, {
+      // Primary route check
+      let response = await fetch(`${API_BASE_URL}/api/admin/edit-material/${materialId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -170,6 +180,23 @@ function AdminDashboard() {
         })
       });
 
+      // Backend route mismatch fallback (यदि backend पर update-material/ रूट हो)
+      if (response.status === 404) {
+        response = await fetch(`${API_BASE_URL}/api/admin/update-material/${materialId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title: editTitle,
+            course: editCourse,
+            semester: editSemester,
+            category: editCategory
+          })
+        });
+      }
+
       const data = await response.json();
       if (response.ok) {
         alert(data.message || 'सफलतापूर्वक अपडेट हो गया!');
@@ -179,6 +206,7 @@ function AdminDashboard() {
         alert(data.message || 'अपडेट फ़ेल हो गया!');
       }
     } catch (error) {
+      console.error("Update error:", error);
       alert('अपडेट एरर!');
     }
   };
@@ -786,7 +814,7 @@ function AdminDashboard() {
           <div style={{ overflowY: 'auto', maxHeight: '280px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {filteredMaterials.length > 0 ? (
               filteredMaterials.map((mat) => (
-                <div key={mat._id} className="adm-mat-item">
+                <div key={mat._id || mat.id} className="adm-mat-item">
                   <div style={{ wordBreak: 'break-word' }}>
                     <span style={{ fontWeight: 'bold', color: '#0f172a', fontSize: '14px' }}>
                       {mat.category === 'quiz' ? '❓' : mat.category === 'pyq' ? '📝' : '📄'} {mat.title}
@@ -800,7 +828,7 @@ function AdminDashboard() {
                   </div>
                   <div className="adm-action-btns">
                     <button onClick={() => handleOpenEditModal(mat)} className="adm-edit-btn">✏️ Edit</button>
-                    <button onClick={() => handleDeleteMaterial(mat._id, mat.title)} className="adm-delete-btn">🗑️ Delete</button>
+                    <button onClick={() => handleDeleteMaterial(mat._id || mat.id, mat.title)} className="adm-delete-btn">🗑️ Delete</button>
                   </div>
                 </div>
               ))
