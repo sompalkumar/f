@@ -34,7 +34,7 @@ function ForgotPassword() {
     if (e) e.preventDefault();
     
     if (!mobile || mobile.length !== 10) {
-      alert('कृपया 10-अंकों का वैध मोबाइल नंबर दर्ज करें!');
+      alert('Please enter a valid 10-digit mobile number!');
       return;
     }
 
@@ -48,14 +48,14 @@ function ForgotPassword() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.message || 'OTP सफलतापूर्वक भेजा गया!');
+        alert(data.message || 'OTP sent successfully!');
         setIsOtpSent(true);
       } else {
-        alert(data.message || 'OTP भेजने में विफल');
+        alert(data.message || 'Failed to send OTP');
       }
     } catch (error) {
       console.error('Send OTP Error:', error);
-      alert('सर्वर से कनेक्शन नहीं हो पा रहा है!');
+      alert('Failed to connect to the server!');
     } finally {
       setLoading(false);
     }
@@ -71,12 +71,12 @@ function ForgotPassword() {
     e.preventDefault();
     
     if (!otp || otp.length < 4) {
-      alert('कृपया सही OTP दर्ज करें!');
+      alert('Please enter a valid OTP!');
       return;
     }
 
     if (!isPasswordStrong(newPassword)) {
-      alert('⚠️ पासवर्ड कम से कम 8 अक्षरों का होना चाहिए और उसमें कम से कम 1 बड़ा अक्षर (A-Z), 1 छोटा अक्षर (a-z), 1 संख्या (0-9) और 1 विशेष वर्ण (@$!%*?&) होना चाहिए!');
+      alert('⚠️ Password must be at least 8 characters long and include at least 1 uppercase letter (A-Z), 1 lowercase letter (a-z), 1 number (0-9), and 1 special character (@$!%*?&)!');
       return;
     }
 
@@ -90,14 +90,14 @@ function ForgotPassword() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.message || 'पासवर्ड सफलतापूर्वक बदल दिया गया है!');
+        alert(data.message || 'Password successfully changed!');
         navigate('/');
       } else {
-        alert(data.message || 'OTP या पासवर्ड रीसेट विफल');
+        alert(data.message || 'OTP or Password reset failed');
       }
     } catch (error) {
       console.error('Reset Password Error:', error);
-      alert('सर्वर से कनेक्शन टूट गया!');
+      alert('Failed to connect to the server!');
     } finally {
       setLoading(false);
     }
@@ -292,7 +292,7 @@ function ForgotPassword() {
           {!isOtpSent ? (
             <form onSubmit={handleSendOtp}>
               <p className="fp-subtitle">
-                अपना रजिस्टर्ड मोबाइल नंबर दर्ज करें
+                Please enter your registered mobile number
               </p>
               
               <div className="fp-input-group">
@@ -318,7 +318,7 @@ function ForgotPassword() {
             /* Screen 2: OTP & New Password Input */
             <form onSubmit={handleVerifyAndReset}>
               <p className="fp-subtitle" style={{ color: '#34d399', fontWeight: '500' }}>
-                आपके मोबाइल ({mobile}) पर भेजा गया OTP दर्ज करें
+                Please enter the OTP sent to your mobile number ({mobile})
               </p>
               
               <div className="fp-actions-row">

@@ -53,7 +53,7 @@ function CourseDetail() {
       if (res.status === 401 || res.status === 403) {
         sessionStorage.clear(); 
         localStorage.clear();
-        alert('⏰ आपका सुरक्षा सेशन समाप्त हो चुका है! कृपया दोबारा लॉगिन करें।');
+        alert('⏰ Your security session has expired! Please login again.');
         navigate('/', { replace: true });
         return;
       }

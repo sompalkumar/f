@@ -118,7 +118,7 @@ function AdminDashboard() {
 
   // 🔴 Delete Material Handler
   const handleDeleteMaterial = async (id, fileTitle) => {
-    const confirmDelete = window.confirm(`🗑️ क्या आप सच में "${fileTitle}" को हमेशा के लिए डिलीट करना चाहते हैं?`);
+    const confirmDelete = window.confirm(`🗑️ Do you really want to delete "${fileTitle}" forever?`);
     if (!confirmDelete) return;
 
     try {
@@ -132,13 +132,13 @@ function AdminDashboard() {
       });
       const data = await response.json();
       if (response.ok) {
-        alert(data.message || 'सफलतापूर्वक डिलीट हो गया!');
+        alert(data.message || 'Successfully deleted!');
         fetchUploadedMaterials();
       } else { 
-        alert(data.message || 'डिलीट फ़ेल हो गया!'); 
+        alert(data.message || 'Failed to delete!'); 
       }
     } catch (error) { 
-      alert('फ़ाइल डिलीट एरर!'); 
+      alert('File delete error!'); 
     }
   };
 
@@ -151,7 +151,7 @@ function AdminDashboard() {
     setEditCategory(mat.category || 'notes');
   };
 
-  // 🟡 Update Material Handler (FIXED)
+  // 🟡 Update Material Handler
   const handleUpdateMaterial = async (e) => {
     e.preventDefault();
     if (!editingMaterial) return;
@@ -199,15 +199,15 @@ function AdminDashboard() {
 
       const data = await response.json();
       if (response.ok) {
-        alert(data.message || 'सफलतापूर्वक अपडेट हो गया!');
+        alert(data.message || 'Successfully updated!');
         setEditingMaterial(null);
         fetchUploadedMaterials();
       } else {
-        alert(data.message || 'अपडेट फ़ेल हो गया!');
+        alert(data.message || 'Failed to update!');
       }
     } catch (error) {
       console.error("Update error:", error);
-      alert('अपडेट एरर!');
+      alert('Update error!');
     }
   };
 
@@ -248,18 +248,18 @@ function AdminDashboard() {
     e.preventDefault();
 
     if (!title.trim()) {
-      alert('⚠️ कृपया Title / Topic Name लिखें!');
+      alert('⚠️ Please enter a Title / Topic Name!');
       return;
     }
 
     if (category === 'quiz') {
       if (!quizQuestion.trim() || !optionA.trim() || !optionB.trim() || !optionC.trim() || !optionD.trim()) {
-        alert('⚠️ कृपया क्विज का प्रश्न और चारों ऑप्शंस भरें!');
+        alert('⚠️ Please fill in the quiz question and all four options!');
         return;
       }
     } else {
       if (!file && !driveUrl.trim()) {
-        alert('⚠️ कृपया एक लोकल फ़ाइल चुनें या Google Drive Link पेस्ट करें!');
+        alert('⚠️ Please select a local file or paste a Google Drive Link!');
         return;
       }
     }
@@ -291,7 +291,7 @@ function AdminDashboard() {
       });
       const data = await response.json();
       if (response.ok) { 
-        alert(data.message || 'सफलतापूर्वक अपलोड हो गया!'); 
+        alert(data.message || 'Successfully uploaded!'); 
         setTitle(''); 
         setDriveUrl('');
         setFile(null); 
@@ -301,10 +301,10 @@ function AdminDashboard() {
         if (fileInput) fileInput.value = ''; 
         fetchUploadedMaterials(); 
       } else { 
-        alert(data.message || 'अपलोड फ़ेल हो गया!'); 
+        alert(data.message || 'Failed to upload!'); 
       }
     } catch (error) { 
-      alert('अपलोड एरर!'); 
+      alert('Upload error!'); 
     }
   };
 
@@ -754,11 +754,11 @@ function AdminDashboard() {
                     type="url" 
                     placeholder="https://drive.google.com/file/d/.../view?usp=sharing" 
                     value={driveUrl} 
-                    onChange={(e) => setDriveUrl(e.target.value)} 
+                    onChange={(e) => setDriveUrl(e.target.value)}
                     className="adm-input" 
                   />
                   <small style={{ color: '#64748b', fontSize: '11px', display: 'block', marginTop: '6px' }}>
-                    * लिंक खुद ब खुद <b>/preview</b> फॉर्मेट में बदल जाएगी।
+                    * The link will be automatically converted to the <b>/preview</b> format.
                   </small>
                 </div>
 
@@ -790,7 +790,7 @@ function AdminDashboard() {
             
             <div style={{ flex: 1, minWidth: '140px' }}>
               <select value={filterCourse} onChange={(e) => setFilterCourse(e.target.value)} className="adm-input" style={{ padding: '8px', fontSize: '13px' }}>
-                <option value="all">📁 All Courses (सभी कोर्सेज)</option>
+                <option value="all">📁 All Courses</option>
                 <option value="bca">BCA</option>
                 <option value="bcom">B.Com</option>
                 <option value="arts">Arts</option>
@@ -800,7 +800,7 @@ function AdminDashboard() {
 
             <div style={{ flex: 1, minWidth: '140px' }}>
               <select value={filterSemester} onChange={(e) => setFilterSemester(e.target.value)} className="adm-input" style={{ padding: '8px', fontSize: '13px' }}>
-                <option value="all">⏱️ All Semesters (सभी सेमेस्टर)</option>
+                <option value="all">⏱️ All Semesters</option>
                 <option value="1">Sem-1</option>
                 <option value="2">Sem-2</option>
                 <option value="3">Sem-3</option>

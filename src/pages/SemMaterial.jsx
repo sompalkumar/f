@@ -296,7 +296,7 @@ function SemMaterial() {
             📚 {courseId?.toUpperCase() || 'COURSE'} — Semester {semId}
           </h2>
           <p className="sm-desc">
-            इस सेमेस्टर के सभी आधिकारिक नोट्स, बुक्स और स्टडी फाइल्स नीचे से आसानी से डाउनलोड करें।
+            Easily download all official notes, books, and study files for this semester from below.
           </p>
         </div>
 
@@ -337,7 +337,7 @@ function SemMaterial() {
             </div>
           ) : (
             <p style={{ color: '#94a3b8', textAlign: 'center', padding: '20px 0', fontSize: '14px' }}>
-              इस सेमेस्टर के लिए फिलहाल कोई स्टडी मटेरियल उपलब्ध नहीं है।
+              No study materials available for this semester.
             </p>
           )}
         </div>

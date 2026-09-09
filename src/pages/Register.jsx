@@ -55,11 +55,11 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateMobile(mobile)) { 
-      alert('⚠️ कृपया एक वैध 10 अंकों का मोबाइल नंबर दर्ज करें!'); 
+      alert('⚠️ Please enter a valid 10-digit mobile number!'); 
       return; 
     }
     if (captchaInput.trim().toLowerCase() !== currentCaptcha.toLowerCase()) { 
-      alert('⚠️ गलत कैप्चा कोड!'); 
+      alert('⚠️ Incorrect captcha code!'); 
       refreshCaptcha();
       setCaptchaInput('');
       return; 
@@ -76,7 +76,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.message || '🛑 लॉगिन विफल! कृपया अपनी जानकारी पुनः जांचें।');
+        alert(data.message || '🛑 Login failed! Please check your information.');
         refreshCaptcha();
         setCaptchaInput('');
         setIsLoading(false);
@@ -87,7 +87,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
       const currentSelectedRole = String(userRole).toLowerCase().trim();
 
       if (currentSelectedRole === 'admin' && backendRole !== 'admin') {
-        alert('❌ Access Denied! केवल अधिकृत Admin ही Admin Tab से लॉगिन कर सकते हैं।');
+        alert('❌ Access Denied! Only authorized Admins can login to the Admin Tab.');
         refreshCaptcha();
         setCaptchaInput('');
         setIsLoading(false);
@@ -114,7 +114,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
 
     } catch (error) {
       console.error(error);
-      alert('सर्वर एरर! कृपया सर्वर कनेक्शन जांचें।');
+      alert('Server Error! Please check your server connection.');
     } finally {
       setIsLoading(false);
     }
@@ -122,8 +122,8 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (!validateMobile(mobile)) { alert('⚠️ मोबाइल नंबर 10 अंकों का होना चाहिए!'); return; }
-    if (!isPasswordStrong(password)) { alert('⚠️ कृपया एक मजबूत पासवर्ड बनाएं!'); return; }
+    if (!validateMobile(mobile)) { alert('⚠️ Please enter a valid 10-digit mobile number!'); return; }
+    if (!isPasswordStrong(password)) { alert('⚠️ Please create a strong password!'); return; }
     
     setIsLoading(true);
     try {
@@ -134,15 +134,15 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
       });
       const data = await response.json();
       if (response.ok) { 
-        alert(data.message || 'पंजीकरण सफल!'); 
+        alert(data.message || 'Registration successful!'); 
         resetFormState();
         setModalView('login'); 
       } else { 
-        alert(data.message || 'पंजीकरण विफल!'); 
+        alert(data.message || 'Registration failed!'); 
       }
     } catch (error) {
       console.error(error);
-      alert('सर्वर एरर!');
+      alert('Server Error!');
     } finally {
       setIsLoading(false);
     }
@@ -150,7 +150,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (!validateMobile(mobile)) { alert('वैध नंबर डालें!'); return; }
+    if (!validateMobile(mobile)) { alert('Please enter a valid 10-digit mobile number!'); return; }
     
     setIsLoading(true);
     try {
@@ -161,14 +161,14 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
       });
       const data = await response.json();
       if (response.ok) { 
-        alert(data.message || 'OTP भेजा गया!'); 
+        alert(data.message || 'OTP sent successfully!'); 
         setIsOtpSent(true); 
       } else { 
-        alert(data.message || 'OTP भेजने में त्रुटि!'); 
+        alert(data.message || 'Error sending OTP!'); 
       }
     } catch (error) {
       console.error(error);
-      alert('ओटीपी सर्वर त्रुटि!'); 
+      alert('OTP server error!'); 
     } finally {
       setIsLoading(false);
     }
@@ -176,7 +176,7 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    if (!isPasswordStrong(password)) { alert('⚠️ मजबूत पासवर्ड डालें।'); return; }
+    if (!isPasswordStrong(password)) { alert('⚠️ Please enter a strong password.'); return; }
     
     setIsLoading(true);
     try {
@@ -187,15 +187,15 @@ function Register({ activeTab, showPortalModal, setShowPortalModal }) {
       });
       const data = await response.json();
       if (response.ok) { 
-        alert(data.message || 'पासवर्ड सफलतापूर्वक बदल गया!'); 
+        alert(data.message || 'Password updated successfully!'); 
         resetFormState();
         setModalView('login'); 
       } else { 
-        alert(data.message || 'OTP सत्यापन विफल!'); 
+        alert(data.message || 'OTP verification failed!'); 
       }
     } catch (error) {
       console.error(error);
-      alert('सर्वर एरर!');
+      alert('Server Error!');
     } finally {
       setIsLoading(false);
     }

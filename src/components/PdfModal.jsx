@@ -332,7 +332,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
                   {title || 'YouTube Video Material'}
                 </h4>
                 <p style={{ margin: '8px 0 0', fontSize: '13px', color: '#94a3b8', lineHeight: '1.5' }}>
-                  यह एक वीडियो रिसोर्स है। आप इसे सीधे नीचे दिए बटन से YouTube पर देख सकते हैं:
+                  This is a video resource. You can watch it directly on YouTube by clicking the button below:
                 </p>
                 <button onClick={handleOpenLink} className="pdf-folder-btn" style={{ background: '#ef4444' }}>
                   ▶ Click Here to Watch Video
@@ -346,7 +346,8 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
                   Google Drive Folder Access
                 </h4>
                 <p style={{ margin: '8px 0 0', fontSize: '13px', color: '#94a3b8', lineHeight: '1.5' }}>
-                  सुरक्षा कारणों की वजह से यह फ़ोल्डर एम्बेड नहीं हो सकता। नीचे बटन पर क्लिक करके खोलें:
+                  Open it by clicking the button below:
+
                 </p>
                 <button onClick={handleOpenLink} className="pdf-folder-btn">
                   📂 Open Course Materials ↗
