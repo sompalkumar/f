@@ -3,11 +3,21 @@ import ReactDOM from 'react-dom';
 
 function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   const [downloading, setDownloading] = useState(false);
-  const [printing, setPrinting] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [zoom, setZoom] = useState(1);
 
-  // 1. URL Analysis (Checking if Folder vs Single File)
+  // 1. YouTube Detection Helper
+  const extractYouTubeId = useCallback((url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  }, []);
+
+  const youtubeId = extractYouTubeId(pdfUrl);
+  const isYouTube = Boolean(youtubeId);
+
+  // 2. Google Drive Helpers
   const isGoogleDriveFolder = Boolean(pdfUrl && pdfUrl.includes('/drive/folders/'));
 
   const extractDriveFileId = useCallback((url) => {
@@ -26,9 +36,13 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     }
   }, [isOpen, pdfUrl]);
 
-  // 2. Safe URL Generator (Strictly Prevents 403 Robots Page)
+  // 3. Safe URL Generator
   const getEmbedUrl = () => {
     if (!pdfUrl || isGoogleDriveFolder) return '';
+
+    if (isYouTube) {
+      return `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1`;
+    }
 
     if (isGoogleDriveFile && fileId) {
       const rawDirectUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
@@ -40,7 +54,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
 
   const embedUrl = getEmbedUrl();
 
-  // 3. Lock Background Scrolling
+  // 4. Lock Background Scrolling
   useEffect(() => {
     if (!isOpen) return;
 
@@ -69,10 +83,9 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   // Actions
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 2.5));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5));
-  const handleResetZoom = () => setZoom(1);
   const handleRotate = () => setRotation((prev) => (prev + 90) % 360);
 
-  const handleOpenFolderOrFile = () => {
+  const handleOpenLink = () => {
     window.open(pdfUrl, '_blank', 'noopener,noreferrer');
   };
 
@@ -217,12 +230,12 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 40px 24px;
+          padding: 32px 24px;
           text-align: center;
           background: #1e293b;
           border-radius: 16px;
           border: 1px solid rgba(255, 255, 255, 0.12);
-          max-width: 460px;
+          max-width: 480px;
           box-shadow: 0 20px 40px rgba(0,0,0,0.6);
           margin: 16px;
         }
@@ -241,10 +254,28 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           display: flex;
           align-items: center;
           gap: 8px;
+          text-decoration: none;
         }
 
         .pdf-folder-btn:hover {
           background: #1d4ed8;
+        }
+
+        .yt-thumb-wrapper {
+          position: relative;
+          width: 100%;
+          max-width: 420px;
+          border-radius: 12px;
+          overflow: hidden;
+          margin-bottom: 16px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .yt-thumb-img {
+          width: 100%;
+          display: block;
+          aspect-ratio: 16/9;
+          object-fit: cover;
         }
 
         .pdf-iframe-wrapper {
@@ -267,10 +298,10 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           {/* Header */}
           <div className="pdf-modal-header">
             <h3 className="pdf-modal-title" title={title || 'Resource'}>
-              📄 {title || 'Resource View'}
+              {isYouTube ? '🎥 ' : '📄 '} {title || 'Resource View'}
             </h3>
 
-            {!isGoogleDriveFolder && (
+            {!isGoogleDriveFolder && !isYouTube && (
               <div className="pdf-toolbar-controls">
                 <button onClick={handleZoomOut} className="pdf-tool-btn">➖ Out</button>
                 <span style={{ color: '#38bdf8', fontSize: '11px', fontWeight: 'bold' }}>
@@ -287,7 +318,27 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
 
           {/* Body */}
           <div className="pdf-modal-body">
-            {isGoogleDriveFolder ? (
+            {isYouTube ? (
+              /* YouTube Video Card / Embed View */
+              <div className="pdf-folder-card">
+                <div className="yt-thumb-wrapper">
+                  <img 
+                    src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`} 
+                    alt="YouTube Video Thumbnail" 
+                    className="yt-thumb-img"
+                  />
+                </div>
+                <h4 style={{ margin: 0, fontSize: '18px', color: '#f8fafc' }}>
+                  {title || 'YouTube Video Material'}
+                </h4>
+                <p style={{ margin: '8px 0 0', fontSize: '13px', color: '#94a3b8', lineHeight: '1.5' }}>
+                  यह एक वीडियो रिसोर्स है। आप इसे सीधे नीचे दिए बटन से YouTube पर देख सकते हैं:
+                </p>
+                <button onClick={handleOpenLink} className="pdf-folder-btn" style={{ background: '#ef4444' }}>
+                  ▶ Click Here to Watch Video
+                </button>
+              </div>
+            ) : isGoogleDriveFolder ? (
               /* Google Drive Folder Safe Handler */
               <div className="pdf-folder-card">
                 <div style={{ fontSize: '48px', marginBottom: '12px' }}>📁</div>
@@ -295,10 +346,10 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
                   Google Drive Folder Access
                 </h4>
                 <p style={{ margin: '8px 0 0', fontSize: '13px', color: '#94a3b8', lineHeight: '1.5' }}>
-                  सुरक्षा कारणों (X-Frame Restrictions) की वजह से फ़ोल्डर डायरेक्ट वेबसाइट में एम्बेड नहीं हो सकता। नीचे दिए बटन से इसे खोलें:
+                  सुरक्षा कारणों की वजह से यह फ़ोल्डर एम्बेड नहीं हो सकता। नीचे बटन पर क्लिक करके खोलें:
                 </p>
-                <button onClick={handleOpenFolderOrFile} className="pdf-folder-btn">
-                  📂 Open Course Materials on Drive ↗
+                <button onClick={handleOpenLink} className="pdf-folder-btn">
+                  📂 Open Course Materials ↗
                 </button>
               </div>
             ) : (
