@@ -5,17 +5,18 @@ import { API_BASE_URL } from '../config';
 function Dashboard() {
   const navigate = useNavigate();
 
-  // 🟢 State for Popup PDF Modal
+  // 🟢 Modal States
   const [isPdfOpen, setIsPdfOpen] = useState(false);
-  const [currentPdfUrl, setCurrentPdfUrl] = useState('');
-  const [currentPdfTitle, setCurrentPdfTitle] = useState('');
-  const [currentRawUrl, setCurrentRawUrl] = useState('');
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalType, setModalType] = useState('standard'); // 'youtube' | 'drive-file' | 'drive-folder' | 'standard'
+  const [embedUrl, setEmbedUrl] = useState('');
+  const [rawFileUrl, setRawFileUrl] = useState('');
 
   // 🟢 Dynamic Uploaded Materials State
   const [materials, setMaterials] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 🟢 Session aur Local Storage dono jagah se Credentials fetch karein
+  // 🟢 Session & Local Storage Auth
   const isLoggedIn = 
     sessionStorage.getItem('isLoggedIn') === 'true' || 
     localStorage.getItem('isLoggedIn') === 'true';
@@ -29,7 +30,6 @@ function Dashboard() {
     localStorage.getItem('userName') || 
     'Student';
 
-  // 🛡️ User Role ('student' ya 'admin')
   const userRole = 
     sessionStorage.getItem('userRole') || 
     localStorage.getItem('userRole') || 
@@ -64,13 +64,11 @@ function Dashboard() {
     }
   }, [token, navigate]);
 
-  // 🛡️ Security Check: Agar user logged in nahi hai ya token missing hai toh Root (/) par bhejen
   useEffect(() => {
     if (!isLoggedIn || !token) {
       navigate('/', { replace: true });
       return;
     }
-
     fetchUploadedMaterials();
   }, [isLoggedIn, token, navigate, fetchUploadedMaterials]);
 
@@ -82,38 +80,61 @@ function Dashboard() {
     { id: 'science', name: '🔬 Science (Bachelor of Science)' }
   ];
 
-  // PDF Pop-up खोलने के लिए फंक्शन (With Security Cleanup)
+  // 🛡️ Intelligent Resource Parser & Modal Opener (Fixes X-Frame & 403 errors)
   const openPdfModal = (url, title) => {
-    let finalPreviewUrl = url;
+    if (!url) return;
 
-    // Google Drive Viewer Link Format Cleanup for Iframe
-    if (url && url.includes('drive.google.com')) {
-      if (url.includes('/view')) {
-        finalPreviewUrl = url.replace(/\/view.*$/, '/preview');
-      } else if (!url.endsWith('/preview')) {
-        finalPreviewUrl = `${url.replace(/\/$/, '')}/preview`;
+    setRawFileUrl(url);
+    setModalTitle(title || 'Study Material');
+
+    // 1. YouTube Detection (Fixes X-Frame-Options blocked error)
+    const ytRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|m\.youtube\.com\/watch\?v=)([^#&?]*).*/;
+    const ytMatch = url.match(ytRegExp);
+    if (ytMatch && ytMatch[2] && ytMatch[2].length === 11) {
+      setModalType('youtube');
+      setEmbedUrl(`https://www.youtube-nocookie.com/embed/${ytMatch[2]}?autoplay=1&rel=0`);
+      setIsPdfOpen(true);
+      return;
+    }
+
+    // 2. Google Drive Folder Detection (Fixes Folder 403 Forbidden error)
+    if (url.includes('/folders/')) {
+      setModalType('drive-folder');
+      setEmbedUrl('');
+      setIsPdfOpen(true);
+      return;
+    }
+
+    // 3. Google Drive File Detection
+    if (url.includes('drive.google.com')) {
+      const driveMatch = url.match(/(?:d\/|id=|file\/d\/)([\w-]{25,})/);
+      if (driveMatch && driveMatch[1]) {
+        setModalType('drive-file');
+        setEmbedUrl(`https://drive.google.com/file/d/${driveMatch[1]}/preview`);
+        setIsPdfOpen(true);
+        return;
       }
     }
 
-    setCurrentRawUrl(url);
-    setCurrentPdfUrl(finalPreviewUrl);
-    setCurrentPdfTitle(title);
+    // 4. Standard PDF or Direct File Link
+    setModalType('standard');
+    setEmbedUrl(url);
     setIsPdfOpen(true);
   };
 
-  // PDF Pop-up बंद करने के लिए फंक्शन
   const closePdfModal = () => {
     setIsPdfOpen(false);
-    setCurrentPdfUrl('');
-    setCurrentPdfTitle('');
-    setCurrentRawUrl('');
+    setEmbedUrl('');
+    setModalTitle('');
+    setRawFileUrl('');
+    setModalType('standard');
   };
 
-  // ⬇️ Direct Download Link Converter
+  // ⬇️ Direct Download Link Generator
   const getDownloadUrl = (rawUrl) => {
     if (!rawUrl) return '#';
     if (rawUrl.includes('drive.google.com')) {
-      const match = rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      const match = rawUrl.match(/(?:d\/|id=|file\/d\/)([\w-]{25,})/);
       if (match && match[1]) {
         return `https://drive.google.com/uc?export=download&id=${match[1]}`;
       }
@@ -121,14 +142,12 @@ function Dashboard() {
     return rawUrl;
   };
 
-  // Agar login nahi hai ya token missing hai toh UI render hone se rokein
   if (!isLoggedIn || !token) {
     return null; 
   }
 
   return (
     <>
-      {/* 📱 Light Theme Styles Matched with Image */}
       <style>{`
         .db-wrapper {
           min-height: calc(100vh - 60px);
@@ -180,7 +199,7 @@ function Dashboard() {
         }
 
         .db-admin-btn:hover {
-          background: #008080;
+          background: #006666;
           transform: translateY(-1px);
         }
 
@@ -264,7 +283,7 @@ function Dashboard() {
         }
 
         .db-button:hover {
-          background: #008080;
+          background: #006666;
           box-shadow: 0 6px 14px rgba(0, 128, 128, 0.3);
         }
 
@@ -272,75 +291,81 @@ function Dashboard() {
           transform: scale(0.98);
         }
 
-        /* 🔲 PDF Pop-up Modal Styling */
+        /* 🔲 Fixed Full-Height PDF Modal Styling */
         .pdf-modal-overlay {
           position: fixed;
-          top: 0;
-          left: 0;
+          inset: 0;
           width: 100vw;
           height: 100vh;
-          background-color: rgba(0, 0, 0, 0.6);
-          backdrop-filter: blur(4px);
+          background-color: rgba(0, 0, 0, 0.7);
+          backdrop-filter: blur(6px);
           display: flex;
           justify-content: center;
           align-items: center;
           z-index: 99999;
-          padding: 15px;
+          padding: 10px;
           box-sizing: border-box;
         }
 
         .pdf-modal-container {
           background: #ffffff;
-          border: 1.5px solid #cbd5e1;
+          border: 1px solid #cbd5e1;
           width: 100%;
-          max-width: 950px;
-          height: 88vh;
-          border-radius: 16px;
+          max-width: 1100px;
+          height: 94vh;
+          max-height: 94vh;
+          border-radius: 14px;
           display: flex;
           flex-direction: column;
           overflow: hidden;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
           position: relative;
         }
 
         .pdf-modal-header {
-          padding: 16px 22px;
-          background: #f1f5f9;
-          border-bottom: 1px solid #cbd5e1;
-          color: #0f172a;
+          padding: 12px 16px;
+          background: #f8fafc;
+          border-bottom: 1px solid #e2e8f0;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          z-index: 10;
+          gap: 10px;
+          flex-shrink: 0;
         }
 
         .pdf-modal-title {
           margin: 0;
-          font-size: 16px;
+          font-size: 15px;
           font-weight: 700;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          max-width: 50%;
+          flex: 1;
+          min-width: 0;
           color: #0f172a;
         }
 
         .pdf-header-actions {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 8px;
+          flex-shrink: 0;
         }
 
         .pdf-download-btn {
           background: #008080;
           border: none;
           color: #ffffff;
-          padding: 8px 16px;
+          padding: 7px 12px;
           border-radius: 6px;
           text-decoration: none;
           font-weight: 700;
-          font-size: 13px;
+          font-size: 12px;
           transition: all 0.2s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          white-space: nowrap;
         }
 
         .pdf-download-btn:hover {
@@ -351,11 +376,11 @@ function Dashboard() {
           background: #e2e8f0;
           color: #334155;
           border: 1px solid #cbd5e1;
-          padding: 8px 16px;
+          padding: 7px 12px;
           border-radius: 6px;
           cursor: pointer;
           font-weight: 700;
-          font-size: 13px;
+          font-size: 12px;
           transition: all 0.2s ease;
         }
 
@@ -363,23 +388,56 @@ function Dashboard() {
           background: #cbd5e1;
         }
 
+        /* Full Height Fix: min-height: 0 ensures complete screen visibility */
         .pdf-modal-body {
-          flex: 1;
+          flex: 1 1 0%;
+          min-height: 0;
           width: 100%;
           height: 100%;
-          background-color: #f8fafc;
+          background-color: #0f172a;
           position: relative;
+          display: flex;
+          flex-direction: column;
         }
 
-        .drive-security-blocker {
-          position: absolute;
-          top: 0;
-          right: 0;
-          width: 65px;
-          height: 60px;
-          background-color: transparent;
-          z-index: 999;
-          cursor: not-allowed;
+        .pdf-full-iframe {
+          width: 100%;
+          height: 100%;
+          flex: 1 1 0%;
+          min-height: 0;
+          border: none;
+          background: #ffffff;
+          display: block;
+        }
+
+        .pdf-folder-card {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
+          text-align: center;
+          color: #ffffff;
+          background: #0f172a;
+        }
+
+        .pdf-open-btn {
+          background: #2563eb;
+          color: #ffffff;
+          padding: 10px 20px;
+          border-radius: 8px;
+          font-weight: 700;
+          text-decoration: none;
+          font-size: 14px;
+          margin-top: 16px;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .pdf-open-btn:hover {
+          background: #1d4ed8;
         }
 
         @media screen and (max-width: 576px) {
@@ -399,18 +457,9 @@ function Dashboard() {
             grid-template-columns: 1fr;
           }
 
-          .db-button {
-            max-width: 100%;
-          }
-
           .pdf-modal-container {
-            height: 92vh;
-            border-radius: 12px;
-          }
-
-          .pdf-modal-title {
-            max-width: 40%;
-            font-size: 14px;
+            height: 96vh;
+            max-height: 96vh;
           }
         }
       `}</style>
@@ -446,7 +495,7 @@ function Dashboard() {
                   {course.name}
                 </h3>
                 <button 
-                  onClick={() => navigate(`/course/${course.id}`)}
+                  onClick={() => navigate(`/course/${course.id}`)} 
                   className="db-button"
                 >
                   View Semesters
@@ -478,7 +527,7 @@ function Dashboard() {
                 padding: '20px', 
                 background: '#e2e8f0', 
                 borderRadius: '12px', 
-                border: '1.5px solid #cbd5e1',
+                border: '1.5px solid #cbd5e1', 
                 fontWeight: '600' 
               }}>Loading uploaded materials...</p>
             ) : materials.length > 0 ? (
@@ -494,11 +543,11 @@ function Dashboard() {
                         <span style={{ 
                           fontSize: '11px', 
                           background: '#ffffff', 
-                          border: '1px solid #94a3b8',
+                          border: '1px solid #94a3b8', 
                           padding: '4px 10px', 
                           borderRadius: '6px', 
-                          fontWeight: '800',
-                          color: '#0f172a'
+                          fontWeight: '800', 
+                          color: '#0f172a' 
                         }}>
                           {mat.course ? mat.course.toUpperCase() : 'BCA'} - SEM {mat.semester || '1'}
                         </span>
@@ -512,7 +561,7 @@ function Dashboard() {
                           onClick={() => openPdfModal(fileTargetUrl, mat.title)}
                           className="db-button"
                         >
-                          View PDF 👁️
+                          View Resource 👁️
                         </button>
                       ) : (
                         <button className="db-button" disabled style={{ backgroundColor: '#94a3b8', cursor: 'not-allowed', color: '#ffffff', boxShadow: 'none' }}>
@@ -527,11 +576,11 @@ function Dashboard() {
               <p style={{ 
                 color: '#334155', 
                 backgroundColor: '#e2e8f0', 
-                border: '1.5px solid #cbd5e1',
+                border: '1.5px solid #cbd5e1', 
                 padding: '20px', 
                 borderRadius: '12px', 
-                textAlign: 'center',
-                fontWeight: '600'
+                textAlign: 'center', 
+                fontWeight: '600' 
               }}>
                 No uploaded study material found yet.
               </p>
@@ -540,42 +589,78 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* 🔲 In-App Iframe PDF Pop-up Modal with Security Protection */}
+      {/* 🔲 Robust Full-Height In-App Resource Viewer */}
       {isPdfOpen && (
-        <div className="pdf-modal-overlay">
-          <div className="pdf-modal-container">
+        <div className="pdf-modal-overlay" onClick={closePdfModal}>
+          <div className="pdf-modal-container" onClick={(e) => e.stopPropagation()}>
+            
+            {/* Modal Header */}
             <div className="pdf-modal-header">
-              <h3 className="pdf-modal-title">{currentPdfTitle}</h3>
+              <h3 className="pdf-modal-title" title={modalTitle}>
+                {modalType === 'youtube' ? '🎥 ' : modalType === 'drive-folder' ? '📁 ' : '📄 '}
+                {modalTitle}
+              </h3>
+
               <div className="pdf-header-actions">
-                {/* ⬇️ Student Direct Download Option */}
+                {/* External View Link (Always saves from 403 blocks) */}
                 <a 
-                  href={getDownloadUrl(currentRawUrl)} 
+                  href={rawFileUrl} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="pdf-download-btn"
-                  download
+                  style={{ background: '#2563eb' }}
                 >
-                  ⬇️ Download PDF
+                  🔗 Open Tab
                 </a>
+
+                {modalType !== 'youtube' && modalType !== 'drive-folder' && (
+                  <a 
+                    href={getDownloadUrl(rawFileUrl)} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="pdf-download-btn"
+                  >
+                    ⬇️ Save
+                  </a>
+                )}
+
                 <button onClick={closePdfModal} className="pdf-modal-close-btn">
-                  ✕ Close
+                  ✕
                 </button>
               </div>
             </div>
 
+            {/* Modal Body */}
             <div className="pdf-modal-body">
-              {/* 🛡️ SECURITY FIX: Transparent Blocker Overlay */}
-              <div className="drive-security-blocker" title="External opening is disabled for security"></div>
-
-              <iframe
-                src={currentPdfUrl}
-                width="100%"
-                height="100%"
-                style={{ border: 'none' }}
-                title="PDF Preview"
-                allow="autoplay"
-              ></iframe>
+              {modalType === 'drive-folder' ? (
+                /* Google Drive Folder View */
+                <div className="pdf-folder-card">
+                  <div style={{ fontSize: '48px', marginBottom: '10px' }}>📁</div>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: '18px' }}>Google Drive Folder</h4>
+                  <p style={{ color: '#94a3b8', fontSize: '13px', margin: 0, maxWidth: '380px' }}>
+                    Google Drive folders cannot be rendered directly inside a frame. Click below to view all contents:
+                  </p>
+                  <a 
+                    href={rawFileUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="pdf-open-btn"
+                  >
+                    📂 Open Folder in New Tab
+                  </a>
+                </div>
+              ) : (
+                /* 100% Full Viewport Embed View (YouTube / PDF) */
+                <iframe
+                  src={embedUrl}
+                  title={modalTitle || 'Material View'}
+                  className="pdf-full-iframe"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                  allowFullScreen
+                />
+              )}
             </div>
+
           </div>
         </div>
       )}
