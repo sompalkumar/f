@@ -221,7 +221,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
 
         .pdf-close-btn {
           background: rgba(239, 68, 68, 0.25);
-          color: #fca5a5;
+          color: #f80000;
           border: 1px solid rgba(239, 68, 68, 0.5);
           padding: 6px 14px;
           border-radius: 6px;
@@ -235,7 +235,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
 
         .pdf-close-btn:hover,
         .pdf-close-btn:active {
-          background: #ef4444;
+          background: #720404;
           color: #ffffff;
         }
 
