@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
-// 🟢 Advance PDF Modal Component Import (Same as Semester Page)
-import PdfModal from '..components/PdfModal'; 
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -11,6 +9,7 @@ function Dashboard() {
   const [isPdfOpen, setIsPdfOpen] = useState(false);
   const [currentPdfUrl, setCurrentPdfUrl] = useState('');
   const [currentPdfTitle, setCurrentPdfTitle] = useState('');
+  const [currentRawUrl, setCurrentRawUrl] = useState('');
 
   // 🟢 Dynamic Uploaded Materials State
   const [materials, setMaterials] = useState([]);
@@ -83,19 +82,43 @@ function Dashboard() {
     { id: 'science', name: '🔬 Science (Bachelor of Science)' }
   ];
 
-  // 🟢 PDF Pop-up Kholne Ka Function (PdfModal ke internal handlers ke liye clean raw URL pass karein)
+  // PDF Pop-up खोलने के लिए फंक्शन (With Security Cleanup)
   const openPdfModal = (url, title) => {
-    if (!url) return;
-    setCurrentPdfUrl(url);
-    setCurrentPdfTitle(title || 'Study Material');
+    let finalPreviewUrl = url;
+
+    // Google Drive Viewer Link Format Cleanup for Iframe
+    if (url && url.includes('drive.google.com')) {
+      if (url.includes('/view')) {
+        finalPreviewUrl = url.replace(/\/view.*$/, '/preview');
+      } else if (!url.endsWith('/preview')) {
+        finalPreviewUrl = `${url.replace(/\/$/, '')}/preview`;
+      }
+    }
+
+    setCurrentRawUrl(url);
+    setCurrentPdfUrl(finalPreviewUrl);
+    setCurrentPdfTitle(title);
     setIsPdfOpen(true);
   };
 
-  // 🟢 PDF Pop-up Band Karne Ka Function
+  // PDF Pop-up बंद करने के लिए फंक्शन
   const closePdfModal = () => {
     setIsPdfOpen(false);
     setCurrentPdfUrl('');
     setCurrentPdfTitle('');
+    setCurrentRawUrl('');
+  };
+
+  // ⬇️ Direct Download Link Converter
+  const getDownloadUrl = (rawUrl) => {
+    if (!rawUrl) return '#';
+    if (rawUrl.includes('drive.google.com')) {
+      const match = rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+      }
+    }
+    return rawUrl;
   };
 
   // Agar login nahi hai ya token missing hai toh UI render hone se rokein
@@ -157,7 +180,7 @@ function Dashboard() {
         }
 
         .db-admin-btn:hover {
-          background: #006666;
+          background: #008080;
           transform: translateY(-1px);
         }
 
@@ -241,12 +264,122 @@ function Dashboard() {
         }
 
         .db-button:hover {
-          background: #006666;
+          background: #008080;
           box-shadow: 0 6px 14px rgba(0, 128, 128, 0.3);
         }
 
         .db-button:active {
           transform: scale(0.98);
+        }
+
+        /* 🔲 PDF Pop-up Modal Styling */
+        .pdf-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background-color: rgba(0, 0, 0, 0.6);
+          backdrop-filter: blur(4px);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 99999;
+          padding: 15px;
+          box-sizing: border-box;
+        }
+
+        .pdf-modal-container {
+          background: #ffffff;
+          border: 1.5px solid #cbd5e1;
+          width: 100%;
+          max-width: 950px;
+          height: 88vh;
+          border-radius: 16px;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+          position: relative;
+        }
+
+        .pdf-modal-header {
+          padding: 16px 22px;
+          background: #f1f5f9;
+          border-bottom: 1px solid #cbd5e1;
+          color: #0f172a;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          z-index: 10;
+        }
+
+        .pdf-modal-title {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 700;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 50%;
+          color: #0f172a;
+        }
+
+        .pdf-header-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .pdf-download-btn {
+          background: #008080;
+          border: none;
+          color: #ffffff;
+          padding: 8px 16px;
+          border-radius: 6px;
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 13px;
+          transition: all 0.2s ease;
+        }
+
+        .pdf-download-btn:hover {
+          background: #006666;
+        }
+
+        .pdf-modal-close-btn {
+          background: #e2e8f0;
+          color: #334155;
+          border: 1px solid #cbd5e1;
+          padding: 8px 16px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 700;
+          font-size: 13px;
+          transition: all 0.2s ease;
+        }
+
+        .pdf-modal-close-btn:hover {
+          background: #cbd5e1;
+        }
+
+        .pdf-modal-body {
+          flex: 1;
+          width: 100%;
+          height: 100%;
+          background-color: #f8fafc;
+          position: relative;
+        }
+
+        .drive-security-blocker {
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 65px;
+          height: 60px;
+          background-color: transparent;
+          z-index: 999;
+          cursor: not-allowed;
         }
 
         @media screen and (max-width: 576px) {
@@ -268,6 +401,16 @@ function Dashboard() {
 
           .db-button {
             max-width: 100%;
+          }
+
+          .pdf-modal-container {
+            height: 92vh;
+            border-radius: 12px;
+          }
+
+          .pdf-modal-title {
+            max-width: 40%;
+            font-size: 14px;
           }
         }
       `}</style>
@@ -303,7 +446,7 @@ function Dashboard() {
                   {course.name}
                 </h3>
                 <button 
-                  onClick={() => navigate(`/course/${course.id}`)} 
+                  onClick={() => navigate(`/course/${course.id}`)}
                   className="db-button"
                 >
                   View Semesters
@@ -335,7 +478,7 @@ function Dashboard() {
                 padding: '20px', 
                 background: '#e2e8f0', 
                 borderRadius: '12px', 
-                border: '1.5px solid #cbd5e1', 
+                border: '1.5px solid #cbd5e1',
                 fontWeight: '600' 
               }}>Loading uploaded materials...</p>
             ) : materials.length > 0 ? (
@@ -351,11 +494,11 @@ function Dashboard() {
                         <span style={{ 
                           fontSize: '11px', 
                           background: '#ffffff', 
-                          border: '1px solid #94a3b8', 
+                          border: '1px solid #94a3b8',
                           padding: '4px 10px', 
                           borderRadius: '6px', 
-                          fontWeight: '800', 
-                          color: '#0f172a' 
+                          fontWeight: '800',
+                          color: '#0f172a'
                         }}>
                           {mat.course ? mat.course.toUpperCase() : 'BCA'} - SEM {mat.semester || '1'}
                         </span>
@@ -384,11 +527,11 @@ function Dashboard() {
               <p style={{ 
                 color: '#334155', 
                 backgroundColor: '#e2e8f0', 
-                border: '1.5px solid #cbd5e1', 
+                border: '1.5px solid #cbd5e1',
                 padding: '20px', 
                 borderRadius: '12px', 
-                textAlign: 'center', 
-                fontWeight: '600' 
+                textAlign: 'center',
+                fontWeight: '600'
               }}>
                 No uploaded study material found yet.
               </p>
@@ -397,13 +540,45 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* 🟢 Full-Screen Tested Advance PDF Modal Integration */}
-      <PdfModal 
-        isOpen={isPdfOpen}
-        onClose={closePdfModal}
-        pdfUrl={currentPdfUrl}
-        title={currentPdfTitle}
-      />
+      {/* 🔲 In-App Iframe PDF Pop-up Modal with Security Protection */}
+      {isPdfOpen && (
+        <div className="pdf-modal-overlay">
+          <div className="pdf-modal-container">
+            <div className="pdf-modal-header">
+              <h3 className="pdf-modal-title">{currentPdfTitle}</h3>
+              <div className="pdf-header-actions">
+                {/* ⬇️ Student Direct Download Option */}
+                <a 
+                  href={getDownloadUrl(currentRawUrl)} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="pdf-download-btn"
+                  download
+                >
+                  ⬇️ Download PDF
+                </a>
+                <button onClick={closePdfModal} className="pdf-modal-close-btn">
+                  ✕ Close
+                </button>
+              </div>
+            </div>
+
+            <div className="pdf-modal-body">
+              {/* 🛡️ SECURITY FIX: Transparent Blocker Overlay */}
+              <div className="drive-security-blocker" title="External opening is disabled for security"></div>
+
+              <iframe
+                src={currentPdfUrl}
+                width="100%"
+                height="100%"
+                style={{ border: 'none' }}
+                title="PDF Preview"
+                allow="autoplay"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
