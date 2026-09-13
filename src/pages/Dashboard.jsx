@@ -72,6 +72,24 @@ function Dashboard() {
     fetchUploadedMaterials();
   }, [isLoggedIn, token, navigate, fetchUploadedMaterials]);
 
+  // 🛡️ Lock Background Scroll & Handle Escape Key when Modal is Open
+  useEffect(() => {
+    if (!isPdfOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') closePdfModal();
+    };
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow || '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isPdfOpen]);
+
   // Courses List
   const courses = [
     { id: 'bca', name: '💻 BCA (Bachelor of Computer Applications)' },
@@ -297,19 +315,26 @@ function Dashboard() {
           inset: 0;
           width: 100vw;
           height: 100vh;
-          background-color: rgba(0, 0, 0, 0.7);
-          backdrop-filter: blur(6px);
+          background-color: rgba(2, 6, 23, 0.82);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           display: flex;
           justify-content: center;
           align-items: center;
           z-index: 99999;
-          padding: 10px;
+          padding: 12px;
           box-sizing: border-box;
+          animation: modalFadeIn 0.2s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+          from { opacity: 0; transform: scale(0.98); }
+          to { opacity: 1; transform: scale(1); }
         }
 
         .pdf-modal-container {
           background: #ffffff;
-          border: 1px solid #cbd5e1;
+          border: 1px solid rgba(255, 255, 255, 0.2);
           width: 100%;
           max-width: 1100px;
           height: 94vh;
@@ -318,7 +343,7 @@ function Dashboard() {
           display: flex;
           flex-direction: column;
           overflow: hidden;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
           position: relative;
         }
 
@@ -329,7 +354,7 @@ function Dashboard() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 10px;
+          gap: 12px;
           flex-shrink: 0;
         }
 
@@ -602,7 +627,7 @@ function Dashboard() {
               </h3>
 
               <div className="pdf-header-actions">
-                {/* External View Link (Always saves from 403 blocks) */}
+                {/* External View Link */}
                 <a 
                   href={rawFileUrl} 
                   target="_blank" 
@@ -624,7 +649,7 @@ function Dashboard() {
                   </a>
                 )}
 
-                <button onClick={closePdfModal} className="pdf-modal-close-btn">
+                <button onClick={closePdfModal} className="pdf-modal-close-btn" aria-label="Close">
                   ✕
                 </button>
               </div>
@@ -650,13 +675,12 @@ function Dashboard() {
                   </a>
                 </div>
               ) : (
-                /* 100% Full Viewport Embed View (YouTube / PDF) */
+                /* Clean Full-Height Iframe (No duplicate allowfullscreen warning) */
                 <iframe
                   src={embedUrl}
                   title={modalTitle || 'Material View'}
                   className="pdf-full-iframe"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                  allowFullScreen
                 />
               )}
             </div>
