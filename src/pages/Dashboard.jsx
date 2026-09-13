@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 // 🟢 Advance PDF Modal Component Import (Same as Semester Page)
-import PdfModal from 'components/PdfModal'; 
+import PdfModal from '..components/PdfModal'; 
 
 function Dashboard() {
   const navigate = useNavigate();
