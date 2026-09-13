@@ -383,7 +383,7 @@ function AdminDashboard() {
         .adm-candidate-btn, .adm-logout-btn {
           padding: 12px 18px;
           background: #008080;
-          color: white;
+          color: black;
           border: none;
           border-radius: 8px;
           cursor: pointer;
@@ -857,7 +857,7 @@ function AdminDashboard() {
                     <td className="adm-td">{log.userName}</td>
                     <td className="adm-td">{log.mobile}</td>
                     <td className="adm-td">{new Date(log.loginTime).toLocaleString()}</td>
-                    <td style={{ ...tdStyle, color: !log.logoutTime ? '#16a34a' : '#dc2626', fontWeight: 'bold' }}>
+                    <td style={{ ...tdStyle, color: !log.logoutTime ? '#02ff28' : '#ff0000', fontWeight: 'bold' }}>
                       {!log.logoutTime ? '● Online' : '○ Offline'}
                     </td>
                   </tr>

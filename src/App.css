@@ -81,7 +81,7 @@ button, .btn, .counter, #next-steps ul a {
 
 /* Special Red Buttons (Logout / Action) */
 .btn-logout, .btn-close, [data-action="logout"], [data-action="close"] {
-  background-color: #00ff15;
+  background-color: #ec0303;
   color: #ffffff;
 }
 
