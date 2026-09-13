@@ -7,28 +7,23 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   const [zoom, setZoom] = useState(1);
   const [hasError, setHasError] = useState(false);
 
-  // 🛡️ 1. Backend Root & Broken URL Detection (Fixes X-Frame-Options sameorigin & 404)
+  // 1. Broken URL Guard (Prevents 404 & X-Frame-Options blocks)
   const isInvalidUrl = useCallback((url) => {
     if (!url || typeof url !== 'string' || url.trim() === '') return true;
-    const cleanUrl = url.trim().toLowerCase();
-    
-    // Agar link sirf backend domain pe point kar raha ho (bina kisi file ke)
-    if (
-      cleanUrl === 'https://bca-35ms.onrender.com' ||
-      cleanUrl === 'https://bca-35ms.onrender.com/' ||
-      cleanUrl.endsWith('.onrender.com') ||
-      cleanUrl.endsWith('.onrender.com/') ||
-      cleanUrl.includes('/undefined') ||
-      cleanUrl.includes('/null')
-    ) {
-      return true;
-    }
-    return false;
+    const clean = url.trim().toLowerCase();
+    return (
+      clean === 'https://bca-35ms.onrender.com' ||
+      clean === 'https://bca-35ms.onrender.com/' ||
+      clean.endsWith('.onrender.com') ||
+      clean.endsWith('.onrender.com/') ||
+      clean.includes('/undefined') ||
+      clean.includes('/null')
+    );
   }, []);
 
   const isBrokenUrl = isInvalidUrl(pdfUrl);
 
-  // 🎥 2. YouTube Detection Helper
+  // 2. YouTube Detection Helper
   const extractYouTubeId = useCallback((url) => {
     if (!url || isBrokenUrl) return null;
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|m\.youtube\.com\/watch\?v=)([^#&?]*).*/;
@@ -39,8 +34,10 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   const youtubeId = extractYouTubeId(pdfUrl);
   const isYouTube = Boolean(youtubeId);
 
-  // 📁 3. Google Drive Helpers
-  const isGoogleDriveFolder = Boolean(pdfUrl && !isBrokenUrl && (pdfUrl.includes('/drive/folders/') || /\/folders\/[\w-]+/.test(pdfUrl)));
+  // 3. Google Drive Helpers
+  const isGoogleDriveFolder = Boolean(
+    pdfUrl && !isBrokenUrl && (pdfUrl.includes('/drive/folders/') || /\/folders\/[\w-]+/.test(pdfUrl))
+  );
 
   const extractDriveFileId = useCallback((url) => {
     if (!url || isBrokenUrl || isGoogleDriveFolder) return null;
@@ -49,9 +46,10 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   }, [isBrokenUrl, isGoogleDriveFolder]);
 
   const fileId = extractDriveFileId(pdfUrl);
-  const isGoogleDriveFile = Boolean(pdfUrl && !isBrokenUrl && (pdfUrl.includes('drive.google.com') || fileId) && !isGoogleDriveFolder);
+  const isGoogleDriveFile = Boolean(
+    pdfUrl && !isBrokenUrl && (pdfUrl.includes('drive.google.com') || fileId) && !isGoogleDriveFolder
+  );
 
-  // Reset modal state on open or URL change
   useEffect(() => {
     if (isOpen) {
       setRotation(0);
@@ -61,7 +59,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
     }
   }, [isOpen, pdfUrl]);
 
-  // 🌐 4. Safe Embed URL Generator (Direct 100% Height Preview)
+  // 4. Safe Embed URL Generator
   const getEmbedUrl = () => {
     if (isBrokenUrl || isGoogleDriveFolder) return '';
 
@@ -69,7 +67,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
       return `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0`;
     }
 
-    // Google Drive official preview format (Fixes 10-15% collapse & gview errors)
     if (isGoogleDriveFile && fileId) {
       return `https://drive.google.com/file/d/${fileId}/preview`;
     }
@@ -79,7 +76,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
 
   const embedUrl = getEmbedUrl();
 
-  // 🔒 5. Safe Background Scroll & Keyboard Handling
+  // 5. Scroll Lock & Keyboard Handling
   useEffect(() => {
     if (!isOpen) return;
 
@@ -114,9 +111,10 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
   const handleDirectDownload = useCallback(() => {
     if (!pdfUrl || isBrokenUrl) return;
     setDownloading(true);
-    const downloadLink = isGoogleDriveFile && fileId 
-      ? `https://drive.google.com/uc?export=download&id=${fileId}`
-      : pdfUrl;
+    const downloadLink =
+      isGoogleDriveFile && fileId
+        ? `https://drive.google.com/uc?export=download&id=${fileId}`
+        : pdfUrl;
 
     window.open(downloadLink, '_blank', 'noopener,noreferrer');
     setDownloading(false);
@@ -162,7 +160,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           overflow: hidden;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
           position: relative;
-          touch-action: auto !important;
         }
 
         .pdf-modal-header {
@@ -236,7 +233,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
           color: #ffffff;
         }
 
-        /* Full Height Fix: min-height: 0 ensures complete screen visibility */
         .pdf-modal-body {
           flex: 1 1 0%;
           min-height: 0;
@@ -336,7 +332,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
       <div className="pdf-modal-backdrop" onClick={onClose}>
         <div className="pdf-modal-container" onClick={(e) => e.stopPropagation()}>
           
-          {/* Header */}
           <div className="pdf-modal-header">
             <h3 className="pdf-modal-title" title={title || 'Resource'}>
               {isYouTube ? '🎥 ' : isGoogleDriveFolder ? '📁 ' : '📄 '} {title || 'Resource View'}
@@ -359,10 +354,8 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
             <button onClick={onClose} className="pdf-close-btn" aria-label="Close">✕ Close</button>
           </div>
 
-          {/* Body */}
           <div className="pdf-modal-body">
             {isBrokenUrl || hasError ? (
-              /* 🛡️ Safe Error View (Prevents X-Frame-Options: SAMEORIGIN and 404 Sad Face) */
               <div className="pdf-folder-card-wrapper">
                 <div className="pdf-folder-card">
                   <div style={{ fontSize: '48px', marginBottom: '12px' }}>⚠️</div>
@@ -370,7 +363,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
                     Resource Unavailable
                   </h4>
                   <p style={{ margin: '10px 0 0', fontSize: '13px', color: '#94a3b8', lineHeight: '1.5' }}>
-                    This file link is missing or cannot be previewed inside the frame. Please check if the file was deleted during server restart.
+                    This file link is missing or could not be loaded directly.
                   </p>
                   {pdfUrl && !isBrokenUrl && (
                     <button onClick={handleOpenLink} className="pdf-folder-btn" style={{ background: '#475569' }}>
@@ -380,7 +373,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
                 </div>
               </div>
             ) : isYouTube ? (
-              /* YouTube Video Card View */
               <div className="pdf-folder-card-wrapper">
                 <div className="pdf-folder-card">
                   <div className="yt-thumb-wrapper">
@@ -402,7 +394,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
                 </div>
               </div>
             ) : isGoogleDriveFolder ? (
-              /* Google Drive Folder Safe Handler */
               <div className="pdf-folder-card-wrapper">
                 <div className="pdf-folder-card">
                   <div style={{ fontSize: '48px', marginBottom: '12px' }}>📁</div>
@@ -410,7 +401,7 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
                     Google Drive Folder Access
                   </h4>
                   <p style={{ margin: '8px 0 0', fontSize: '13px', color: '#94a3b8', lineHeight: '1.5' }}>
-                    Folders cannot be embedded in frames. Open it by clicking the button below:
+                    Folders cannot be embedded in frames. Open it by clicking below:
                   </p>
                   <button onClick={handleOpenLink} className="pdf-folder-btn">
                     📂 Open Course Materials ↗
@@ -418,7 +409,6 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
                 </div>
               </div>
             ) : (
-              /* 100% Full Height PDF Single File Viewer */
               <div 
                 className="pdf-iframe-wrapper"
                 style={{
@@ -426,11 +416,12 @@ function PdfModal({ isOpen, onClose, pdfUrl, title }) {
                   transformOrigin: 'center center'
                 }}
               >
+                {/* allow mein "unload" add karne se Chrome permissions policy violation resolve hoti hai */}
                 <iframe 
                   src={embedUrl} 
                   title={title || 'PDF Viewer'}
                   className="pdf-modal-iframe"
-                  allow="autoplay; encrypted-media; fullscreen"
+                  allow="autoplay; encrypted-media; fullscreen; unload"
                   onError={() => setHasError(true)}
                 />
               </div>
