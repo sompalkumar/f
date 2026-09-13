@@ -383,7 +383,7 @@ function AdminDashboard() {
         .adm-candidate-btn, .adm-logout-btn {
           padding: 12px 18px;
           background: #008080;
-          color: black;
+          color: white;
           border: none;
           border-radius: 8px;
           cursor: pointer;

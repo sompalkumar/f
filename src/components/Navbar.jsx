@@ -151,12 +151,12 @@ function Navbar({ onTabChange, activeTab, onLoginClick }) {
         }
 
         .logout-btn {
-          background: #ef4444;
+          background: #ff0000;
           color: #ffffff;
         }
 
         .logout-btn:hover {
-          background: #dc2626;
+          background: #970303;
         }
 
         /* 📱 Mobile Responsiveness Adjustments */
